@@ -1,0 +1,10 @@
+_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
+DOMAIN_ADAPT:
+  EMA:
+    ENABLED: True
+  TEACHER:
+    ENABLED: True
+DATASETS:
+  TRAIN_LABEL: ("cityscapes_fine_instance_seg_train",)
+  TRAIN_UNLABEL: ("cityscapes_foggy_train",)
+  TEST: ("cityscapes_fine_instance_seg_val","cityscapes_foggy_val",)
