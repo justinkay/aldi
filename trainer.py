@@ -10,23 +10,22 @@ from detectron2.data.dataset_mapper import DatasetMapper
 from mean_teacher import EMATeacher
 
 
-class MultipleIterator:
-    def __init__(self, iters):
-        self.iters = iters
-    def __next__(self):
-        return [next(iter) for iter in self.iters]
-
-
-class PrefetchDataloaders:
+class PrefetchableConcatDataloaders:
+    """
+    Two dataloaders, one labeled, one unlabeled, whose batches are concatenated.
+    They can also be "prefetched" so that the next batch is already loaded, allowing
+    use and modification of data before it hits the default Detectron2 training logic.
+    (E.g. the batch can be modified with weak/strong augmentation and pseudo labeling)
+    """
     def __init__(self, labeled_loader, unlabeled_loader):
-        self._iter = MultipleIterator([iter(labeled_loader), 
-                                       iter(unlabeled_loader)])
+        self.labeled_iter = iter(labeled_loader)
+        self.unlabeled_iter = iter(unlabeled_loader)
         self.prefetched_data = None
     
     def __iter__(self):
         while True:
             if self.prefetched_data is None:
-                labeled, unlabeled = next(self._iter)
+                labeled, unlabeled = next(self.labeled_iter), next(self.unlabeled_iter)
             else:
                 labeled, unlabeled = self.prefetched_data
                 self.clear_prefetch()
@@ -84,7 +83,7 @@ class DATrainer(DefaultTrainer):
             mapper=DatasetMapper(cfg, is_train=True), # default mapper
             num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
             total_batch_size=cfg.SOLVER.IMG_PER_BATCH_UNLABEL)
-        return PrefetchDataloaders(labeled_loader, unlabeled_loader)
+        return PrefetchableConcatDataloaders(labeled_loader, unlabeled_loader)
 
     def run_step(self):
         """Remember that self._trainer is the student trainer."""
@@ -112,5 +111,7 @@ class DATrainer(DefaultTrainer):
         # ...
 
         # now call student.run_step as normal
+        # problem is this doesn't allow custom loss functions (or filtering some losses out)
+        # docs say "if you want to do something with the losses, you can wrap the model"
         self._trainer.iter = self.iter
         self._trainer.run_step()
