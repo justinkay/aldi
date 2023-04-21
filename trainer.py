@@ -9,7 +9,7 @@ from detectron2.modeling.meta_arch.build import build_model
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.data.dataset_mapper import DatasetMapper
 
-from aug import build_strong_augmentation, apply_aug_to_batch
+from aug import build_strong_augmentation
 from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
 from ema import EmaRCNN
 from pseudolabels import process_pseudo_label, add_label
@@ -42,6 +42,8 @@ class DATrainer(DefaultTrainer):
         # EMA of student
         if cfg.DOMAIN_ADAPT.EMA.ENABLED:
             self.ema = EmaRCNN(build_model(cfg), cfg.DOMAIN_ADAPT.EMA.ALPHA)
+
+        self.strong_aug = build_strong_augmentation()
 
     @classmethod
     def build_train_loader(cls, cfg):
@@ -82,15 +84,12 @@ class DATrainer(DefaultTrainer):
                 # add pseudo labels as "ground truth"
                 unlabeled = add_label(unlabeled, teacher_preds)
 
-        # TODO apply extra augmentations within dataloader
-        # apply LABELED.Aug
-        # apply UNLABELED.AUG
-        # very slow way
+        # apply stronger augmentation
+        # TODO: allow different augs for labeled/unlabeled
+        for img in labeled:
+            img["image"] = self.strong_aug(img["image"])
         for img in unlabeled:
-            print(img['image'].device)
-            image_pil = Image.fromarray(img["image"].numpy().transpose(1, 2, 0))
-            image_strong_aug = np.array(build_strong_augmentation()(image_pil))
-            img["image"] = torch.as_tensor(np.ascontiguousarray(image_strong_aug.transpose(2, 0, 1)))
+            img["image"] = self.strong_aug(img["image"])
 
         # now call student.run_step as normal
         # problem is this doesn't allow custom loss functions (or filtering some losses out)
