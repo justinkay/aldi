@@ -1,5 +1,7 @@
 import os
 import torch
+from PIL import Image
+import numpy as np
 
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
@@ -7,7 +9,8 @@ from detectron2.modeling.meta_arch.build import build_model
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.data.dataset_mapper import DatasetMapper
 
-from dataloader2 import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
+from aug import build_strong_augmentation, apply_aug_to_batch
+from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
 from ema import EmaRCNN
 from pseudolabels import process_pseudo_label, add_label
 
@@ -82,6 +85,12 @@ class DATrainer(DefaultTrainer):
         # TODO apply extra augmentations within dataloader
         # apply LABELED.Aug
         # apply UNLABELED.AUG
+        # very slow way
+        for img in unlabeled:
+            print(img['image'].device)
+            image_pil = Image.fromarray(img["image"].numpy().transpose(1, 2, 0))
+            image_strong_aug = np.array(build_strong_augmentation()(image_pil))
+            img["image"] = torch.as_tensor(np.ascontiguousarray(image_strong_aug.transpose(2, 0, 1)))
 
         # now call student.run_step as normal
         # problem is this doesn't allow custom loss functions (or filtering some losses out)
