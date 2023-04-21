@@ -15,6 +15,8 @@ def add_da_config(cfg):
     # Teacher model provides pseudo labels
     _C.DOMAIN_ADAPT.TEACHER = CN()
     _C.DOMAIN_ADAPT.TEACHER.ENABLED = False
+    _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # could support a tuple multiple methods in the future
+    _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
 
     # From Adaptive Teacher - to be replaced
     _C.SOLVER.IMG_PER_BATCH_LABEL = 4

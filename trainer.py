@@ -7,7 +7,7 @@ from detectron2.modeling.meta_arch.build import build_model
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.data.dataset_mapper import DatasetMapper
 
-from mean_teacher import EMATeacher
+from ema import EmaRCNN
 
 
 class PrefetchableConcatDataloaders:
@@ -25,7 +25,7 @@ class PrefetchableConcatDataloaders:
     def __iter__(self):
         while True:
             if self.prefetched_data is None:
-                labeled, unlabeled = next(self.labeled_iter), next(self.unlabeled_iter)
+                labeled, unlabeled = self._get_next_batch()
             else:
                 labeled, unlabeled = self.prefetched_data
                 self.clear_prefetch()
@@ -33,8 +33,11 @@ class PrefetchableConcatDataloaders:
 
     def prefetch_batch(self):
         assert self.prefetched_data is None, "Prefetched data already exists"
-        self.prefetched_data = next(self._iter)
+        self.prefetched_data = self._get_next_batch()
         return self.prefetched_data
+
+    def _get_next_batch(self):
+        return next(self.labeled_iter), next(self.unlabeled_iter)
 
     def clear_prefetch(self):
         self.prefetched_data = None
@@ -66,8 +69,7 @@ class DATrainer(DefaultTrainer):
 
         # EMA of student
         if cfg.DOMAIN_ADAPT.EMA.ENABLED:
-            self.ema = EMATeacher(build_model(cfg), cfg.DOMAIN_ADAPT.EMA.ALPHA)
-            self.ema.eval()
+            self.ema = EmaRCNN(build_model(cfg), cfg.DOMAIN_ADAPT.EMA.ALPHA)
 
     @classmethod
     def build_train_loader(cls, cfg):
@@ -99,7 +101,10 @@ class DATrainer(DefaultTrainer):
 
             with torch.no_grad():
                 # run teacher on weakly augmented data
-                pseudo_labels = self.ema(unlabeled)
+                self.ema.eval()
+                teacher_proposals, teacher_instances, _ = self.ema(unlabeled)
+                
+
 
                 # add pseudo labels as ground truth for strongly augmented data
                 # for d, l in zip(unlabeled, pseudo_labels):
