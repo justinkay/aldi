@@ -45,18 +45,22 @@ class DATrainer(DefaultTrainer):
 
     @classmethod
     def build_train_loader(cls, cfg):
+        total_batch_size = cfg.SOLVER.IMS_PER_BATCH
+        labeled_bs, unlabeled_bs = ( int(r * total_batch_size / sum(cfg.DATASETS.LABELED_UNLABELED_RATIO)) for r in cfg.DATASETS.LABELED_UNLABELED_RATIO )
+        print(f"labeled_bs: {labeled_bs}, unlabeled_bs: {unlabeled_bs}")
+
         labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
-                cfg.DATASETS.TRAIN_LABEL,
+                cfg.DATASETS.TRAIN,
                 filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
             mapper=DatasetMapper(cfg, is_train=True), # default mapper
             num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
-            total_batch_size=cfg.SOLVER.IMG_PER_BATCH_LABEL)
+            total_batch_size=labeled_bs)
         unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
-                cfg.DATASETS.TRAIN_UNLABEL,
+                cfg.DATASETS.UNLABELED,
                 filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
             mapper=UnlabeledDatasetMapper(cfg, is_train=True),
             num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
-            total_batch_size=cfg.SOLVER.IMG_PER_BATCH_UNLABEL)
+            total_batch_size=unlabeled_bs)
         return PrefetchableConcatDataloaders(labeled_loader, unlabeled_loader)
 
     def run_step(self):

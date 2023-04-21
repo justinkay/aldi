@@ -7,6 +7,10 @@ def add_da_config(cfg):
 
     _C.DOMAIN_ADAPT = CN()
 
+    # Datasets and sampling
+    _C.DATASETS.UNLABELED = tuple()
+    _C.DATASETS.LABELED_UNLABELED_RATIO = (1,1)
+
     # EMA of stuent weights
     _C.DOMAIN_ADAPT.EMA = CN()
     _C.DOMAIN_ADAPT.EMA.ENABLED = False
@@ -20,12 +24,4 @@ def add_da_config(cfg):
 
     # Custom loss functions/modifications
     _C.DOMAIN_ADAPT.LOSSES = CN()
-    _C.DOMAIN_ADAPT.LOSSES.RPN_LOSS_ENABLED = True
-
-    # From Adaptive Teacher - to be replaced
-    _C.SOLVER.IMG_PER_BATCH_LABEL = 4
-    _C.SOLVER.IMG_PER_BATCH_UNLABEL = 4
-    _C.DATASETS.TRAIN_LABEL = tuple()
-    _C.DATASETS.TRAIN_UNLABEL = tuple()
-
-    
+    _C.DOMAIN_ADAPT.LOSSES.RPN_LOSS_ENABLED = True    
