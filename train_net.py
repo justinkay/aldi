@@ -14,6 +14,7 @@ from detectron2.evaluation import verify_results
 from config import add_da_config
 from trainer import DATrainer
 import datasets # register Foggy Cityscapes
+import rcnn # register DA R-CNN
 
 def setup(args):
     """

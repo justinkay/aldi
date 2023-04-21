@@ -18,6 +18,10 @@ def add_da_config(cfg):
     _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # could support a tuple multiple methods in the future
     _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
 
+    # Custom loss functions/modifications
+    _C.DOMAIN_ADAPT.LOSSES = CN()
+    _C.DOMAIN_ADAPT.LOSSES.RPN_LOSS_ENABLED = True
+
     # From Adaptive Teacher - to be replaced
     _C.SOLVER.IMG_PER_BATCH_LABEL = 4
     _C.SOLVER.IMG_PER_BATCH_UNLABEL = 4

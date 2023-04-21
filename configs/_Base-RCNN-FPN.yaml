@@ -1,6 +1,7 @@
 # Copied directly from detectron2/configs/Base-RCNN-FPN.yaml
+# Except change "GeneralizedRCNN" to "DARCNN"
 MODEL:
-  META_ARCHITECTURE: "GeneralizedRCNN"
+  META_ARCHITECTURE: "DARCNN"
   BACKBONE:
     NAME: "build_resnet_fpn_backbone"
   RESNETS:

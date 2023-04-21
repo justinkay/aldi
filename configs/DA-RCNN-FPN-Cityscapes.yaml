@@ -4,6 +4,8 @@ DOMAIN_ADAPT:
     ENABLED: True
   TEACHER:
     ENABLED: True
+  LOSSES:
+    RPN_LOSS_ENABLED: False
 DATASETS:
   TRAIN_LABEL: ("cityscapes_fine_instance_seg_train",)
   TRAIN_UNLABEL: ("cityscapes_foggy_train",)
