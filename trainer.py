@@ -7,40 +7,9 @@ from detectron2.modeling.meta_arch.build import build_model
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.data.dataset_mapper import DatasetMapper
 
+from dataloader2 import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
 from ema import EmaRCNN
-
-
-class PrefetchableConcatDataloaders:
-    """
-    Two dataloaders, one labeled, one unlabeled, whose batches are concatenated.
-    They can also be "prefetched" so that the next batch is already loaded, allowing
-    use and modification of data before it hits the default Detectron2 training logic.
-    (E.g. the batch can be modified with weak/strong augmentation and pseudo labeling)
-    """
-    def __init__(self, labeled_loader, unlabeled_loader):
-        self.labeled_iter = iter(labeled_loader)
-        self.unlabeled_iter = iter(unlabeled_loader)
-        self.prefetched_data = None
-    
-    def __iter__(self):
-        while True:
-            if self.prefetched_data is None:
-                labeled, unlabeled = self._get_next_batch()
-            else:
-                labeled, unlabeled = self.prefetched_data
-                self.clear_prefetch()
-            yield labeled + unlabeled
-
-    def prefetch_batch(self):
-        assert self.prefetched_data is None, "Prefetched data already exists"
-        self.prefetched_data = self._get_next_batch()
-        return self.prefetched_data
-
-    def _get_next_batch(self):
-        return next(self.labeled_iter), next(self.unlabeled_iter)
-
-    def clear_prefetch(self):
-        self.prefetched_data = None
+from pseudolabels import process_pseudo_label, add_label
 
 
 class DATrainer(DefaultTrainer):
@@ -82,7 +51,7 @@ class DATrainer(DefaultTrainer):
         unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
                 cfg.DATASETS.TRAIN_UNLABEL,
                 filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-            mapper=DatasetMapper(cfg, is_train=True), # default mapper
+            mapper=UnlabeledDatasetMapper(cfg, is_train=True),
             num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
             total_batch_size=cfg.SOLVER.IMG_PER_BATCH_UNLABEL)
         return PrefetchableConcatDataloaders(labeled_loader, unlabeled_loader)
@@ -102,18 +71,17 @@ class DATrainer(DefaultTrainer):
             with torch.no_grad():
                 # run teacher on weakly augmented data
                 self.ema.eval()
-                teacher_proposals, teacher_instances, _ = self.ema(unlabeled)
+                _, teacher_preds, _ = self.ema(unlabeled)
                 
-
-
-                # add pseudo labels as ground truth for strongly augmented data
-                # for d, l in zip(unlabeled, pseudo_labels):
-                #     print("D BEFORE", d)
-                #     d["instances"] = l["instances"]
-                #     print("D AFTER", d)
+                # postprocess pseudo labels
+                teacher_preds, _ = process_pseudo_label(teacher_preds, self.cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD, 
+                                                             "roih", self.cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD)
+                # add pseudo labels as "ground truth"
+                unlabeled = add_label(unlabeled, teacher_preds)
 
         # TODO apply extra augmentations within dataloader
-        # ...
+        # apply LABELED.Aug
+        # apply UNLABELED.AUG
 
         # now call student.run_step as normal
         # problem is this doesn't allow custom loss functions (or filtering some losses out)

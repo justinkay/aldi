@@ -3,7 +3,25 @@ import copy
 from detectron2.structures.boxes import Boxes
 from detectron2.structures.instances import Instances
 
-def threshold_bbox(self, proposal_bbox_inst, thres=0.7, proposal_type="roih"):
+# From Adaptive Teacher ATeacherTrainer
+def process_pseudo_label(proposals_rpn_unsup_k, cur_threshold, proposal_type, psedo_label_method=""):
+    list_instances = []
+    num_proposal_output = 0.0
+    for proposal_bbox_inst in proposals_rpn_unsup_k:
+        # thresholding
+        if psedo_label_method == "thresholding":
+            proposal_bbox_inst = threshold_bbox(
+                proposal_bbox_inst, thres=cur_threshold, proposal_type=proposal_type
+            )
+        else:
+            raise ValueError("Unkown pseudo label boxes methods")
+        num_proposal_output += len(proposal_bbox_inst)
+        list_instances.append(proposal_bbox_inst)
+    num_proposal_output = num_proposal_output / len(proposals_rpn_unsup_k)
+    return list_instances, num_proposal_output
+
+# From Adaptive Teacher ATeacherTrainer
+def threshold_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih"):
     if proposal_type == "rpn":
         valid_map = proposal_bbox_inst.objectness_logits > thres
 
@@ -38,39 +56,8 @@ def threshold_bbox(self, proposal_bbox_inst, thres=0.7, proposal_type="roih"):
 
     return new_proposal_inst
 
-def process_pseudo_label(
-    self, proposals_rpn_unsup_k, cur_threshold, proposal_type, psedo_label_method=""
-):
-    list_instances = []
-    num_proposal_output = 0.0
-    for proposal_bbox_inst in proposals_rpn_unsup_k:
-        # thresholding
-        if psedo_label_method == "thresholding":
-            proposal_bbox_inst = self.threshold_bbox(
-                proposal_bbox_inst, thres=cur_threshold, proposal_type=proposal_type
-            )
-        else:
-            raise ValueError("Unkown pseudo label boxes methods")
-        num_proposal_output += len(proposal_bbox_inst)
-        list_instances.append(proposal_bbox_inst)
-    num_proposal_output = num_proposal_output / len(proposals_rpn_unsup_k)
-    return list_instances, num_proposal_output
-
-def remove_label(self, label_data):
-    for label_datum in label_data:
-        if "instances" in label_datum.keys():
-            del label_datum["instances"]
-    return label_data
-
-def add_label(self, unlabled_data, label):
+# From Adaptive Teacher ATeacherTrainer
+def add_label(unlabled_data, label):
     for unlabel_datum, lab_inst in zip(unlabled_data, label):
         unlabel_datum["instances"] = lab_inst
     return unlabled_data
-
-def get_label(self, label_data):
-    label_list = []
-    for label_datum in label_data:
-        if "instances" in label_datum.keys():
-            label_list.append(copy.deepcopy(label_datum["instances"]))
-    
-    return label_list

@@ -25,8 +25,9 @@ class EmaRCNN(nn.Module):
         assert hasattr(self.model, "roi_heads"), "Only R-CNNs are supported by EmaRCNN"
 
         # register hooks so we can grab output of sub-modules
-        self.rpn_io = self.model.proposal_generator.register_forward_hook(SaveIO())
-        self.roih_io = self.model.roi_heads.register_forward_hook(SaveIO())
+        self.rpn_io, self.roih_io = SaveIO(), SaveIO()
+        self.model.proposal_generator.register_forward_hook(self.rpn_io)
+        self.model.roi_heads.register_forward_hook(self.roih_io)
 
     def _init_ema_weights(self, model):
         self.model.load_state_dict(model.state_dict())
@@ -61,8 +62,8 @@ class EmaRCNN(nn.Module):
             Full model output (postprocessed_output)
         """
         self.model.eval()
-        postprocessed_output = self.model(target_img) # transformed back into original input space with GeneralizedRCNN._postprocess
-        proposals, _ = self.rpn_io.output # not transformed back to original input space
-        pred_instances, _ = self.roih_io.output # not transformed back to original input space
+        postprocessed_output = self.model(target_img)   # transformed back into original input space with GeneralizedRCNN._postprocess
+        proposals, _ = self.rpn_io.output               # not transformed back to original input space
+        pred_instances, _ = self.roih_io.output         # not transformed back to original input space
 
         return proposals, pred_instances, postprocessed_output
