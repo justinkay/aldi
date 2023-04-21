@@ -4,9 +4,42 @@ import torch
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
 from detectron2.modeling.meta_arch.build import build_model
+from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
+from detectron2.data.dataset_mapper import DatasetMapper
 
-from dataloader import DatasetMapperTwoCropSeparate, build_detection_semisup_train_loader_two_crops
 from mean_teacher import EMATeacher
+
+
+class MultipleIterator:
+    def __init__(self, iters):
+        self.iters = iters
+    def __next__(self):
+        return [next(iter) for iter in self.iters]
+
+
+class PrefetchDataloaders:
+    def __init__(self, labeled_loader, unlabeled_loader):
+        self._iter = MultipleIterator([iter(labeled_loader), 
+                                       iter(unlabeled_loader)])
+        self.prefetched_data = None
+    
+    def __iter__(self):
+        while True:
+            if self.prefetched_data is None:
+                labeled, unlabeled = next(self._iter)
+            else:
+                labeled, unlabeled = self.prefetched_data
+                self.clear_prefetch()
+            yield labeled + unlabeled
+
+    def prefetch_batch(self):
+        assert self.prefetched_data is None, "Prefetched data already exists"
+        self.prefetched_data = next(self._iter)
+        return self.prefetched_data
+
+    def clear_prefetch(self):
+        self.prefetched_data = None
+
 
 class DATrainer(DefaultTrainer):
     """
@@ -35,20 +68,27 @@ class DATrainer(DefaultTrainer):
         # EMA of student
         if cfg.DOMAIN_ADAPT.EMA.ENABLED:
             self.ema = EMATeacher(build_model(cfg), cfg.DOMAIN_ADAPT.EMA.ALPHA)
+            self.ema.eval()
 
-    # TODO: JUST TAKEN FROM ADAPTIVE TEACHER FOR NOW
     @classmethod
     def build_train_loader(cls, cfg):
-        mapper = DatasetMapperTwoCropSeparate(cfg, True)
-        return build_detection_semisup_train_loader_two_crops(cfg, mapper)
+        labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
+                cfg.DATASETS.TRAIN_LABEL,
+                filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
+            mapper=DatasetMapper(cfg, is_train=True), # default mapper
+            num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
+            total_batch_size=cfg.SOLVER.IMG_PER_BATCH_LABEL)
+        unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
+                cfg.DATASETS.TRAIN_UNLABEL,
+                filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
+            mapper=DatasetMapper(cfg, is_train=True), # default mapper
+            num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
+            total_batch_size=cfg.SOLVER.IMG_PER_BATCH_UNLABEL)
+        return PrefetchDataloaders(labeled_loader, unlabeled_loader)
 
-    def before_step(self):
-        """
-        - Update the teacher
-        - Prefetch dataloader batch and add pseudo labels from teacher
-        """
-        super().before_step()
-
+    def run_step(self):
+        """Remember that self._trainer is the student trainer."""
+        
         # EMA update
         if self.cfg.DOMAIN_ADAPT.EMA.ENABLED:
             self.ema.update_weights(self.model, self.iter)
@@ -56,13 +96,21 @@ class DATrainer(DefaultTrainer):
         # Teacher-student self-training
         if self.cfg.DOMAIN_ADAPT.TEACHER.ENABLED:
             # Prefetch dataloader batch and add pseudo labels from teacher
-            label_strong, label_weak, unlabeled_strong, unlabeled_weak = self.data_loader.prefetch_batch()
+            labeled, unlabeled = self._trainer.data_loader.prefetch_batch()
+
             with torch.no_grad():
                 # run teacher on weakly augmented data
-                pseudo_labels = self.ema(unlabeled_weak)
+                pseudo_labels = self.ema(unlabeled)
 
                 # add pseudo labels as ground truth for strongly augmented data
-                for d, l in zip(unlabeled_strong, pseudo_labels):
-                    print("D BEFORE", d)
-                    d["instances"] = l["instances"]
-                    print("D AFTER", d)
+                # for d, l in zip(unlabeled, pseudo_labels):
+                #     print("D BEFORE", d)
+                #     d["instances"] = l["instances"]
+                #     print("D AFTER", d)
+
+        # TODO apply extra augmentations within dataloader
+        # ...
+
+        # now call student.run_step as normal
+        self._trainer.iter = self.iter
+        self._trainer.run_step()
