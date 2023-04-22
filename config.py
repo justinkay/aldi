@@ -1,4 +1,6 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+# Everything in this file makes domain adaptation disabled by default.
+# Everything must be explicitly enabled in the config files.
+
 from detectron2.config import CfgNode as CN
 
 
@@ -9,7 +11,7 @@ def add_da_config(cfg):
 
     # Datasets and sampling
     _C.DATASETS.UNLABELED = tuple()
-    _C.DATASETS.LABELED_UNLABELED_RATIO = (1,1)
+    _C.DATASETS.LABELED_UNLABELED_RATIO = (1,0)
 
     # EMA of stuent weights
     _C.DOMAIN_ADAPT.EMA = CN()
@@ -24,4 +26,8 @@ def add_da_config(cfg):
 
     # Custom loss functions/modifications
     _C.DOMAIN_ADAPT.LOSSES = CN()
-    _C.DOMAIN_ADAPT.LOSSES.RPN_LOSS_ENABLED = True    
+    _C.DOMAIN_ADAPT.LOSSES.RPN_LOSS_ENABLED = True
+
+    # Data augmentations
+    _C.DOMAIN_ADAPT.LABELED_STRONG_AUG = False
+    _C.DOMAIN_ADAPT.UNLABELED_STRONG_AUG = False

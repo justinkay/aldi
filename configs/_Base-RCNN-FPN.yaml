@@ -1,7 +1,12 @@
 # Copied directly from detectron2/configs/Base-RCNN-FPN.yaml
-# Except change "GeneralizedRCNN" to "DARCNN"
+# Except:
+#    - change "GeneralizedRCNN" to "DARCNN"
+#    - load COCO weights
+#    - turn MASK_ON to False
 MODEL:
   META_ARCHITECTURE: "DARCNN"
+  WEIGHTS: "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl"
+  MASK_ON: False
   BACKBONE:
     NAME: "build_resnet_fpn_backbone"
   RESNETS:

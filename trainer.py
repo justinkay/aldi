@@ -47,7 +47,7 @@ class DATrainer(DefaultTrainer):
     def build_train_loader(cls, cfg):
         total_batch_size = cfg.SOLVER.IMS_PER_BATCH
         labeled_bs, unlabeled_bs = ( int(r * total_batch_size / sum(cfg.DATASETS.LABELED_UNLABELED_RATIO)) for r in cfg.DATASETS.LABELED_UNLABELED_RATIO )
-        print(f"labeled_bs: {labeled_bs}, unlabeled_bs: {unlabeled_bs}")
+        loaders = []
 
         labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
                 cfg.DATASETS.TRAIN,
@@ -55,16 +55,31 @@ class DATrainer(DefaultTrainer):
             mapper=DatasetMapper(cfg, is_train=True), # default mapper
             num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
             total_batch_size=labeled_bs)
-        unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
-                cfg.DATASETS.UNLABELED,
-                filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-            mapper=UnlabeledDatasetMapper(cfg, is_train=True),
-            num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
-            total_batch_size=unlabeled_bs)
-        return PrefetchableConcatDataloaders(labeled_loader, unlabeled_loader)
+        loaders.append(labeled_loader)
+
+        # if we are utilizing unlabeled data, add it to the dataloader
+        if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
+            unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
+                    cfg.DATASETS.UNLABELED,
+                    filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
+                mapper=UnlabeledDatasetMapper(cfg, is_train=True),
+                num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
+                total_batch_size=unlabeled_bs)
+            loaders.append(unlabeled_loader)
+
+        return PrefetchableConcatDataloaders(loaders)
 
     def run_step(self):
         """Remember that self._trainer is the student trainer."""
+        
+        # Prefetch dataloader batch so we can add pseudo labels from teacher as needed
+        data = self._trainer.data_loader.prefetch_batch()
+        if len(data) == 1:
+            labeled, unlabeled = data, None
+        elif len(data) == 2:
+            labeled, unlabeled = data
+        else:
+            raise ValueError("Unsupported number of dataloaders")
         
         # EMA update
         if self.cfg.DOMAIN_ADAPT.EMA.ENABLED:
@@ -72,9 +87,6 @@ class DATrainer(DefaultTrainer):
 
         # Teacher-student self-training
         if self.cfg.DOMAIN_ADAPT.TEACHER.ENABLED:
-            # Prefetch dataloader batch and add pseudo labels from teacher
-            labeled, unlabeled = self._trainer.data_loader.prefetch_batch()
-
             with torch.no_grad():
                 # run teacher on weakly augmented data
                 self.ema.eval()
@@ -87,11 +99,12 @@ class DATrainer(DefaultTrainer):
                 unlabeled = add_label(unlabeled, teacher_preds)
 
         # apply stronger augmentation
-        # TODO: allow different augs for labeled/unlabeled
-        for img in labeled:
-            img["image"] = self.strong_aug(img["image"])
-        for img in unlabeled:
-            img["image"] = self.strong_aug(img["image"])
+        if self.cfg.DOMAIN_ADAPT.LABELED_STRONG_AUG:
+            for img in labeled:
+                img["image"] = self.strong_aug(img["image"])
+        if self.cfg.DOMAIN_ADAPT.UNLABELED_STRONG_AUG and unlabeled is not None:
+            for img in unlabeled:
+                img["image"] = self.strong_aug(img["image"])
 
         # now call student.run_step as normal
         # problem is this doesn't allow custom loss functions (or filtering some losses out)

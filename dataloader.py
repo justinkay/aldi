@@ -14,19 +14,18 @@ class PrefetchableConcatDataloaders:
     use and modification of data before it hits the default Detectron2 training logic.
     (E.g. the batch can be modified with weak/strong augmentation and pseudo labeling)
     """
-    def __init__(self, labeled_loader, unlabeled_loader):
-        self.labeled_iter = iter(labeled_loader)
-        self.unlabeled_iter = iter(unlabeled_loader)
+    def __init__(self, loaders: list):
+        self.iters = [iter(loader) for loader in loaders]
         self.prefetched_data = None
     
     def __iter__(self):
         while True:
             if self.prefetched_data is None:
-                labeled, unlabeled = self._get_next_batch()
+                outputs = self._get_next_batch()
             else:
-                labeled, unlabeled = self.prefetched_data
+                outputs = self.prefetched_data
                 self.clear_prefetch()
-            yield labeled + unlabeled
+            yield [ x for o in outputs for x in o ]
 
     def prefetch_batch(self):
         assert self.prefetched_data is None, "Prefetched data already exists"
@@ -34,7 +33,7 @@ class PrefetchableConcatDataloaders:
         return self.prefetched_data
 
     def _get_next_batch(self):
-        return next(self.labeled_iter), next(self.unlabeled_iter)
+        return [next(it) for it in self.iters]
 
     def clear_prefetch(self):
         self.prefetched_data = None
