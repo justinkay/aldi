@@ -6,6 +6,8 @@ from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
 from detectron2.modeling.meta_arch.build import build_model
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.data.dataset_mapper import DatasetMapper
+from detectron2.engine import hooks
+from detectron2.utils import comm
 
 from aug import build_strong_augmentation
 from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
@@ -57,6 +59,8 @@ class DATrainer(DefaultTrainer):
         # else:
         #     mapper = DatasetMapper(cfg, is_train=True)
 
+        # TODO: also try just having 3 data loaders: labeled, unlabeled, unlabeled_strong; maybe it's faster overall?
+
         labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
                 cfg.DATASETS.TRAIN,
                 filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
@@ -76,6 +80,30 @@ class DATrainer(DefaultTrainer):
             loaders.append(unlabeled_loader)
 
         return PrefetchableConcatDataloaders(loaders)
+
+    def build_hooks(self):
+        """Add hooks for saving EMA model."""
+        ret = super().build_hooks()
+
+        # add checkpoint and eval for EMA model if enabled
+        if self.cfg.EMA.ENABLED:
+            if comm.is_main_process():
+                ret.insert(-1, # before the PeriodicWriter; see DefaultTrainer.build_hooks()
+                           hooks.PeriodicCheckpointer(self.checkpointer, self.cfg.SOLVER.CHECKPOINT_PERIOD, file_prefix="model_teacher")) 
+
+            def test_and_save_results():
+                self._last_eval_results = self.test(self.cfg, self.ema.model)
+                return self._last_eval_results
+
+            # Do evaluation after checkpointer, because then if it fails,
+            # we can use the saved checkpoint to debug.
+            eval_hook = hooks.EvalHook(self.cfg.TEST.EVAL_PERIOD, test_and_save_results)
+            if comm.is_main_process():
+                ret.insert(-1, eval_hook) # again, before PeriodicWriter if in main process
+            else:
+                ret.append(eval_hook)
+
+        return ret
 
     def run_step(self):
         """Remember that self._trainer is the student trainer."""
