@@ -12,11 +12,13 @@ def add_da_config(cfg):
     # Datasets and sampling
     _C.DATASETS.UNLABELED = tuple()
     _C.DATASETS.LABELED_UNLABELED_RATIO = (1,0)
+    _C.DATASETS.LABELED_STRONG_AUG = False
+    _C.DATASETS.UNLABELED_STRONG_AUG = False
 
     # EMA of stuent weights
-    _C.DOMAIN_ADAPT.EMA = CN()
-    _C.DOMAIN_ADAPT.EMA.ENABLED = False
-    _C.DOMAIN_ADAPT.EMA.ALPHA = 0.9996 # From Adaptive Teacher settings
+    _C.EMA = CN()
+    _C.EMA.ENABLED = False
+    _C.EMA.ALPHA = 0.9996 # From Adaptive Teacher settings
 
     # Teacher model provides pseudo labels
     _C.DOMAIN_ADAPT.TEACHER = CN()
@@ -27,7 +29,3 @@ def add_da_config(cfg):
     # Custom loss functions/modifications
     _C.DOMAIN_ADAPT.LOSSES = CN()
     _C.DOMAIN_ADAPT.LOSSES.RPN_LOSS_ENABLED = True
-
-    # Data augmentations
-    _C.DOMAIN_ADAPT.LABELED_STRONG_AUG = False
-    _C.DOMAIN_ADAPT.UNLABELED_STRONG_AUG = False

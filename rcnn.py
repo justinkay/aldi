@@ -5,6 +5,17 @@ from detectron2.config import configurable
 from detectron2.modeling.meta_arch import GeneralizedRCNN
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 
+
+class SaveIO:
+    """Simple PyTorch hook to save the output of a nn.module."""
+    def __init__(self):
+        self.input = None
+        self.output = None
+        
+    def __call__(self, module, module_in, module_out):
+        self.input = module_in
+        self.output = module_out
+
 @META_ARCH_REGISTRY.register()
 class DARCNN(GeneralizedRCNN):
 
@@ -17,6 +28,11 @@ class DARCNN(GeneralizedRCNN):
     ):
         super().__init__(**kwargs)
         self.do_reg_loss = do_reg_loss
+
+        # register hooks so we can grab output of sub-modules
+        self.rpn_io, self.roih_io = SaveIO(), SaveIO()
+        self.proposal_generator.register_forward_hook(self.rpn_io)
+        self.roi_heads.register_forward_hook(self.roih_io)
 
     @classmethod
     def from_config(cls, cfg):

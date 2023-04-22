@@ -38,8 +38,8 @@ class DATrainer(DefaultTrainer):
         super().__init__(cfg)
 
         # EMA of student
-        if cfg.DOMAIN_ADAPT.EMA.ENABLED:
-            self.ema = EmaRCNN(build_model(cfg), cfg.DOMAIN_ADAPT.EMA.ALPHA)
+        if cfg.EMA.ENABLED:
+            self.ema = EmaRCNN(build_model(cfg), cfg.EMA.ALPHA)
 
         self.strong_aug = build_strong_augmentation()
 
@@ -48,6 +48,14 @@ class DATrainer(DefaultTrainer):
         total_batch_size = cfg.SOLVER.IMS_PER_BATCH
         labeled_bs, unlabeled_bs = ( int(r * total_batch_size / sum(cfg.DATASETS.LABELED_UNLABELED_RATIO)) for r in cfg.DATASETS.LABELED_UNLABELED_RATIO )
         loaders = []
+
+        # TODO:
+        # construct augmentations for labeled data,
+        # since we don't need to augment it multiple ways like unlabeled data
+        # if cfg.DATASETS.LABELED_STRONG_AUG:
+        #     mapper = DatasetMapper(cfg, is_train=True, augmentations=self.strong_aug) # won't work
+        # else:
+        #     mapper = DatasetMapper(cfg, is_train=True)
 
         labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
                 cfg.DATASETS.TRAIN,
@@ -75,14 +83,14 @@ class DATrainer(DefaultTrainer):
         # Prefetch dataloader batch so we can add pseudo labels from teacher as needed
         data = self._trainer.data_loader.prefetch_batch()
         if len(data) == 1:
-            labeled, unlabeled = data, None
+            labeled, unlabeled = data[0], None
         elif len(data) == 2:
             labeled, unlabeled = data
         else:
             raise ValueError("Unsupported number of dataloaders")
         
         # EMA update
-        if self.cfg.DOMAIN_ADAPT.EMA.ENABLED:
+        if self.cfg.EMA.ENABLED:
             self.ema.update_weights(self.model, self.iter)
 
         # Teacher-student self-training
@@ -99,10 +107,10 @@ class DATrainer(DefaultTrainer):
                 unlabeled = add_label(unlabeled, teacher_preds)
 
         # apply stronger augmentation
-        if self.cfg.DOMAIN_ADAPT.LABELED_STRONG_AUG:
+        if self.cfg.DATASETS.LABELED_STRONG_AUG:
             for img in labeled:
                 img["image"] = self.strong_aug(img["image"])
-        if self.cfg.DOMAIN_ADAPT.UNLABELED_STRONG_AUG and unlabeled is not None:
+        if self.cfg.DATASETS.UNLABELED_STRONG_AUG and unlabeled is not None:
             for img in unlabeled:
                 img["image"] = self.strong_aug(img["image"])
 

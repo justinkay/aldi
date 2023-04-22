@@ -1,14 +1,14 @@
 _BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
+EMA:
+  ENABLED: True
 DOMAIN_ADAPT:
-  EMA:
-    ENABLED: True
   TEACHER:
     ENABLED: True
   LOSSES:
     RPN_LOSS_ENABLED: False
-  LABELED_STRONG_AUG: True
-  UNLABELED_STRONG_AUG: True
 DATASETS:
   UNLABELED: ("cityscapes_foggy_train",)
   LABELED_UNLABELED_RATIO: (1,1)
+  LABELED_STRONG_AUG: True
+  UNLABELED_STRONG_AUG: True
 OUTPUT_DIR: "output/cityscapes_meanteacher/"
