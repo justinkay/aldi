@@ -9,7 +9,7 @@ from detectron2.data.dataset_mapper import DatasetMapper
 from detectron2.engine import hooks
 from detectron2.utils import comm
 
-from aug import build_strong_augmentation
+from aug import build_strong_augmentation, do_mic #, build_strong_augmentation_detectron2
 from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
 from ema import EmaRCNN
 from pseudolabels import process_pseudo_label, add_label
@@ -64,7 +64,9 @@ class DATrainer(DefaultTrainer):
         labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
                 cfg.DATASETS.TRAIN,
                 filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-            mapper=DatasetMapper(cfg, is_train=True), # default mapper
+            mapper=DatasetMapper(cfg, is_train=True, # default mapper
+                                #  augmentations=build_strong_augmentation_detectron2()
+                                 ),
             num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
             total_batch_size=labeled_bs)
         loaders.append(labeled_loader)
@@ -134,13 +136,22 @@ class DATrainer(DefaultTrainer):
                 # add pseudo labels as "ground truth"
                 unlabeled = add_label(unlabeled, teacher_preds)
 
-        # apply stronger augmentation
+        # Apply stronger augmentations
         if self.cfg.DATASETS.LABELED_STRONG_AUG:
             for img in labeled:
                 img["image"] = self.strong_aug(img["image"])
         if self.cfg.DATASETS.UNLABELED_STRONG_AUG and unlabeled is not None:
             for img in unlabeled:
                 img["image"] = self.strong_aug(img["image"])
+
+        # MIC
+        # TODO: Note that MIC adds its own "Strong augmentations" in place of the above
+        if self.cfg.DATASETS.LABELED_MIC_AUG:
+            for img in labeled:
+                img["image"] = do_mic(img["image"], self.cfg.DATASETS.MIC_RATIO, self.cfg.DATASETS.MIC_BLOCK_SIZE)
+        if self.cfg.DATASETS.UNLABELED_MIC_AUG and unlabeled is not None:
+            for img in unlabeled:
+                img["image"] = do_mic(img["image"], self.cfg.DATASETS.MIC_RATIO, self.cfg.DATASETS.MIC_BLOCK_SIZE)
 
         # now call student.run_step as normal
         # problem is this doesn't allow custom loss functions (or filtering some losses out)

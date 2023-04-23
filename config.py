@@ -14,6 +14,10 @@ def add_da_config(cfg):
     _C.DATASETS.LABELED_UNLABELED_RATIO = (1,0)
     _C.DATASETS.LABELED_STRONG_AUG = False
     _C.DATASETS.UNLABELED_STRONG_AUG = False
+    _C.DATASETS.LABELED_MIC_AUG = False
+    _C.DATASETS.UNLABELED_MIC_AUG = False
+    _C.DATASETS.MIC_RATIO = 0.5
+    _C.DATASETS.MIC_BLOCK_SIZE = 32
 
     # EMA of stuent weights
     _C.EMA = CN()

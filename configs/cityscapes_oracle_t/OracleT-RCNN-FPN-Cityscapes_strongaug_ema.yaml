@@ -1,0 +1,6 @@
+_BASE_: "./OracleT-RCNN-FPN-Cityscapes.yaml"
+DATASETS:
+  LABELED_STRONG_AUG: True
+EMA:
+  ENABLED: True
+OUTPUT_DIR: "output/cityscapes_oracle-t_strongaug_ema/"
