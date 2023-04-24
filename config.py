@@ -33,3 +33,4 @@ def add_da_config(cfg):
     # Custom loss functions/modifications
     _C.DOMAIN_ADAPT.LOSSES = CN()
     _C.DOMAIN_ADAPT.LOSSES.RPN_LOSS_ENABLED = True
+    _C.DOMAIN_ADAPT.QUALITY_LOSS_WEIGHT_ENABLED = False

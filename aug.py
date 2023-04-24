@@ -13,9 +13,10 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 # Changes:
 #    - Remove conversion to PILImage
 #    - Use Torchvision implementation of Gaussian blur with larger kernel_size/radius
+#    - Disable hue adjustment in ColorJitter because it is very slow
 def build_strong_augmentation():
     return transforms.Compose([
-        transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+        transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.0)], p=0.8),
         transforms.RandomGrayscale(p=0.2),
         transforms.RandomApply([transforms.GaussianBlur(kernel_size=(1,9), sigma=(0.1, 2.0))], p=0.5),
         transforms.RandomErasing(
