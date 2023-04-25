@@ -1,4 +1,4 @@
-_BASE_: "../Base-RCNN-FPN-Cityscapes.yaml"
+_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
 DATASETS:
   LABELED_STRONG_AUG: True
 EMA:

@@ -13,7 +13,8 @@ class SaveWeakDatasetMapper(DatasetMapper):
         """
         DatasetMapper that retrieves the weakly augmented image from the aug_input object
         and saves it in the dataset_dict. See aug.SaveImgAug.
-        Would be great to avoid copy and pasting this method but haven't found a way yet.
+        Would be great to avoid copy and pasting this method but haven't found a way yet
+        (need access to aug_input object).
         """
 
         ### Direct copy from DatasetMapper ###
@@ -58,7 +59,7 @@ class UnlabeledDatasetMapper(SaveWeakDatasetMapper):
 
 class PrefetchableConcatDataloaders:
     """
-    Two dataloaders, one labeled, one unlabeled, whose batches are concatenated.
+    Multiple dataloaders whose batches are concatenated.
     They can also be "prefetched" so that the next batch is already loaded, allowing
     use and modification of data before it hits the default Detectron2 training logic.
     (E.g. the batch can be modified with weak/strong augmentation and pseudo labeling)

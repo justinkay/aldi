@@ -1,5 +1,6 @@
 import os
 import torch
+import copy
 
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
@@ -14,8 +15,11 @@ from detectron2.data import transforms as T
 from aug import WEAK_IMG, get_augs
 from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
 from ema import EmaRCNN
-from pseudolabels import process_pseudo_label, add_label
+from pseudolabels import add_label, process_pseudo_label
 
+
+# save intermediate objects during execution for debugging
+DEBUG = False
 
 class DATrainer(DefaultTrainer):
     """
@@ -44,6 +48,11 @@ class DATrainer(DefaultTrainer):
         # EMA of student
         if cfg.EMA.ENABLED:
             self.ema = EmaRCNN(build_model(cfg), cfg.EMA.ALPHA)
+
+        # Debugging variables
+        if DEBUG:
+            self._last_labeled, self._last_unlabeled, self._last_pseudo = None, None, None
+
 
     @classmethod
     def build_train_loader(cls, cfg):
@@ -104,6 +113,10 @@ class DATrainer(DefaultTrainer):
         else:
             raise ValueError("Unsupported number of dataloaders")
         
+        if DEBUG:
+            self._last_labeled = copy.deepcopy(labeled)
+            self._last_unlabeled = copy.deepcopy(unlabeled)
+
         # EMA update
         if self.cfg.EMA.ENABLED:
             self.ema.update_weights(self.model, self.iter)
@@ -120,17 +133,24 @@ class DATrainer(DefaultTrainer):
             with torch.no_grad():
                 # run teacher on weakly augmented data
                 self.ema.eval()
-                _, teacher_preds, _ = self.ema(unlabeled)
+                _, _, teacher_preds = self.ema(unlabeled)
                 
+                if DEBUG:
+                    self._last_teacher_preds = copy.deepcopy(teacher_preds)
+
                 # postprocess pseudo labels
                 teacher_preds, _ = process_pseudo_label(teacher_preds, self.cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD, 
                                                              "roih", self.cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD)
+                
                 # add pseudo labels as "ground truth"
                 unlabeled = add_label(unlabeled, teacher_preds)
 
             # restore strongly augmented images for student
             for img in unlabeled:
                 img["image"] = img["original_image"]
+
+        if DEBUG:
+            self._last_pseudo = copy.deepcopy(unlabeled)
 
         # now call student.run_step as normal
         self._trainer.iter = self.iter

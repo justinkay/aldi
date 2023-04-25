@@ -142,19 +142,19 @@ class RandomEraseTransform(Transform):
             img = img.astype(np.float32)
 
         for attempt in range(100):
-            _, imgw, imgh = img.shape
+            imgh, imgw, c,  = img.shape
             area = imgw * imgh
             target_area = random.uniform(self.sl, self.sh) * area
             aspect_ratio = random.uniform(self.r1, self.r2)
             h = int(round(math.sqrt(target_area * aspect_ratio)))
             w = int(round(math.sqrt(target_area / aspect_ratio)))
-            if w > 0 and h > 0 and w < imgw and h < imgh:
-                x1 = random.randint(0, imgh - h)
-                y1 = random.randint(0, imgw - w)
+            if w > 1 and h > 1 and w < imgw and h < imgh:
+                h0 = random.randint(0, imgh - h - 1)
+                w0 = random.randint(0, imgw - w - 1)
                 if self.value == "random":
-                    img[:, x1:x1+h, y1:y1+w] = np.random.rand(img.shape[0], h, w)
+                    img[h0:h0+h, w0:w0+w, :] = np.random.rand(h, w, c)
                 else:
-                    img[:, x1:x1+h, y1:y1+w] = self.value
+                    img[h0:h0+h, w0:w0+w, :] = self.value
                 break
         if was_int:
             return np.clip(img, 0, 255).astype(np.uint8)

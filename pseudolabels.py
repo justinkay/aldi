@@ -4,23 +4,24 @@ from detectron2.structures.boxes import Boxes
 from detectron2.structures.instances import Instances
 
 # From Adaptive Teacher ATeacherTrainer
-def process_pseudo_label(proposals_rpn_unsup_k, cur_threshold, proposal_type, psedo_label_method=""):
+# Modified to use proposals['instances']
+def process_pseudo_label(proposals, cur_threshold, proposal_type, psedo_label_method=""):
     list_instances = []
     num_proposal_output = 0.0
-    for proposal_bbox_inst in proposals_rpn_unsup_k:
+    for proposal_bbox_inst in proposals:
         # thresholding
         if psedo_label_method == "thresholding":
             proposal_bbox_inst = threshold_bbox(
-                proposal_bbox_inst, thres=cur_threshold, proposal_type=proposal_type
+                proposal_bbox_inst['instances'], thres=cur_threshold, proposal_type=proposal_type
             )
         else:
             raise ValueError("Unkown pseudo label boxes methods")
         num_proposal_output += len(proposal_bbox_inst)
         list_instances.append(proposal_bbox_inst)
-    num_proposal_output = num_proposal_output / len(proposals_rpn_unsup_k)
+    num_proposal_output = num_proposal_output / len(proposals)
     return list_instances, num_proposal_output
 
-# From Adaptive Teacher ATeacherTrainer
+# # From Adaptive Teacher ATeacherTrainer
 def threshold_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih"):
     if proposal_type == "rpn":
         valid_map = proposal_bbox_inst.objectness_logits > thres

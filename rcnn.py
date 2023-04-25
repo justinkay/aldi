@@ -40,7 +40,7 @@ class DARCNN(GeneralizedRCNN):
     @classmethod
     def from_config(cls, cfg):
         ret = super().from_config(cfg)
-        ret.update({"do_reg_loss": cfg.DOMAIN_ADAPT.LOSSES.RPN_LOSS_ENABLED})
+        ret.update({"do_reg_loss": cfg.DOMAIN_ADAPT.LOSSES.LOC_LOSS_ENABLED})
         ret.update({"do_quality_loss_weight": cfg.DOMAIN_ADAPT.LOSSES.QUALITY_LOSS_WEIGHT_ENABLED})
         return ret
 
