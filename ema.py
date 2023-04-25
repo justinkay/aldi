@@ -50,16 +50,26 @@ class EmaRCNN(nn.Module):
             self._update_ema(model, iter)
 
     @torch.no_grad()
-    def forward(self, target_img):
+    def forward(self, target_img, do_postprocess=True):
         """
+        Method is not really used because the intermediate hooks don't help us much.
+            (Because it turns out the ROI heads outputs are modified inplace by GeneralizedRCNN._postprocess)
+        Args:
+            do_postprocess: transform outputs back into input space (see GeneralizedRCNN._postprocess)
+                            this should probably be disabled if using intermediate results for training
         Returns:
             RPN outputs (proposals), 
             ROI Heads outputs (pred_instances)
             Full model output (postprocessed_output)
         """
         self.model.eval()
-        postprocessed_output = self.model(target_img)   # transformed back into original input space with GeneralizedRCNN._postprocess
-        proposals, _ = self.model.rpn_io.output         # not transformed back to original input space
-        pred_instances, _ = self.model.roih_io.output   # not transformed back to original input space
+        model_output = self.model.inference(target_img, do_postprocess=do_postprocess)
+        
+        # not transformed back to original input space
+        proposals, _ = self.model.rpn_io.output
 
-        return proposals, pred_instances, postprocessed_output
+        # NOTE: these are modified inplace by GeneralizedRCNN._postprocess
+        # so keeping this copy isn't doing much for us 
+        pred_instances, _ = self.model.roih_io.output
+
+        return proposals, pred_instances, model_output

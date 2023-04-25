@@ -7,7 +7,8 @@ from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
 from detectron2.modeling.meta_arch.build import build_model
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.data.dataset_mapper import DatasetMapper
-from detectron2.engine import hooks
+from detectron2.engine import hooks, BestCheckpointer
+from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.utils import comm
 from detectron2.data import detection_utils as utils
 from detectron2.data import transforms as T
@@ -62,7 +63,7 @@ class DATrainer(DefaultTrainer):
 
         if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
             labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, True)),
+                mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True)),
                 num_workers=cfg.DATALOADER.NUM_WORKERS, 
                 total_batch_size=labeled_bs)
             loaders.append(labeled_loader)
@@ -70,7 +71,7 @@ class DATrainer(DefaultTrainer):
         # if we are utilizing unlabeled data, add it to the dataloader
         if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
             unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.UNLABELED, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, True)),
+                mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True)),
                 num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
                 total_batch_size=unlabeled_bs)
             loaders.append(unlabeled_loader)
@@ -87,18 +88,21 @@ class DATrainer(DefaultTrainer):
                 ret.insert(-1, # before the PeriodicWriter; see DefaultTrainer.build_hooks()
                            hooks.PeriodicCheckpointer(self.checkpointer, self.cfg.SOLVER.CHECKPOINT_PERIOD, file_prefix="model_teacher")) 
 
-            def test_and_save_results():
+            def test_and_save_results_ema():
                 self._last_eval_results = self.test(self.cfg, self.ema.model)
                 return self._last_eval_results
 
             # Do evaluation after checkpointer, because then if it fails,
             # we can use the saved checkpoint to debug.
-            eval_hook = hooks.EvalHook(self.cfg.TEST.EVAL_PERIOD, test_and_save_results)
+            eval_hook = hooks.EvalHook(self.cfg.TEST.EVAL_PERIOD, test_and_save_results_ema)
             if comm.is_main_process():
                 ret.insert(-1, eval_hook) # again, before PeriodicWriter if in main process
             else:
                 ret.append(eval_hook)
 
+        # add a hook to save the best checkpoint to model_best.pth
+        if comm.is_main_process():
+            ret.insert(-1, BestCheckpointer(self.cfg.SOLVER.CHECKPOINT_PERIOD, self.checkpointer, "bbox/AP50", "max", file_prefix="model_best")) # again, before PeriodicWriter
         return ret
 
     def run_step(self):
@@ -130,19 +134,22 @@ class DATrainer(DefaultTrainer):
                 img["original_image"] = img["image"]
                 img["image"] = img[WEAK_IMG]
 
+            if DEBUG:
+                self._last_unlabeled_weak = copy.deepcopy(unlabeled)
+
             with torch.no_grad():
                 # run teacher on weakly augmented data
-                self.ema.eval()
-                _, _, teacher_preds = self.ema(unlabeled)
+                self.ema.model.eval()
+                teacher_preds = self.ema.model.inference(unlabeled, do_postprocess=False)
                 
                 if DEBUG:
                     self._last_teacher_preds = copy.deepcopy(teacher_preds)
 
-                # postprocess pseudo labels
+                # postprocess pseudo labels (thresholding)
                 teacher_preds, _ = process_pseudo_label(teacher_preds, self.cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD, 
                                                              "roih", self.cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD)
                 
-                # add pseudo labels as "ground truth"
+                # add pseudo labels back as "ground truth"
                 unlabeled = add_label(unlabeled, teacher_preds)
 
             # restore strongly augmented images for student
