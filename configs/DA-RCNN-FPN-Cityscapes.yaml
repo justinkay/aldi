@@ -1,4 +1,4 @@
-_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
+_BASE_: "./cityscapes_baseline/Base-RCNN-FPN-Cityscapes.yaml"
 EMA:
   ENABLED: True
 DOMAIN_ADAPT:
@@ -7,7 +7,7 @@ DOMAIN_ADAPT:
   LOSSES:
     RPN_LOSS_ENABLED: False
 DATASETS:
-  UNLABELED: ("cityscapes_foggy_train",)
+  UNLABELED: ("cityscapes_fine_instance_seg_train",) # FOR TESTING ("cityscapes_foggy_train",)
   LABELED_UNLABELED_RATIO: (1,1)
   LABELED_STRONG_AUG: True
   UNLABELED_STRONG_AUG: True

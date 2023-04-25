@@ -8,8 +8,10 @@ from detectron2.data.build import build_detection_train_loader, get_detection_da
 from detectron2.data.dataset_mapper import DatasetMapper
 from detectron2.engine import hooks
 from detectron2.utils import comm
+from detectron2.data import detection_utils as utils
+from detectron2.data import transforms as T
 
-from aug import build_strong_augmentation, do_mic #, build_strong_augmentation_detectron2
+from aug import WEAK_IMG, get_augs
 from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
 from ema import EmaRCNN
 from pseudolabels import process_pseudo_label, add_label
@@ -26,7 +28,7 @@ class DATrainer(DefaultTrainer):
         But the Trainer is training the student.
 
     Assumption:
-        Student is already burned in by another trainer (?).
+        If doing adaptation, student is already "burned in" by another trainer.
     """
     
     @classmethod
@@ -43,40 +45,23 @@ class DATrainer(DefaultTrainer):
         if cfg.EMA.ENABLED:
             self.ema = EmaRCNN(build_model(cfg), cfg.EMA.ALPHA)
 
-        self.strong_aug = build_strong_augmentation()
-
     @classmethod
     def build_train_loader(cls, cfg):
         total_batch_size = cfg.SOLVER.IMS_PER_BATCH
         labeled_bs, unlabeled_bs = ( int(r * total_batch_size / sum(cfg.DATASETS.LABELED_UNLABELED_RATIO)) for r in cfg.DATASETS.LABELED_UNLABELED_RATIO )
         loaders = []
 
-        # TODO:
-        # construct augmentations for labeled data,
-        # since we don't need to augment it multiple ways like unlabeled data
-        # if cfg.DATASETS.LABELED_STRONG_AUG:
-        #     mapper = DatasetMapper(cfg, is_train=True, augmentations=self.strong_aug) # won't work
-        # else:
-        #     mapper = DatasetMapper(cfg, is_train=True)
-
-        # TODO: also try just having 3 data loaders: labeled, unlabeled, unlabeled_strong; maybe it's faster overall?
-
-        labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
-                cfg.DATASETS.TRAIN,
-                filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-            mapper=DatasetMapper(cfg, is_train=True, # default mapper
-                                #  augmentations=build_strong_augmentation_detectron2()
-                                 ),
-            num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
-            total_batch_size=labeled_bs)
-        loaders.append(labeled_loader)
+        if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
+            labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
+                mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, True)),
+                num_workers=cfg.DATALOADER.NUM_WORKERS, 
+                total_batch_size=labeled_bs)
+            loaders.append(labeled_loader)
 
         # if we are utilizing unlabeled data, add it to the dataloader
         if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
-            unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(
-                    cfg.DATASETS.UNLABELED,
-                    filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                mapper=UnlabeledDatasetMapper(cfg, is_train=True),
+            unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.UNLABELED, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
+                mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, True)),
                 num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
                 total_batch_size=unlabeled_bs)
             loaders.append(unlabeled_loader)
@@ -125,6 +110,13 @@ class DATrainer(DefaultTrainer):
 
         # Teacher-student self-training
         if self.cfg.DOMAIN_ADAPT.TEACHER.ENABLED:
+
+            # img["image"] currently contains strongly augmented images;
+            # we want to generate pseudo labels using the weakly augmented images
+            for img in unlabeled:
+                img["original_image"] = img["image"]
+                img["image"] = img[WEAK_IMG]
+
             with torch.no_grad():
                 # run teacher on weakly augmented data
                 self.ema.eval()
@@ -136,25 +128,10 @@ class DATrainer(DefaultTrainer):
                 # add pseudo labels as "ground truth"
                 unlabeled = add_label(unlabeled, teacher_preds)
 
-        # Apply stronger augmentations
-        if self.cfg.DATASETS.LABELED_STRONG_AUG:
-            for img in labeled:
-                img["image"] = self.strong_aug(img["image"])
-        if self.cfg.DATASETS.UNLABELED_STRONG_AUG and unlabeled is not None:
+            # restore strongly augmented images for student
             for img in unlabeled:
-                img["image"] = self.strong_aug(img["image"])
-
-        # MIC
-        # TODO: Note that MIC adds its own "Strong augmentations" in place of the above
-        if self.cfg.DATASETS.LABELED_MIC_AUG:
-            for img in labeled:
-                img["image"] = do_mic(img["image"], self.cfg.DATASETS.MIC_RATIO, self.cfg.DATASETS.MIC_BLOCK_SIZE)
-        if self.cfg.DATASETS.UNLABELED_MIC_AUG and unlabeled is not None:
-            for img in unlabeled:
-                img["image"] = do_mic(img["image"], self.cfg.DATASETS.MIC_RATIO, self.cfg.DATASETS.MIC_BLOCK_SIZE)
+                img["image"] = img["original_image"]
 
         # now call student.run_step as normal
-        # problem is this doesn't allow custom loss functions (or filtering some losses out)
-        # docs say "if you want to do something with the losses, you can wrap the model"
         self._trainer.iter = self.iter
         self._trainer.run_step()

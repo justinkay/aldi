@@ -5,7 +5,6 @@ from detectron2.config import configurable
 from detectron2.modeling.meta_arch import GeneralizedRCNN
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 from detectron2.layers import cat, cross_entropy
-from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers
 
 class SaveIO:
     """Simple PyTorch hook to save the output of a nn.module."""

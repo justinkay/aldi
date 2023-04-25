@@ -1,4 +1,4 @@
-_BASE_: "./_Base-RCNN-FPN.yaml"
+_BASE_: "../_Base-RCNN-FPN.yaml"
 MODEL:
   ROI_HEADS:
     NUM_CLASSES: 8
