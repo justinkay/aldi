@@ -162,6 +162,8 @@ class RandomEraseTransform(Transform):
             return img
 
     def apply_coords(self, coords: np.ndarray) -> np.ndarray:
+        # TODO : Maybe we could improve this by removing any boxes that fall completely
+        # within the erased area
         return coords
 
     def apply_segmentation(self, segmentation: np.ndarray) -> np.ndarray:

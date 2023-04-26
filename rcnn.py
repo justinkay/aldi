@@ -46,7 +46,9 @@ class DARCNN(GeneralizedRCNN):
 
     def forward(self, batched_inputs: List[Dict[str, torch.Tensor]]):
         output = super().forward(batched_inputs)
-        # Some methods (Adaptive/Unbiased Teacher) disable the regression losses
+
+        # Some methods (Adaptive/Unbiased Teacher, MIC) disable the regression losses
+        # TODO: This should only be disabled for predictions on pseudo-labeled data
         if self.training and not self.do_reg_loss:
             output["loss_rpn_loc"] *= 0
             output["loss_box_reg"] *= 0

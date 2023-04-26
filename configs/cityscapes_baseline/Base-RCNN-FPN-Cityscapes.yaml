@@ -21,9 +21,11 @@ SOLVER:
   IMS_PER_BATCH: 16
   AMP:
     ENABLED: True
-  CHECKPOINT_PERIOD: 312
   WARMUP_FACTOR: 0.0032 # roughly 1/312
   WARMUP_ITERS: 312
+  # just save a few checkpoints throughout because we will also use BestCheckpointer
+  # every TEST.EVAL_PERIOD
+  CHECKPOINT_PERIOD: 3000
 TEST:
   EVAL_PERIOD: 312
 OUTPUT_DIR: "output/cityscapes_baseline/"

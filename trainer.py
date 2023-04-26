@@ -102,7 +102,8 @@ class DATrainer(DefaultTrainer):
 
         # add a hook to save the best checkpoint to model_best.pth
         if comm.is_main_process():
-            ret.insert(-1, BestCheckpointer(self.cfg.SOLVER.CHECKPOINT_PERIOD, self.checkpointer, "bbox/AP50", "max", file_prefix="model_best")) # again, before PeriodicWriter
+            for test_set in self.cfg.DATASETS.TEST:
+                ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, self.checkpointer, f"{test_set}/bbox/AP50", "max", file_prefix=f"{test_set}_model_best"))
         return ret
 
     def run_step(self):
@@ -158,6 +159,7 @@ class DATrainer(DefaultTrainer):
 
         if DEBUG:
             self._last_pseudo = copy.deepcopy(unlabeled)
+            self._last_prefetched = self._trainer.data_loader.prefetched_data
 
         # now call student.run_step as normal
         self._trainer.iter = self.iter
