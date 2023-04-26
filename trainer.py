@@ -1,6 +1,7 @@
 import os
 import torch
 import copy
+import weakref
 
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
@@ -15,7 +16,7 @@ from detectron2.data import transforms as T
 
 from aug import WEAK_IMG, get_augs
 from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
-from ema import EmaRCNN
+from meanteacher import EmaRCNN
 from pseudolabels import add_label, process_pseudo_label
 
 
@@ -49,6 +50,14 @@ class DATrainer(DefaultTrainer):
         # EMA of student
         if cfg.EMA.ENABLED:
             self.ema = EmaRCNN(build_model(cfg), cfg.EMA.ALPHA)
+            self.ema_checkpointer = DetectionCheckpointer(
+                self.ema.model,
+                cfg.OUTPUT_DIR,
+                trainer=weakref.proxy(self),
+        )
+
+        # build hooks after EMA is initialized
+        self.register_hooks(self.build_hooks_late())
 
         # Debugging variables
         if DEBUG:
@@ -79,6 +88,10 @@ class DATrainer(DefaultTrainer):
         return PrefetchableConcatDataloaders(loaders)
 
     def build_hooks(self):
+        """Disable hooks in superclass initialization; build them after EMA model is built."""
+        return []
+    
+    def build_hooks_late(self):
         """Add hooks for saving EMA model."""
         ret = super().build_hooks()
 
@@ -86,7 +99,7 @@ class DATrainer(DefaultTrainer):
         if self.cfg.EMA.ENABLED:
             if comm.is_main_process():
                 ret.insert(-1, # before the PeriodicWriter; see DefaultTrainer.build_hooks()
-                           hooks.PeriodicCheckpointer(self.checkpointer, self.cfg.SOLVER.CHECKPOINT_PERIOD, file_prefix="model_teacher")) 
+                           hooks.PeriodicCheckpointer(self.ema_checkpointer, self.cfg.SOLVER.CHECKPOINT_PERIOD, file_prefix="model_teacher")) 
 
             def test_and_save_results_ema():
                 self._last_eval_results = self.test(self.cfg, self.ema.model)
@@ -100,7 +113,7 @@ class DATrainer(DefaultTrainer):
             else:
                 ret.append(eval_hook)
 
-        # add a hook to save the best checkpoint to model_best.pth
+        # add a hook to save the best (teacher, if EMA enabled) checkpoint to model_best.pth
         if comm.is_main_process():
             for test_set in self.cfg.DATASETS.TEST:
                 ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, self.checkpointer, f"{test_set}/bbox/AP50", "max", file_prefix=f"{test_set}_model_best"))
