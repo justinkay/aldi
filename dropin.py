@@ -1,6 +1,6 @@
 ##############
 # This file contains drop-in replacements for components in Detectron2.
-# Comoponents in this file **do not change the original functionality** of Detectron2,
+# Components in this file **do not change the original functionality** of Detectron2,
 # but often add hooks into the original functionality to reduce the need to copy-paste 
 # code when subclassing.
 ##############
@@ -28,7 +28,6 @@ class DefaultTrainer(_DefaultTrainer):
     Same as detectron2.engine.defaults.DefaultTrainer, but adds a _create_trainer method
     to allow easier use of other trainers.
     """
-
     def __init__(self, cfg):
             """
             Args:
@@ -42,7 +41,6 @@ class DefaultTrainer(_DefaultTrainer):
                 setup_logger()
             cfg = DefaultTrainer.auto_scale_workers(cfg, comm.get_world_size())
 
-            # Assume these objects must be constructed in this order.
             model = self.build_model(cfg)
             optimizer = self.build_optimizer(cfg, model)
             data_loader = self.build_train_loader(cfg)
@@ -55,7 +53,6 @@ class DefaultTrainer(_DefaultTrainer):
 
             self.scheduler = self.build_lr_scheduler(cfg, optimizer)
             self.checkpointer = DetectionCheckpointer(
-                # Assume you want to save checkpoints together with logs/statistics
                 model,
                 cfg.OUTPUT_DIR,
                 trainer=weakref.proxy(self),
@@ -96,22 +93,10 @@ class SimpleTrainer(_SimpleTrainer):
         else:
             losses = sum(loss_dict.values())
         if not self.zero_grad_before_forward:
-            """
-            If you need to accumulate gradients or do something similar, you can
-            wrap the optimizer with your custom `zero_grad()` method.
-            """
             self.optimizer.zero_grad()
         losses.backward()
-
         self.after_backward()
-
         self._write_metrics(loss_dict, data_time)
-
-        """
-        If you need gradient clipping/scaling or other processing, you can
-        wrap the optimizer with your custom `step()` method. But it is
-        suboptimal as explained in https://arxiv.org/abs/2006.15704 Sec 3.2.4
-        """
         self.optimizer.step()
     
     def run_model(self, data):
@@ -177,42 +162,28 @@ class DatasetMapper(_DatasetMapper):
         access the aug_input object in subclasses without copy-pasting the entire
         __call__ method.
         """
-        dataset_dict = copy.deepcopy(dataset_dict)  # it will be modified by code below
-        # USER: Write your own image loading if it's not from a file
+        dataset_dict = copy.deepcopy(dataset_dict)
         image = utils.read_image(dataset_dict["file_name"], format=self.image_format)
         utils.check_image_size(dataset_dict, image)
-
-        # USER: Remove if you don't do semantic/panoptic segmentation.
         if "sem_seg_file_name" in dataset_dict:
             sem_seg_gt = utils.read_image(dataset_dict.pop("sem_seg_file_name"), "L").squeeze(2)
         else:
             sem_seg_gt = None
-
         aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
         transforms = self.augmentations(aug_input)
         image, sem_seg_gt = aug_input.image, aug_input.sem_seg
-
         image_shape = image.shape[:2]  # h, w
-        # Pytorch's dataloader is efficient on torch.Tensor due to shared-memory,
-        # but not efficient on large generic data structures due to the use of pickle & mp.Queue.
-        # Therefore it's important to use torch.Tensor.
         dataset_dict["image"] = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
         if sem_seg_gt is not None:
             dataset_dict["sem_seg"] = torch.as_tensor(sem_seg_gt.astype("long"))
-
-        # USER: Remove if you don't use pre-computed proposals.
-        # Most users would not need this feature.
         if self.proposal_topk is not None:
             utils.transform_proposals(
                 dataset_dict, image_shape, transforms, proposal_topk=self.proposal_topk
             )
-
         if not self.is_train:
-            # USER: Modify this if you want to keep them for some reason.
             dataset_dict.pop("annotations", None)
             dataset_dict.pop("sem_seg_file_name", None)
             return dataset_dict
-
         if "annotations" in dataset_dict:
             self._transform_annotations(dataset_dict, transforms, image_shape)
 
