@@ -75,7 +75,7 @@ class PrefetchableConcatDataloaders:
             else:
                 outputs = self.prefetched_data
                 self.clear_prefetch()
-            yield [ x for o in outputs for x in o ]
+            yield outputs #[ x for o in outputs for x in o ]
 
     def prefetch_batch(self):
         assert self.prefetched_data is None, "Prefetched data already exists"

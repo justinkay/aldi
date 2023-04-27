@@ -27,6 +27,7 @@ class EmaRCNN(nn.Module):
         self.model.load_state_dict(self._get_student_dict(model))
 
     def _update_ema(self, model, iter):
+        print("updating", iter)
         student_model_dict = self._get_student_dict(model)
 
         # update teacher
