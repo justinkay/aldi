@@ -9,8 +9,11 @@ import logging
 import weakref
 import time
 import torch
+import copy
 
 from detectron2.checkpoint import DetectionCheckpointer
+from detectron2.data.dataset_mapper import DatasetMapper as _DatasetMapper
+from detectron2.data import detection_utils as utils
 from detectron2.engine.train_loop import TrainerBase
 from detectron2.engine.train_loop import AMPTrainer as _AMPTrainer
 from detectron2.engine.train_loop import SimpleTrainer as _SimpleTrainer
@@ -45,7 +48,10 @@ class DefaultTrainer(_DefaultTrainer):
             data_loader = self.build_train_loader(cfg)
 
             model = create_ddp_model(model, broadcast_buffers=False)
+
+            ## Change is here ##
             self._trainer = self._create_trainer(cfg, model, data_loader, optimizer)
+            ##   End change   ##
 
             self.scheduler = self.build_lr_scheduler(cfg, optimizer)
             self.checkpointer = DetectionCheckpointer(
@@ -162,3 +168,59 @@ class AMPTrainer(_AMPTrainer):
 
     def run_model(self, data):
         return self.model(data)
+    
+    
+class DatasetMapper(_DatasetMapper):
+    def __call__(self, dataset_dict):
+        """
+        Same as detectron2.data.dataset_mapper.DatasetMapper, but adds a way to
+        access the aug_input object in subclasses without copy-pasting the entire
+        __call__ method.
+        """
+        dataset_dict = copy.deepcopy(dataset_dict)  # it will be modified by code below
+        # USER: Write your own image loading if it's not from a file
+        image = utils.read_image(dataset_dict["file_name"], format=self.image_format)
+        utils.check_image_size(dataset_dict, image)
+
+        # USER: Remove if you don't do semantic/panoptic segmentation.
+        if "sem_seg_file_name" in dataset_dict:
+            sem_seg_gt = utils.read_image(dataset_dict.pop("sem_seg_file_name"), "L").squeeze(2)
+        else:
+            sem_seg_gt = None
+
+        aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
+        transforms = self.augmentations(aug_input)
+        image, sem_seg_gt = aug_input.image, aug_input.sem_seg
+
+        image_shape = image.shape[:2]  # h, w
+        # Pytorch's dataloader is efficient on torch.Tensor due to shared-memory,
+        # but not efficient on large generic data structures due to the use of pickle & mp.Queue.
+        # Therefore it's important to use torch.Tensor.
+        dataset_dict["image"] = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
+        if sem_seg_gt is not None:
+            dataset_dict["sem_seg"] = torch.as_tensor(sem_seg_gt.astype("long"))
+
+        # USER: Remove if you don't use pre-computed proposals.
+        # Most users would not need this feature.
+        if self.proposal_topk is not None:
+            utils.transform_proposals(
+                dataset_dict, image_shape, transforms, proposal_topk=self.proposal_topk
+            )
+
+        if not self.is_train:
+            # USER: Modify this if you want to keep them for some reason.
+            dataset_dict.pop("annotations", None)
+            dataset_dict.pop("sem_seg_file_name", None)
+            return dataset_dict
+
+        if "annotations" in dataset_dict:
+            self._transform_annotations(dataset_dict, transforms, image_shape)
+
+        ## Change is here ##
+        dataset_dict = self._after_call(dataset_dict, aug_input)
+        ##   End change   ##
+
+        return dataset_dict
+    
+    def _after_call(self, dataset_dict, aug_input):
+        return dataset_dict

@@ -2,52 +2,20 @@ import copy
 import torch
 import numpy as np
 
-from detectron2.data import DatasetMapper
 from detectron2.data import detection_utils as utils
 from detectron2.data import transforms as T
 
-from aug import WEAK_IMG
+from aug import WEAK_IMG_KEY
+from dropin import DatasetMapper
 
 class SaveWeakDatasetMapper(DatasetMapper):
-    def __call__(self, dataset_dict):
-        """
-        DatasetMapper that retrieves the weakly augmented image from the aug_input object
-        and saves it in the dataset_dict. See aug.SaveImgAug.
-        Would be great to avoid copy and pasting this method but haven't found a way yet
-        (need access to aug_input object).
-        """
-
-        ### Direct copy from DatasetMapper ###
-        dataset_dict = copy.deepcopy(dataset_dict)  # it will be modified by code below
-        image = utils.read_image(dataset_dict["file_name"], format=self.image_format)
-        utils.check_image_size(dataset_dict, image)
-        if "sem_seg_file_name" in dataset_dict:
-            sem_seg_gt = utils.read_image(dataset_dict.pop("sem_seg_file_name"), "L").squeeze(2)
-        else:
-            sem_seg_gt = None
-        aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
-        transforms = self.augmentations(aug_input)
-        image, sem_seg_gt = aug_input.image, aug_input.sem_seg
-        image_shape = image.shape[:2]  # h, w
-        dataset_dict["image"] = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
-        if sem_seg_gt is not None:
-            dataset_dict["sem_seg"] = torch.as_tensor(sem_seg_gt.astype("long"))
-        if self.proposal_topk is not None:
-            utils.transform_proposals(
-                dataset_dict, image_shape, transforms, proposal_topk=self.proposal_topk
-            )
-        if not self.is_train:
-            dataset_dict.pop("annotations", None)
-            dataset_dict.pop("sem_seg_file_name", None)
-            return dataset_dict
-        if "annotations" in dataset_dict:
-            self._transform_annotations(dataset_dict, transforms, image_shape)
-        ### End direct copy from DatasetMapper ###
-
-        # Save weakly augmented image in dataset_dict
-        weak_img = getattr(aug_input, WEAK_IMG)
-        dataset_dict[WEAK_IMG] = torch.as_tensor(np.ascontiguousarray(weak_img.transpose(2, 0, 1)))
-
+    """
+    DatasetMapper that retrieves the weakly augmented image from the aug_input object
+    and saves it in the dataset_dict. See aug.SaveImgAug.
+    """
+    def _after_call(self, dataset_dict, aug_input):
+        weak_img = getattr(aug_input, WEAK_IMG_KEY)
+        dataset_dict[WEAK_IMG_KEY] = torch.as_tensor(np.ascontiguousarray(weak_img.transpose(2, 0, 1)))
         return dataset_dict
 
 class UnlabeledDatasetMapper(SaveWeakDatasetMapper):
@@ -75,7 +43,7 @@ class PrefetchableConcatDataloaders:
             else:
                 outputs = self.prefetched_data
                 self.clear_prefetch()
-            yield outputs #[ x for o in outputs for x in o ]
+            yield outputs
 
     def prefetch_batch(self):
         assert self.prefetched_data is None, "Prefetched data already exists"

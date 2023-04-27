@@ -11,7 +11,7 @@ from detectron2.data import detection_utils as utils
 from fvcore.transforms.transform import Transform, NoOpTransform
 
 # key for weakly augmented image in aug_input object
-WEAK_IMG = "img_weak"
+WEAK_IMG_KEY = "img_weak"
 
 def get_augs(cfg, labeled):
     """
@@ -23,11 +23,11 @@ def get_augs(cfg, labeled):
         augs.insert(0, T.RandomCrop(cfg.INPUT.CROP.TYPE, cfg.INPUT.CROP.SIZE))
     
     # add a hook to save the image after weak augmentation occurs
-    augs.append(SaveImgAug(WEAK_IMG))
+    augs.append(SaveImgAug(WEAK_IMG_KEY))
 
     # add strong augmentation
     if (labeled and cfg.DATASETS.LABELED_STRONG_AUG) or (not labeled and cfg.DATASETS.UNLABELED_STRONG_AUG):
-        augs += build_strong_augmentation_d2()
+        augs += build_strong_augmentation()
 
     # add MIC
     if (labeled and cfg.DATASETS.LABELED_MIC_AUG) or (not labeled and cfg.DATASETS.UNLABELED_MIC_AUG):
@@ -35,7 +35,7 @@ def get_augs(cfg, labeled):
 
     return augs
 
-def build_strong_augmentation_d2(include_erasing=True):
+def build_strong_augmentation(include_erasing=True):
     """
     Modified from Adaptive Teacher / Unbiased Teacher codebase
         - Replace random "hue" of ColorJitter with RandomLighting (this has the advantage of being much faster)

@@ -12,13 +12,20 @@ from detectron2.modeling.meta_arch.build import build_model
 from detectron2.utils.events import get_event_storage
 from detectron2.utils import comm
 
-from aug import WEAK_IMG, get_augs
+from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
-from meanteacher import EmaRCNN
+from ema import EmaRCNN
 from pseudolabels import add_label, process_pseudo_label
 
 def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding"):
+     """
+     Main logic of running Mean Teacher style training for one iteration.
+     - If no unlabeled data is supplied, run a training step as usual.
+     - If unlabeled data is supplied, uses gradient accumulation to run the model on both labeled and 
+     unlabeled data in the same step. This approach is taken (vs., e.g., concatenating the labeled and 
+     unlabeled data into a single batch) to allow for easier customization of training losses.
+     """
      if len(data) == 1:
           labeled, unlabeled = data[0], None
      elif len(data) == 2:
@@ -26,7 +33,10 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
      else:
           raise ValueError(f"Unsupported number of dataloaders, {len(data)}")
 
+     # run model on labeled data per usual
      loss_dict = model(labeled)
+
+     # run model on unlabeled data
      if unlabeled is not None:
           if teacher is None:
                logging.warning("No teacher model provided. Not generating pseudo-labels.")
@@ -35,7 +45,7 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                # we want to generate pseudo labels using the weakly augmented images
                for img in unlabeled:
                     img["original_image"] = img["image"]
-                    img["image"] = img[WEAK_IMG]
+                    img["image"] = img[WEAK_IMG_KEY]
 
                with torch.no_grad():
                     # run teacher on weakly augmented data
@@ -89,9 +99,21 @@ class DAAMPTrainer(AMPTrainer):
                                              threshold=self.pseudo_label_thresh, 
                                              method=self.pseudo_label_method)
      
+class DASimpleTrainer(SimpleTrainer):
+     def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh):
+          super().__init__(model, data_loader, optimizer)
+          self.pseudo_label_method = pseudo_label_method
+          self.pseudo_label_thresh = pseudo_label_thresh
+
+     def run_model(self, data):
+          teacher = self.ema.model if self.ema is not None else None
+          return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
+                                             threshold=self.pseudo_label_thresh, 
+                                             method=self.pseudo_label_method)
+     
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
-         return DAAMPTrainer(model, data_loader, optimizer, cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD,
+         return (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD,
                              cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD)
      
      @classmethod
@@ -106,6 +128,8 @@ class DATrainer(DefaultTrainer):
           ema_hook = EMAHook(self.cfg)
           
           # TODO: Don't know whether I should insert this if not on the main thread?
+          # TODO: Right now we do this even if self.cfg.EMA.ENABLED is false so that the ema
+          #         attribute is always present in the trainer object; probably a cleaner way
           if comm.is_main_process():
                ret.insert(-1, ema_hook) # before the PeriodicWriter; see DefaultTrainer.build_hooks()
           else:
