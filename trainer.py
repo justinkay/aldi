@@ -14,8 +14,8 @@ from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-from dataloader import UnlabeledDatasetMapper, PrefetchableConcatDataloaders
-from ema import EmaRCNN
+from dataloader import UnlabeledDatasetMapper, PrefetchableDataloaders
+from ema import EMA
 from pseudolabels import add_label, process_pseudo_label
 
 def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding"):
@@ -25,6 +25,16 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
      - If unlabeled data is supplied, uses gradient accumulation to run the model on both labeled and 
      unlabeled data in the same step. This approach is taken (vs., e.g., concatenating the labeled and 
      unlabeled data into a single batch) to allow for easier customization of training losses.
+
+     Assumes any images to be pseudo-labeled have a weakly augmented version stored in the dataset dict
+     under the key aug.WEAK_IMG_KEY.
+
+     Args:
+          data: either output from a single (labeled) dataloader or a tuple of outputs from two 
+                dataloaders (labeled, unlabeled)
+          teacher: a teacher model to use for generating pseudo-labels, or None to disable pseudo-labeling
+          threshold: the threshold to use for pseudo-labeling if using a threshold based method
+          method: the method to use for pseudo-labeling, {"thresholding", }
      """
      if len(data) == 1:
           labeled, unlabeled = data[0], None
@@ -49,6 +59,7 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
 
                with torch.no_grad():
                     # run teacher on weakly augmented data
+                    # do_postprocess=False to disable transforming outputs back into original image space
                     teacher.eval()
                     teacher_preds = teacher.inference(unlabeled, do_postprocess=False)
                     
@@ -68,24 +79,6 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                loss_dict[k] /= 2.0
 
      return loss_dict
-
-class EMAHook(HookBase):
-     """A training hook to store and update an EMA model every iteration."""
-     def __init__(self, cfg):
-          self.ema = None
-          if cfg.EMA.ENABLED:
-               self.ema = EmaRCNN(build_model(cfg), cfg.EMA.ALPHA)
-
-     def before_train(self):
-          """Initialize the EMA model in the Trainer."""
-          self.trainer._trainer.ema = self.ema
-          if self.ema is not None:
-               self.ema.update_weights(self.trainer.model, iter=0)
-
-     def after_step(self):
-          """Update after every training step."""
-          if self.ema is not None:
-               self.ema.update_weights(self.trainer.model, iter=self.trainer.iter)
 
 class DAAMPTrainer(AMPTrainer):
      def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh):
@@ -113,8 +106,12 @@ class DASimpleTrainer(SimpleTrainer):
      
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
-         return (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD,
-                             cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD)
+          trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD,
+                              cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD)
+          trainer.ema = None
+          if cfg.EMA.ENABLED:
+               trainer.ema = EMA(build_model(cfg), cfg.EMA.ALPHA)
+          return trainer
      
      @classmethod
      def build_evaluator(cls, cfg, dataset_name, output_folder=None):
@@ -125,20 +122,11 @@ class DATrainer(DefaultTrainer):
 
      def build_hooks(self):
           ret = super().build_hooks()
-          ema_hook = EMAHook(self.cfg)
-          
-          # TODO: Don't know whether I should insert this if not on the main thread?
-          # TODO: Right now we do this even if self.cfg.EMA.ENABLED is false so that the ema
-          #         attribute is always present in the trainer object; probably a cleaner way
-          if comm.is_main_process():
-               ret.insert(-1, ema_hook) # before the PeriodicWriter; see DefaultTrainer.build_hooks()
-          else:
-               ret.append(ema_hook)
 
-          # TODO: Can we place this inside EMA hook? Return a list of hooks?
+          # add hooks to evaluate and save teacher model if applicable
           if self.cfg.EMA.ENABLED:
                ema_checkpointer = DetectionCheckpointer(
-                    ema_hook.ema.model,
+                    self._trainer.ema.model,
                     self.cfg.OUTPUT_DIR,
                     trainer=weakref.proxy(self),
                )
@@ -147,7 +135,7 @@ class DATrainer(DefaultTrainer):
                               hooks.PeriodicCheckpointer(ema_checkpointer, self.cfg.SOLVER.CHECKPOINT_PERIOD, file_prefix="model_teacher")) 
 
                def test_and_save_results_ema():
-                    self._last_eval_results = self.test(self.cfg, ema_hook.ema.model)
+                    self._last_eval_results = self.test(self.cfg, self._trainer.ema.model)
                     return self._last_eval_results
 
                # Do evaluation after checkpointer, because then if it fails,
@@ -170,6 +158,7 @@ class DATrainer(DefaultTrainer):
           labeled_bs, unlabeled_bs = ( int(r * total_batch_size / max(cfg.DATASETS.LABELED_UNLABELED_RATIO)) for r in cfg.DATASETS.LABELED_UNLABELED_RATIO )
           loaders = []
 
+          # create labeled dataloader
           if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
                labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
                     mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True)),
@@ -177,7 +166,7 @@ class DATrainer(DefaultTrainer):
                     total_batch_size=labeled_bs)
                loaders.append(labeled_loader)
 
-          # if we are utilizing unlabeled data, add it to the dataloader
+          # create unlabeled dataloader
           if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
                unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.UNLABELED, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
                     mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True)),
@@ -185,4 +174,9 @@ class DATrainer(DefaultTrainer):
                     total_batch_size=unlabeled_bs)
                loaders.append(unlabeled_loader)
 
-          return PrefetchableConcatDataloaders(loaders)
+          return PrefetchableDataloaders(loaders)
+     
+     def before_step(self):
+          super().before_step()
+          if self.cfg.EMA.ENABLED:
+               self._trainer.ema.update_weights(self._trainer.model, self.iter)

@@ -21,12 +21,14 @@ class UnlabeledDatasetMapper(SaveWeakDatasetMapper):
         dataset_dict.pop("sem_seg_file_name", None)
         return dataset_dict
 
-class PrefetchableConcatDataloaders:
+class PrefetchableDataloaders:
     """
-    Multiple dataloaders whose batches are concatenated.
+    Multiple dataloaders.
     They can also be "prefetched" so that the next batch is already loaded, allowing
     use and modification of data before it hits the default Detectron2 training logic.
     (E.g. the batch can be modified with weak/strong augmentation and pseudo labeling)
+
+    TODO: Not really using anymore -- can probably get rid of it
     """
     def __init__(self, loaders: list):
         self.iters = [iter(loader) for loader in loaders]
