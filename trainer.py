@@ -124,6 +124,7 @@ class DATrainer(DefaultTrainer):
           ret = super().build_hooks()
 
           # add hooks to evaluate and save teacher model if applicable
+          ema_checkpointer = None
           if self.cfg.EMA.ENABLED:
                ema_checkpointer = DetectionCheckpointer(
                     self._trainer.ema.model,
@@ -149,7 +150,9 @@ class DATrainer(DefaultTrainer):
           # add a hook to save the best (teacher, if EMA enabled) checkpoint to model_best.pth
           if comm.is_main_process():
                for test_set in self.cfg.DATASETS.TEST:
-                    ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, self.checkpointer, f"{test_set}/bbox/AP50", "max", file_prefix=f"{test_set}_model_best"))
+                    ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, ema_checkpointer if ema_checkpointer is not None else self.checkpointer, 
+                                                    f"{test_set}/bbox/AP50", "max", file_prefix=f"{test_set}_model_best"))
+
           return ret
      
      @classmethod
