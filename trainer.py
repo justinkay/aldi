@@ -168,7 +168,6 @@ class DATrainer(DefaultTrainer):
      def build_train_loader(cls, cfg):
           total_batch_size = cfg.SOLVER.IMS_PER_BATCH
           labeled_bs, unlabeled_bs = ( int(r * total_batch_size / max(cfg.DATASETS.LABELED_UNLABELED_RATIO)) for r in cfg.DATASETS.LABELED_UNLABELED_RATIO )
-          print(f"labeled_bs: {labeled_bs}, unlabeled_bs: {unlabeled_bs}")
           loaders = []
 
           if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):

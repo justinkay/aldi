@@ -12,8 +12,8 @@ INPUT:
   MAX_SIZE_TRAIN: 2048
   MAX_SIZE_TEST: 2048
 DATASETS:
-  TRAIN: ("cityscapes_fine_instance_seg_train",)
-  TEST: ("cityscapes_fine_instance_seg_val","cityscapes_foggy_val",)
+  TRAIN: ("cityscapes_train",)
+  TEST: ("cityscapes_val", "cityscapes_foggy_val",)
 SOLVER:
   BASE_LR: 0.02
   STEPS: (9000,)

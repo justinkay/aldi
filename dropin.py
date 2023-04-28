@@ -10,10 +10,12 @@ import weakref
 import time
 import torch
 import copy
+import numpy as np
 
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.data.dataset_mapper import DatasetMapper as _DatasetMapper
 from detectron2.data import detection_utils as utils
+from detectron2.data import transforms as T
 from detectron2.engine.train_loop import TrainerBase
 from detectron2.engine.train_loop import AMPTrainer as _AMPTrainer
 from detectron2.engine.train_loop import SimpleTrainer as _SimpleTrainer

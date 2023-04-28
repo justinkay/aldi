@@ -1,9 +1,5 @@
-import copy
 import torch
 import numpy as np
-
-from detectron2.data import detection_utils as utils
-from detectron2.data import transforms as T
 
 from aug import WEAK_IMG_KEY
 from dropin import DatasetMapper
