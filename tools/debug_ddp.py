@@ -3,6 +3,13 @@
 """
 Copied directly from detectron2/tools/train_net.py except where noted.
 """
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.realpath(__file__))
+par_dir = os.path.dirname(current_dir)
+if par_dir not in sys.path:
+    sys.path.append(par_dir)
 
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
@@ -41,6 +48,10 @@ class TestTrainer(DATrainer):
         return
 
 def main(args):
+
+    import trainer
+    trainer.DEBUG = True
+
     """
     Copied directly from detectron2/tools/train_net.py
     But replace Trainer with DATrainer and disable TTA.
