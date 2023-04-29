@@ -3,6 +3,7 @@ import logging
 import weakref
 import torch
 import copy
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.data.dataset_mapper import DatasetMapper
@@ -20,7 +21,7 @@ from ema import EMA
 from pseudolabels import add_label, process_pseudo_label
 
 
-DEBUG = True
+DEBUG = False
 
 def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding", trainer=None):
      """
@@ -90,7 +91,10 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled)
                with torch.no_grad():
                     model.eval()
-                    trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
+                    if type(model) == DDP:
+                         trainer._last_student_preds = model.module.inference(unlabeled, do_postprocess=False)
+                    else:
+                         trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
                     model.train()
 
           losses_unlabeled = model(unlabeled, labeled=False)
