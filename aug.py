@@ -46,9 +46,8 @@ def build_strong_augmentation(include_erasing=True):
             T.RandomContrast(0.6, 1.4),
             T.RandomBrightness(0.6, 1.4),
             T.RandomSaturation(0.6, 1.4),
-            T.RandomLighting(0.1),
         ]), prob=0.8),
-        T.RandomApply(GrayscaleTransform(), prob=0.2),
+        T.RandomApply(T.RandomSaturation(0, 0), prob=0.2), # Random grayscale
         T.RandomApply(RandomBlurTransform((0.1, 2.0)), prob=0.5),
     ]
     if include_erasing:
@@ -78,28 +77,6 @@ class SaveImgAug(T.Augmentation):
         setattr(aug_input, self.savename, image)
         return super().__call__(aug_input)
 
-class GrayscaleTransform(Transform):
-    """See Detectron2.data.transforms.augmentation_impl.RandomSaturation"""
-    def __init__(self):
-        super().__init__()
-
-    def apply_image(self, img: np.ndarray) -> np.ndarray:
-        if img.dtype == np.uint8:
-            img = img.astype(np.float32)
-            img = img.dot([0.299, 0.587, 0.114])[:, :, np.newaxis]
-            return np.clip(img, 0, 255).astype(np.uint8)
-        else:
-            return img.dot([0.299, 0.587, 0.114])[:, :, np.newaxis]
-
-    def apply_coords(self, coords: np.ndarray) -> np.ndarray:
-        return coords
-
-    def apply_segmentation(self, segmentation: np.ndarray) -> np.ndarray:
-        return segmentation
-
-    def inverse(self) -> Transform:
-        return NoOpTransform()
-    
 class RandomBlurTransform(Transform):
     def __init__(self, sigma):
         super().__init__()
