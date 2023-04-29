@@ -75,6 +75,8 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
 
           losses_unlabeled = model(unlabeled, labeled=False)
           for k, v in losses_unlabeled.items():
+               print(k, "labeled", loss_dict[k])
+               print(k, "unlabeled", v)
                loss_dict[k] += v
                loss_dict[k] /= 2.0
 
