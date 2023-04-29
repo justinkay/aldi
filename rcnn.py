@@ -49,7 +49,6 @@ class DARCNN(GeneralizedRCNN):
 
         if self.training and not labeled:
             # Some methods (Adaptive/Unbiased Teacher, MIC) disable the regression losses
-            # TODO: This should only be disabled for predictions on pseudo-labeled data
             if not self.do_reg_loss_unlabeled:
                 output["loss_rpn_loc"] *= 0
                 output["loss_box_reg"] *= 0

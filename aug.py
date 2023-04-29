@@ -129,7 +129,7 @@ class RandomEraseTransform(Transform):
     to better match Torchvision params:
         scale=(sl, sh): range of proportion of erased area against input image.
         ratio=(r1. r2): range of aspect ratio of erased area.
-        value="random" or specified value
+        value="random" or specified value [0,1)
     """
     def __init__(self, sl = 0.02, sh = 0.4, r1 = 0.3, r2=3.3, value="random"): #[0.4914, 0.4822, 0.4465]):
         super().__init__()
@@ -157,6 +157,7 @@ class RandomEraseTransform(Transform):
                     img[h0:h0+h, w0:w0+w, :] = self.value
                 break
         if was_int:
+            img[h0:h0+h, w0:w0+w, :] *= 255 # put mask values in range [0,255]
             return np.clip(img, 0, 255).astype(np.uint8)
         else:
             return img

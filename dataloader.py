@@ -1,6 +1,8 @@
 import torch
 import numpy as np
 
+from detectron2.structures import Instances, Boxes
+
 from aug import WEAK_IMG_KEY
 from dropin import DatasetMapper
 
@@ -17,8 +19,13 @@ class SaveWeakDatasetMapper(DatasetMapper):
 class UnlabeledDatasetMapper(SaveWeakDatasetMapper):
     def __call__(self, dataset_dict):
         dataset_dict = super().__call__(dataset_dict)
+
+        # delete any gt boxes
         dataset_dict.pop("annotations", None)
         dataset_dict.pop("sem_seg_file_name", None)
+        dataset_dict['instances'] = Instances(dataset_dict['instances'].image_size, gt_boxes=Boxes([]), 
+                                              gt_classes=torch.tensor([], dtype=torch.int64))
+
         return dataset_dict
 
 class PrefetchableDataloaders:

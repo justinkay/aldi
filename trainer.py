@@ -2,6 +2,7 @@ import os
 import logging
 import weakref
 import torch
+import copy
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.data.dataset_mapper import DatasetMapper
@@ -18,7 +19,10 @@ from dataloader import UnlabeledDatasetMapper, PrefetchableDataloaders
 from ema import EMA
 from pseudolabels import add_label, process_pseudo_label
 
-def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding"):
+
+DEBUG = True
+
+def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding", trainer=None):
      """
      Main logic of running Mean Teacher style training for one iteration.
      - If no unlabeled data is supplied, run a training step as usual.
@@ -35,6 +39,7 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           teacher: a teacher model to use for generating pseudo-labels, or None to disable pseudo-labeling
           threshold: the threshold to use for pseudo-labeling if using a threshold based method
           method: the method to use for pseudo-labeling, {"thresholding", }
+          trainer: (optional) used for debugging purposes only
      """
      if len(data) == 1:
           labeled, unlabeled = data[0], None
@@ -45,6 +50,10 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
 
      # run model on labeled data per usual
      loss_dict = model(labeled)
+
+     if DEBUG and trainer is not None:
+          trainer._last_labeled = copy.deepcopy(labeled)
+          trainer._last_unlabeled = copy.deepcopy(unlabeled)
 
      # run model on unlabeled data
      if unlabeled is not None:
@@ -61,6 +70,10 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                     # run teacher on weakly augmented data
                     # do_postprocess=False to disable transforming outputs back into original image space
                     teacher.eval()
+
+                    if DEBUG and trainer is not None:
+                         trainer._last_unlabeled_before_teacher = copy.deepcopy(unlabeled)
+
                     teacher_preds = teacher.inference(unlabeled, do_postprocess=False)
                     
                     # postprocess pseudo labels (thresholding)
@@ -69,14 +82,19 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                     # add pseudo labels back as "ground truth"
                     unlabeled = add_label(unlabeled, teacher_preds)
 
-               # restore strongly augmented images for student
-               for img in unlabeled:
-                    img["image"] = img["original_image"]
+                    # restore strongly augmented images for student
+                    for img in unlabeled:
+                         img["image"] = img["original_image"]
+
+          if DEBUG and trainer is not None:
+               trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled)
+               with torch.no_grad():
+                    model.eval()
+                    trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
+                    model.train()
 
           losses_unlabeled = model(unlabeled, labeled=False)
           for k, v in losses_unlabeled.items():
-               print(k, "labeled", loss_dict[k])
-               print(k, "unlabeled", v)
                loss_dict[k] += v
                loss_dict[k] /= 2.0
 
@@ -92,7 +110,7 @@ class DAAMPTrainer(AMPTrainer):
           teacher = self.ema.model if self.ema is not None else None
           return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
                                              threshold=self.pseudo_label_thresh, 
-                                             method=self.pseudo_label_method)
+                                             method=self.pseudo_label_method, trainer=self)
      
 class DASimpleTrainer(SimpleTrainer):
      def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh):
@@ -104,7 +122,7 @@ class DASimpleTrainer(SimpleTrainer):
           teacher = self.ema.model if self.ema is not None else None
           return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
                                              threshold=self.pseudo_label_thresh, 
-                                             method=self.pseudo_label_method)
+                                             method=self.pseudo_label_method, trainer=self)
      
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
@@ -174,7 +192,7 @@ class DATrainer(DefaultTrainer):
           # create unlabeled dataloader
           if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
                unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.UNLABELED, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                    mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True)),
+                    mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=False)),
                     num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
                     total_batch_size=unlabeled_bs)
                loaders.append(unlabeled_loader)
