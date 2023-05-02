@@ -55,6 +55,8 @@ def threshold_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih"):
         new_proposal_inst.gt_boxes = new_boxes
         new_proposal_inst.gt_classes = proposal_bbox_inst.pred_classes[valid_map]
         new_proposal_inst.scores = proposal_bbox_inst.scores[valid_map]
+    else:
+        raise ValueError("Unknown proposal type in threshold_bbox")
 
     return new_proposal_inst
 

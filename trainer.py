@@ -68,13 +68,12 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                     img["image"] = img[WEAK_IMG_KEY]
 
                with torch.no_grad():
+                    if DEBUG and trainer is not None:
+                         trainer._last_unlabeled_before_teacher = copy.deepcopy(unlabeled)
+                         
                     # run teacher on weakly augmented data
                     # do_postprocess=False to disable transforming outputs back into original image space
                     teacher.eval()
-
-                    if DEBUG and trainer is not None:
-                         trainer._last_unlabeled_before_teacher = copy.deepcopy(unlabeled)
-
                     teacher_preds = teacher.inference(unlabeled, do_postprocess=False)
                     
                     # postprocess pseudo labels (thresholding)
@@ -87,20 +86,20 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                     for img in unlabeled:
                          img["image"] = img["original_image"]
 
-          if DEBUG and trainer is not None:
-               trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled)
-               with torch.no_grad():
-                    model.eval()
-                    if type(model) == DDP:
-                         trainer._last_student_preds = model.module.inference(unlabeled, do_postprocess=False)
-                    else:
-                         trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
-                    model.train()
+               if DEBUG and trainer is not None:
+                    trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled)
+                    with torch.no_grad():
+                         model.eval()
+                         if type(model) == DDP:
+                              trainer._last_student_preds = model.module.inference(unlabeled, do_postprocess=False)
+                         else:
+                              trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
+                         model.train()
 
-          losses_unlabeled = model(unlabeled, labeled=False)
-          for k, v in losses_unlabeled.items():
-               loss_dict[k] += v
-               loss_dict[k] /= 2.0
+               losses_unlabeled = model(unlabeled, labeled=False)
+               for k, v in losses_unlabeled.items():
+                    loss_dict[k + "_pseudo"] = v
+                    # loss_dict[k] /= 2.0
 
      return loss_dict
 

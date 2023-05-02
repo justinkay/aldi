@@ -1,4 +1,0 @@
-_BASE_: "./DA-RCNN-FPN-Cityscapes.yaml"
-MODEL:
-  WEIGHTS: "output/cityscapes_baseline/model_best.pth"
-OUTPUT_DIR: "output/cityscapes_meanteacher_strongstart/"
