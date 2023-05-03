@@ -155,7 +155,7 @@ class DATrainer(DefaultTrainer):
      def _create_checkpointer(self, model, cfg):
           checkpointer = super()._create_checkpointer(model, cfg)
           if cfg.EMA.ENABLED:
-               checkpointer.add_checkpointable("ema", self._trainer.ema)
+               checkpointer.add_checkpointable("ema", self._trainer.ema.model)
           return checkpointer
 
      @classmethod
