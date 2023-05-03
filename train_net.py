@@ -16,9 +16,6 @@ from trainer import DATrainer
 import datasets # register datasets with Detectron2
 import rcnn # register DA R-CNN model with Detectron2
 
-# for testing
-import datasets_old
-
 def setup(args):
     """
     Copied directly from detectron2/tools/train_net.py

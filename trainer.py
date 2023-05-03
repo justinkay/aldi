@@ -16,14 +16,15 @@ from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-from dataloader import UnlabeledDatasetMapper, PrefetchableDataloaders
+from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, PrefetchableDataloaders
 from ema import EMA
 from pseudolabels import add_label, process_pseudo_label
 
 
 DEBUG = False
 
-def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding", trainer=None):
+def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding", trainer=None,
+                                   include_weak_in_batch=False):
      """
      Main logic of running Mean Teacher style training for one iteration.
      - If no unlabeled data is supplied, run a training step as usual.
@@ -49,8 +50,11 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
      else:
           raise ValueError(f"Unsupported number of dataloaders, {len(data)}")
 
+     loss_dict = {}
+
      # run model on labeled data per usual
-     loss_dict = model(labeled)
+     # these values are kept as the standard loss names (e.g. "loss_cls")
+     loss_dict.update(model(labeled))
 
      if DEBUG and trainer is not None:
           trainer._last_labeled = copy.deepcopy(labeled)
@@ -99,38 +103,49 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                losses_unlabeled = model(unlabeled, labeled=False)
                for k, v in losses_unlabeled.items():
                     loss_dict[k + "_pseudo"] = v
-                    # loss_dict[k] /= 2.0
 
+     # run model on weakly-augmented labeled data if desired
+     if include_weak_in_batch:
+          for img in labeled:
+               img["image"] = img[WEAK_IMG_KEY]
+          loss_weak = model(labeled)
+          for k, v in loss_weak.items():
+               loss_dict[f"{k}_weak"] = v
+               
      return loss_dict
 
 class DAAMPTrainer(AMPTrainer):
-     def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh):
+     def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh, include_weak_in_batch=False):
           super().__init__(model, data_loader, optimizer)
           self.pseudo_label_method = pseudo_label_method
           self.pseudo_label_thresh = pseudo_label_thresh
+          self.include_weak_in_batch = include_weak_in_batch
 
      def run_model(self, data):
           teacher = self.ema.model if self.ema is not None else None
           return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
                                              threshold=self.pseudo_label_thresh, 
-                                             method=self.pseudo_label_method, trainer=self)
+                                             method=self.pseudo_label_method, trainer=self,
+                                             include_weak_in_batch=self.include_weak_in_batch)
      
 class DASimpleTrainer(SimpleTrainer):
-     def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh):
+     def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh, include_weak_in_batch=False):
           super().__init__(model, data_loader, optimizer)
           self.pseudo_label_method = pseudo_label_method
           self.pseudo_label_thresh = pseudo_label_thresh
+          self.include_weak_in_batch = include_weak_in_batch
 
      def run_model(self, data):
           teacher = self.ema.model if self.ema is not None else None
           return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
                                              threshold=self.pseudo_label_thresh, 
-                                             method=self.pseudo_label_method, trainer=self)
+                                             method=self.pseudo_label_method, trainer=self,
+                                             include_weak_in_batch=self.include_weak_in_batch)
      
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD,
-                              cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD)
+                              cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD, cfg.DATASETS.INCLUDE_WEAK_IN_BATCH)
           trainer.ema = None
           if cfg.EMA.ENABLED:
                trainer.ema = EMA(build_model(cfg), cfg.EMA.ALPHA)
@@ -187,7 +202,7 @@ class DATrainer(DefaultTrainer):
           # create labeled dataloader
           if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
                labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                    mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True)),
+                    mapper=SaveWeakDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True)),
                     num_workers=cfg.DATALOADER.NUM_WORKERS, 
                     total_batch_size=labeled_bs)
                loaders.append(labeled_loader)
