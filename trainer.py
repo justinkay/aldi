@@ -42,6 +42,7 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           threshold: the threshold to use for pseudo-labeling if using a threshold based method
           method: the method to use for pseudo-labeling, {"thresholding", }
           trainer: (optional) used for debugging purposes only
+          include_weak_in_batch: if True, add weakly-augmented source images to the batch
      """
      if len(data) == 1:
           labeled, unlabeled = data[0], None
@@ -151,6 +152,12 @@ class DATrainer(DefaultTrainer):
                trainer.ema = EMA(build_model(cfg), cfg.EMA.ALPHA)
           return trainer
      
+     def _create_checkpointer(self, model, cfg):
+          checkpointer = super()._create_checkpointer(model, cfg)
+          if cfg.EMA.ENABLED:
+               checkpointer.add_checkpointable("ema", self._trainer.ema)
+          return checkpointer
+
      @classmethod
      def build_evaluator(cls, cfg, dataset_name, output_folder=None):
         """Just do COCO Evaluation."""
@@ -161,34 +168,21 @@ class DATrainer(DefaultTrainer):
      def build_hooks(self):
           ret = super().build_hooks()
 
-          # add hooks to evaluate and save teacher model if applicable
-          ema_checkpointer = None
+          # add hooks to evaluate/save teacher model if applicable
           if self.cfg.EMA.ENABLED:
-               ema_checkpointer = DetectionCheckpointer(
-                    self._trainer.ema.model,
-                    self.cfg.OUTPUT_DIR,
-                    trainer=weakref.proxy(self),
-               )
-               if comm.is_main_process():
-                    ret.insert(-1, # before the PeriodicWriter; see DefaultTrainer.build_hooks()
-                              hooks.PeriodicCheckpointer(ema_checkpointer, self.cfg.SOLVER.CHECKPOINT_PERIOD, file_prefix="model_teacher")) 
-
                def test_and_save_results_ema():
                     self._last_eval_results = self.test(self.cfg, self._trainer.ema.model)
                     return self._last_eval_results
-
-               # Do evaluation after checkpointer, because then if it fails,
-               # we can use the saved checkpoint to debug.
                eval_hook = hooks.EvalHook(self.cfg.TEST.EVAL_PERIOD, test_and_save_results_ema)
                if comm.is_main_process():
-                    ret.insert(-1, eval_hook) # again, before PeriodicWriter if in main process
+                    ret.insert(-1, eval_hook) # before PeriodicWriter if in main process
                else:
                     ret.append(eval_hook)
 
           # add a hook to save the best (teacher, if EMA enabled) checkpoint to model_best.pth
           if comm.is_main_process():
                for test_set in self.cfg.DATASETS.TEST:
-                    ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, ema_checkpointer if ema_checkpointer is not None else self.checkpointer, 
+                    ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, self.checkpointer, #ema_checkpointer if ema_checkpointer is not None else self.checkpointer, 
                                                     f"{test_set}/bbox/AP50", "max", file_prefix=f"{test_set}_model_best"))
 
           return ret

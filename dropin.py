@@ -54,11 +54,11 @@ class DefaultTrainer(_DefaultTrainer):
             ##   End change   ##
 
             self.scheduler = self.build_lr_scheduler(cfg, optimizer)
-            self.checkpointer = DetectionCheckpointer(
-                model,
-                cfg.OUTPUT_DIR,
-                trainer=weakref.proxy(self),
-            )
+
+            ## Change is here ##
+            self.checkpointer = self._create_checkpointer(model, cfg)
+            ##   End change   ##
+
             self.start_iter = 0
             self.max_iter = cfg.SOLVER.MAX_ITER
             self.cfg = cfg
@@ -68,6 +68,13 @@ class DefaultTrainer(_DefaultTrainer):
     def _create_trainer(self, cfg, model, data_loader, optimizer):
          return (AMPTrainer if cfg.SOLVER.AMP.ENABLED else SimpleTrainer)(
                 model, data_loader, optimizer
+            )
+    
+    def _create_checkpointer(self, model, cfg):
+        return DetectionCheckpointer(
+                model,
+                cfg.OUTPUT_DIR,
+                trainer=weakref.proxy(self),
             )
     
 class SimpleTrainer(_SimpleTrainer):
