@@ -1,0 +1,4 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+DATASETS:
+  INCLUDE_WEAK_IN_BATCH: False
+OUTPUT_DIR: "output/cityscapes_halfsource_halftarget/"

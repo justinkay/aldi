@@ -28,35 +28,15 @@ class UnlabeledDatasetMapper(SaveWeakDatasetMapper):
 
         return dataset_dict
 
-class PrefetchableDataloaders:
-    """
-    Multiple dataloaders.
-    They can also be "prefetched" so that the next batch is already loaded, allowing
-    use and modification of data before it hits the default Detectron2 training logic.
-    (E.g. the batch can be modified with weak/strong augmentation and pseudo labeling)
-
-    TODO: Not really using anymore -- can probably get rid of it
-    """
-    def __init__(self, loaders: list):
-        self.iters = [iter(loader) for loader in loaders]
-        self.prefetched_data = None
+class TwoDataloaders:
+    class NoneIterator:
+        def __next__(self):
+            return None
+        
+    def __init__(self, loader0, loader1):
+        self.loader0 = TwoDataloaders.NoneIterator() if loader0 is None else iter(loader0)
+        self.loader1 = TwoDataloaders.NoneIterator() if loader1 is None else iter(loader1)
     
     def __iter__(self):
         while True:
-            if self.prefetched_data is None:
-                outputs = self._get_next_batch()
-            else:
-                outputs = self.prefetched_data
-                self.clear_prefetch()
-            yield outputs
-
-    def prefetch_batch(self):
-        assert self.prefetched_data is None, "Prefetched data already exists"
-        self.prefetched_data = self._get_next_batch()
-        return self.prefetched_data
-
-    def _get_next_batch(self):
-        return [next(it) for it in self.iters]
-
-    def clear_prefetch(self):
-        self.prefetched_data = None
+            yield (next(self.loader0), next(self.loader1))

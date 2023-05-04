@@ -1,14 +1,10 @@
 import os
-import logging
-import weakref
 import torch
 import copy
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
-from detectron2.data.dataset_mapper import DatasetMapper
-from detectron2.checkpoint import DetectionCheckpointer
-from detectron2.engine import HookBase, hooks, BestCheckpointer
+from detectron2.engine import hooks, BestCheckpointer
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
 from detectron2.modeling.meta_arch.build import build_model
 from detectron2.utils.events import get_event_storage
@@ -16,7 +12,7 @@ from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, PrefetchableDataloaders
+from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, TwoDataloaders
 from ema import EMA
 from pseudolabels import add_label, process_pseudo_label
 
@@ -36,26 +32,29 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
      under the key aug.WEAK_IMG_KEY.
 
      Args:
-          data: either output from a single (labeled) dataloader or a tuple of outputs from two 
-                dataloaders (labeled, unlabeled)
+          data: a tuple of outputs from two dataloaders (labeled, unlabeled)
           teacher: a teacher model to use for generating pseudo-labels, or None to disable pseudo-labeling
           threshold: the threshold to use for pseudo-labeling if using a threshold based method
           method: the method to use for pseudo-labeling, {"thresholding", }
           trainer: (optional) used for debugging purposes only
           include_weak_in_batch: if True, add weakly-augmented source images to the batch
      """
-     if len(data) == 1:
-          labeled, unlabeled = data[0], None
-     elif len(data) == 2:
-          labeled, unlabeled = data
-     else:
-          raise ValueError(f"Unsupported number of dataloaders, {len(data)}")
+     labeled, unlabeled = data
 
      loss_dict = {}
 
      # run model on labeled data per usual
      # these values are kept as the standard loss names (e.g. "loss_cls")
-     loss_dict.update(model(labeled))
+     if labeled is not None:
+          loss_dict.update(model(labeled))
+
+          # run model on weakly-augmented labeled data if desired
+          if include_weak_in_batch:
+               for img in labeled:
+                    img["image"] = img[WEAK_IMG_KEY]
+               loss_weak = model(labeled)
+               for k, v in loss_weak.items():
+                    loss_dict[f"{k}_weak"] = v
 
      if DEBUG and trainer is not None:
           trainer._last_labeled = copy.deepcopy(labeled)
@@ -109,14 +108,6 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           for k, v in losses_unlabeled.items():
                loss_dict[k + "_pseudo"] = v
 
-     # run model on weakly-augmented labeled data if desired
-     if include_weak_in_batch:
-          for img in labeled:
-               img["image"] = img[WEAK_IMG_KEY]
-          loss_weak = model(labeled)
-          for k, v in loss_weak.items():
-               loss_dict[f"{k}_weak"] = v
-               
      return loss_dict
 
 class DAAMPTrainer(AMPTrainer):
@@ -195,25 +186,24 @@ class DATrainer(DefaultTrainer):
      def build_train_loader(cls, cfg):
           total_batch_size = cfg.SOLVER.IMS_PER_BATCH
           labeled_bs, unlabeled_bs = ( int(r * total_batch_size / max(cfg.DATASETS.LABELED_UNLABELED_RATIO)) for r in cfg.DATASETS.LABELED_UNLABELED_RATIO )
-          loaders = []
 
           # create labeled dataloader
+          labeled_loader = None
           if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
                labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
                     mapper=SaveWeakDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True)),
                     num_workers=cfg.DATALOADER.NUM_WORKERS, 
                     total_batch_size=labeled_bs)
-               loaders.append(labeled_loader)
 
           # create unlabeled dataloader
+          unlabeled_loader = None
           if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
                unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.UNLABELED, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
                     mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=False)),
                     num_workers=cfg.DATALOADER.NUM_WORKERS, # should we do this? two dataloaders...
                     total_batch_size=unlabeled_bs)
-               loaders.append(unlabeled_loader)
 
-          return PrefetchableDataloaders(loaders)
+          return TwoDataloaders(labeled_loader, unlabeled_loader)
      
      def before_step(self):
           super().before_step()
