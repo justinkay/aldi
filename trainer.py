@@ -63,47 +63,51 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
 
      # run model on unlabeled data
      if unlabeled is not None:
-          if teacher is None:
-               logging.warning("No teacher model provided. Not generating pseudo-labels.")
-          else:
-               # img["image"] currently contains strongly augmented images;
-               # we want to generate pseudo labels using the weakly augmented images
-               for img in unlabeled:
-                    img["original_image"] = img["image"]
-                    img["image"] = img[WEAK_IMG_KEY]
+          # are we using an (EMA) teacher model to generate pseudo-labels?
+          # if not, the (student) model generates its own pseudo-labels
+          training_with_student = teacher is None
+          if training_with_student:
+               teacher = model.module if type(model) == DDP else model
 
-               with torch.no_grad():
-                    if DEBUG and trainer is not None:
-                         trainer._last_unlabeled_before_teacher = copy.deepcopy(unlabeled)
-                         
-                    # run teacher on weakly augmented data
-                    # do_postprocess=False to disable transforming outputs back into original image space
-                    teacher.eval()
-                    teacher_preds = teacher.inference(unlabeled, do_postprocess=False)
-                    
-                    # postprocess pseudo labels (thresholding)
-                    teacher_preds, _ = process_pseudo_label(teacher_preds, threshold, "roih", method)
-                    
-                    # add pseudo labels back as "ground truth"
-                    unlabeled = add_label(unlabeled, teacher_preds)
+          # img["image"] currently contains strongly augmented images;
+          # we want to generate pseudo-labels using the weakly augmented images
+          for img in unlabeled:
+               img["original_image"] = img["image"]
+               img["image"] = img[WEAK_IMG_KEY]
 
-                    # restore strongly augmented images for student
-                    for img in unlabeled:
-                         img["image"] = img["original_image"]
-
+          with torch.no_grad():
                if DEBUG and trainer is not None:
-                    trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled)
-                    with torch.no_grad():
-                         model.eval()
-                         if type(model) == DDP:
-                              trainer._last_student_preds = model.module.inference(unlabeled, do_postprocess=False)
-                         else:
-                              trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
-                         model.train()
+                    trainer._last_unlabeled_before_teacher = copy.deepcopy(unlabeled)
+                    
+               # run teacher on weakly augmented data
+               # do_postprocess=False to disable transforming outputs back into original image space
+               teacher.eval()
+               teacher_preds = teacher.inference(unlabeled, do_postprocess=False)
+               if training_with_student: teacher.train()
 
-               losses_unlabeled = model(unlabeled, labeled=False)
-               for k, v in losses_unlabeled.items():
-                    loss_dict[k + "_pseudo"] = v
+               # postprocess pseudo labels (thresholding)
+               teacher_preds, _ = process_pseudo_label(teacher_preds, threshold, "roih", method)
+               
+               # add pseudo labels back as "ground truth"
+               unlabeled = add_label(unlabeled, teacher_preds)
+
+               # restore strongly augmented images for student
+               for img in unlabeled:
+                    img["image"] = img["original_image"]
+
+          if DEBUG and trainer is not None:
+               trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled)
+               with torch.no_grad():
+                    model.eval()
+                    if type(model) == DDP:
+                         trainer._last_student_preds = model.module.inference(unlabeled, do_postprocess=False)
+                    else:
+                         trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
+                    model.train()
+
+          losses_unlabeled = model(unlabeled, labeled=False)
+          for k, v in losses_unlabeled.items():
+               loss_dict[k + "_pseudo"] = v
 
      # run model on weakly-augmented labeled data if desired
      if include_weak_in_batch:
