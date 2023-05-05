@@ -1,5 +1,0 @@
-_BASE_: "./MeanTeacher-Cityscapes.yaml"
-DOMAIN_ADAPT:
-  LOSSES:
-    LOC_LOSS_ENABLED: False
-OUTPUT_DIR: "output/cityscapes_meanteacher_nolocloss/"
