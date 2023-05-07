@@ -1,0 +1,6 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+DATASETS:
+  INCLUDE_RANDOM_ERASING: True
+  LABELED_MIC_AUG: True
+  UNLABELED_MIC_AUG: True
+OUTPUT_DIR: "output/cityscapes_meanteacher_MICaug_and_randomerase/"

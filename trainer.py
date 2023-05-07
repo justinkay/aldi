@@ -108,12 +108,6 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           for k, v in losses_unlabeled.items():
                loss_dict[k + "_pseudo"] = v
 
-     # we are doing gradient accumulation by running multiple batches;
-     # normalize the loss appropriately
-     num_accum_iters = int(labeled is not None) + int(unlabeled is not None) + int(labeled is not None and include_weak_in_batch)
-     for k in loss_dict.keys():
-          loss_dict[k] /= num_accum_iters
-
      return loss_dict
 
 class DAAMPTrainer(AMPTrainer):
