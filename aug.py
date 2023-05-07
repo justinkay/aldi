@@ -2,7 +2,7 @@ import numpy as np
 import random
 import math
 from scipy.ndimage import gaussian_filter
-from torch.nn import functional as F
+import cv2
 
 from detectron2.data.transforms.augmentation import _get_aug_input_args
 from detectron2.data.transforms.augmentation_impl import RandomApply
@@ -31,7 +31,7 @@ def get_augs(cfg, labeled):
 
     # add MIC
     if (labeled and cfg.DATASETS.LABELED_MIC_AUG) or (not labeled and cfg.DATASETS.UNLABELED_MIC_AUG):
-        augs.append(T.RandomApply(MICTransform(0.5, 32), prob=1.0))
+        augs.append(T.RandomApply(MICTransform(cfg.DATASETS.MIC_RATIO, cfg.DATASETS.MIC_BLOCK_SIZE), prob=1.0))
 
     return augs
 
@@ -156,7 +156,7 @@ class MICTransform(Transform):
         self._set_attributes(locals())
 
     def apply_image(self, img: np.ndarray) -> np.ndarray:
-        _, H, W = img.shape
+        H, W, C = img.shape
 
         was_int = False
         if img.dtype == np.uint8:
@@ -166,8 +166,8 @@ class MICTransform(Transform):
         mh, mw = round(H / self.block_size), round(W / self.block_size)
         input_mask = np.random.rand(mh, mw)
         input_mask = input_mask > self.ratio
-        input_mask = np.resize(input_mask, (H, W))
-        masked_img = img * input_mask
+        input_mask = cv2.resize(np.asarray(input_mask, dtype="uint8"), (W,H), interpolation=cv2.INTER_NEAREST)
+        masked_img = img * np.repeat(input_mask[..., np.newaxis], C, axis=-1)
 
         if was_int:
             return np.clip(masked_img, 0, 255).astype(np.uint8)

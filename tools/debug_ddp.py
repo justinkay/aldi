@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# Copyright (c) Facebook, Inc. and its affiliates.
-"""
-Copied directly from detectron2/tools/train_net.py except where noted.
-"""
 import sys
 import os
 
@@ -52,10 +47,6 @@ def main(args):
     import trainer
     trainer.DEBUG = True
 
-    """
-    Copied directly from detectron2/tools/train_net.py
-    But replace Trainer with DATrainer and disable TTA.
-    """
     cfg = setup(args)
 
     trainer = TestTrainer(cfg)
