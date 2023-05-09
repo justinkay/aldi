@@ -1,0 +1,5 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+DATASETS:
+  INCLUDE_WEAK_IN_BATCH: False # this would include it twice
+  LABELED_STRONG_AUG: False
+OUTPUT_DIR: "output/cityscapes_halfsourceweak_halftarget/"
