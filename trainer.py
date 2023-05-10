@@ -134,12 +134,19 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                     # currently:
                     # instance_features (da_ins_features) shape: torch.Size([2048, 1024])
                     # proposals: Instances, len = 1000
+                    #
+                    # in MIC repo,
+                    # img_features 5 torch.Size([2, 256, 400, 200])
+                    # da_ins_feature torch.Size([512, 1024])
+                    # da_ins_labels torch.Size([512])
+                    # da_proposals 2 256
+
                     img_features = list(img_features.values())
                     device = img_features[0].device
                     img_targets = torch.ones(len(img_features), dtype=torch.long, device=device) * domain_label
 
                     proposals = rpn_results[0]
-                    print(proposals)
+                    print("proposals", len(proposals))
                     instance_targets = torch.ones(len(proposals), dtype=torch.long, device=device) * domain_label
 
                     # TODO sub-sample proposals and box_features; see SADA implementation
