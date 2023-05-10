@@ -32,9 +32,11 @@ class DARCNN(GeneralizedRCNN):
         self.do_quality_loss_weight_unlabeled = do_quality_loss_weight_unlabeled
 
         # register hooks so we can grab output of sub-modules
-        self.rpn_io, self.roih_io, self.boxpred_io = SaveIO(), SaveIO(), SaveIO()
+        self.backbone_io, self.rpn_io, self.roih_io, self.boxhead_io, self.boxpred_io = SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO()
+        self.backbone.register_forward_hook(self.backbone_io)
         self.proposal_generator.register_forward_hook(self.rpn_io)
         self.roi_heads.register_forward_hook(self.roih_io)
+        self.roi_heads.box_head.register_forward_hook(self.boxhead_io)
         self.roi_heads.box_predictor.register_forward_hook(self.boxpred_io)
 
     @classmethod

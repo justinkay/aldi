@@ -12,6 +12,7 @@ from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
+from discriminator import DomainAdaptationModule
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, TwoDataloaders
 from ema import EMA
 from pseudolabels import add_label, process_pseudo_label
@@ -20,7 +21,7 @@ from pseudolabels import add_label, process_pseudo_label
 DEBUG = False
 
 def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding", trainer=None,
-                                   include_weak_in_batch=False):
+                                   include_weak_in_batch=False, da_network=None):
      """
      Main logic of running Mean Teacher style training for one iteration.
      - If no unlabeled data is supplied, run a training step as usual.
@@ -42,11 +43,18 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
      labeled, unlabeled = data
 
      loss_dict = {}
+     labeled_features_weak, labeled_features_strong, unlabeled_features = None, None, None
+     labeled_weak_rpn_out, labeled_strong_rpn_out, unlabeled_rpn_out = None, None, None
+     labeled_weak_box_features, labeled_strong_box_features, unlabeled_box_features = None, None, None
 
      # run model on labeled data per usual
      # these values are kept as the standard loss names (e.g. "loss_cls")
      if labeled is not None:
           loss_dict.update(model(labeled))
+          # TODO do this without .module
+          labeled_features_strong = model.module.backbone_io.output
+          labeled_strong_rpn_out = model.module.rpn_io.output
+          labeled_strong_box_features = model.module.boxhead_io.output
 
           # run model on weakly-augmented labeled data if desired
           if include_weak_in_batch:
@@ -55,6 +63,10 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                loss_weak = model(labeled)
                for k, v in loss_weak.items():
                     loss_dict[f"{k}_weak"] = v
+               # TODO do this without .module
+               labeled_features_weak = model.module.backbone_io.output
+               labeled_weak_rpn_out = model.module.rpn_io.output
+               labeled_weak_box_features = model.module.boxhead_io.output
 
      if DEBUG and trainer is not None:
           trainer._last_labeled = copy.deepcopy(labeled)
@@ -107,6 +119,32 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           losses_unlabeled = model(unlabeled, labeled=False)
           for k, v in losses_unlabeled.items():
                loss_dict[k + "_pseudo"] = v
+          # TODO do this without .module
+          unlabeled_features = model.module.backbone_io.output
+          unlabeled_rpn_out = model.module.rpn_io.output
+          unlabeled_box_features = model.module.boxhead_io.output
+
+     # handle any domain alignment modules
+     if da_network is not None:
+          for img_features, rpn_results, instance_features, domain_label in zip([labeled_features_strong, labeled_features_weak, unlabeled_features],
+                                             [labeled_strong_rpn_out, labeled_weak_rpn_out, unlabeled_rpn_out],
+                                             [labeled_strong_box_features, labeled_weak_box_features, unlabeled_box_features],
+                                             [0, 0, 1]): # source, source, target
+               if img_features is not None and rpn_results is not None and instance_features is not None:
+                    # currently:
+                    # instance_features (da_ins_features) shape: torch.Size([2048, 1024])
+                    # proposals: Instances, len = 1000
+                    img_features = list(img_features.values())
+                    device = img_features[0].device
+                    img_targets = torch.ones(len(img_features), dtype=torch.long, device=device) * domain_label
+
+                    proposals = rpn_results[0]
+                    print(proposals)
+                    instance_targets = torch.ones(len(proposals), dtype=torch.long, device=device) * domain_label
+
+                    # TODO sub-sample proposals and box_features; see SADA implementation
+                    # da_losses = self.da_heads(result, features, da_ins_feas, da_ins_labels, da_proposals, targets)
+                    da_losses = da_network(img_features, instance_features, instance_targets, proposals, img_targets)
 
      return loss_dict
 
@@ -122,7 +160,8 @@ class DAAMPTrainer(AMPTrainer):
           return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
                                              threshold=self.pseudo_label_thresh, 
                                              method=self.pseudo_label_method, trainer=self,
-                                             include_weak_in_batch=self.include_weak_in_batch)
+                                             include_weak_in_batch=self.include_weak_in_batch,
+                                             da_network=self.da_network)
      
 class DASimpleTrainer(SimpleTrainer):
      def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh, include_weak_in_batch=False):
@@ -136,15 +175,23 @@ class DASimpleTrainer(SimpleTrainer):
           return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
                                              threshold=self.pseudo_label_thresh, 
                                              method=self.pseudo_label_method, trainer=self,
-                                             include_weak_in_batch=self.include_weak_in_batch)
+                                             include_weak_in_batch=self.include_weak_in_batch,
+                                             da_network=self.da_network)
      
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD,
                               cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD, cfg.DATASETS.INCLUDE_WEAK_IN_BATCH)
+          # build EMA model if applicable
           trainer.ema = None
           if cfg.EMA.ENABLED:
                trainer.ema = EMA(build_model(cfg), cfg.EMA.ALPHA)
+
+          # build domain alignment network if applicable
+          trainer.da_network = None
+          if cfg.MODEL.DA_HEADS.ENABLED:
+               trainer.da_network = DomainAdaptationModule(cfg)
+
           return trainer
      
      def _create_checkpointer(self, model, cfg):
