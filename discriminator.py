@@ -48,8 +48,9 @@ class DALossComputation(object):
         input_shape = {'p2': ShapeSpec(channels=256, height=None, width=None, stride=4), 
                        'p3': ShapeSpec(channels=512, height=None, width=None, stride=8), 
                        'p4': ShapeSpec(channels=1024, height=None, width=None, stride=16), 
-                       'p5': ShapeSpec(channels=2048, height=None, width=None, stride=32)}
-        in_features = ["p2", "p3", "p4", "p5"] # cfg.MODEL.ROI_HEADS.IN_FEATURES
+                       'p5': ShapeSpec(channels=2048, height=None, width=None, stride=32),
+                       'p6': ShapeSpec(channels=2048, height=None, width=None, stride=64),}
+        in_features = ["p2", "p3", "p4", "p5", "p6"] # cfg.MODEL.ROI_HEADS.IN_FEATURES
         resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
         scales = tuple(1.0 / input_shape[k].stride for k in in_features) # cfg.MODEL.ROI_BOX_HEAD.POOLER_SCALES
         sampling_ratio = cfg.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO
@@ -63,16 +64,8 @@ class DALossComputation(object):
         self.pooler = pooler
         self.avgpool = nn.AvgPool2d(kernel_size=resolution, stride=resolution)
         
-    def prepare_masks(self, targets):
-        masks = []
-        for targets_per_image in targets:
-            is_source = targets_per_image.get_field('is_source')
-            mask_per_image = is_source.new_ones(1, dtype=torch.uint8) if is_source.any() else is_source.new_zeros(1, dtype=torch.uint8)
-            masks.append(mask_per_image)
-        return masks
-
     # def __call__(self, proposals, da_img, da_ins, da_img_consist, da_ins_consist, da_ins_labels, targets, da_img_features_joint):
-    def __call__(self, proposals, da_img, da_ins, da_img_consist, da_ins_consist, da_ins_labels, targets):
+    def __call__(self, proposals, da_img, da_ins, da_img_consist, da_ins_consist, da_ins_labels, img_targets):
         """
         Arguments:
             proposals (list[BoxList])
@@ -89,8 +82,9 @@ class DALossComputation(object):
             da_consist_loss (Tensor)
         """
 
-        masks = self.prepare_masks(targets)
-        masks = torch.cat(masks, dim=0)
+        # masks = self.prepare_masks(targets)
+        # masks = torch.cat(masks, dim=0)
+        masks = img_targets # replaced this parameter in order to pass in domain labels directly
 
         # for each feature level, permute the outputs to make them be in the
         # same format as the labels. Note that the labels are computed for
@@ -400,7 +394,7 @@ class DomainAdaptationModule(torch.nn.Module):
         # sampling_ratio    = cfg.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO
         # pooler_type       = cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE
 
-        in_channels = cfg.MODEL.RESNETS.STEM_OUT_CHANNELS # ? cfg.MODEL.BACKBONE.OUT_CHANNELS
+        in_channels = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS # ? .MODEL.RESNETS.STEM_OUT_CHANNELS # ? cfg.MODEL.BACKBONE.OUT_CHANNELS
 
         self.imghead = DAImgHead(in_channels)
         self.loss_evaluator = make_da_heads_loss_evaluator(cfg)
@@ -411,7 +405,7 @@ class DomainAdaptationModule(torch.nn.Module):
         # self.map_levels = LevelMapper(lvl_min, lvl_max) #canonical_scale=224, canonical_level=4, eps=1e-6
         self.inshead = DAInsHead(num_ins_inputs)
 
-    def forward(self, img_features, da_ins_feature, da_ins_labels, da_proposals, targets=None):
+    def forward(self, img_features, da_ins_feature, da_ins_labels, da_proposals, img_targets):
         """
         Arguments:
             img_features (list[Tensor]): features computed from the images that are
@@ -452,7 +446,7 @@ class DomainAdaptationModule(torch.nn.Module):
         if self.training:
             da_img_loss, da_ins_loss, da_consistency_loss = self.loss_evaluator(
                 da_proposals, da_img_features, da_ins_features, da_img_consist_features, da_ins_consist_features,
-                da_ins_labels, targets)
+                da_ins_labels, img_targets)
 
             losses = {
                 "loss_da_image": da_img_loss,

@@ -44,8 +44,8 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
 
      loss_dict = {}
      labeled_features_weak, labeled_features_strong, unlabeled_features = None, None, None
-     labeled_weak_rpn_out, labeled_strong_rpn_out, unlabeled_rpn_out = None, None, None
      labeled_weak_box_features, labeled_strong_box_features, unlabeled_box_features = None, None, None
+     labeled_weak_roih_out, labeled_strong_roih_out, unlabeled_roih_out = None, None, None
 
      # run model on labeled data per usual
      # these values are kept as the standard loss names (e.g. "loss_cls")
@@ -53,8 +53,8 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           loss_dict.update(model(labeled))
           # TODO do this without .module
           labeled_features_strong = model.module.backbone_io.output
-          labeled_strong_rpn_out = model.module.rpn_io.output
           labeled_strong_box_features = model.module.boxhead_io.output
+          labeled_strong_roih_out = model.module.roih_io.output
 
           # run model on weakly-augmented labeled data if desired
           if include_weak_in_batch:
@@ -65,8 +65,8 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                     loss_dict[f"{k}_weak"] = v
                # TODO do this without .module
                labeled_features_weak = model.module.backbone_io.output
-               labeled_weak_rpn_out = model.module.rpn_io.output
                labeled_weak_box_features = model.module.boxhead_io.output
+               labeled_weak_roih_out = model.module.roih_io.output
 
      if DEBUG and trainer is not None:
           trainer._last_labeled = copy.deepcopy(labeled)
@@ -121,38 +121,30 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                loss_dict[k + "_pseudo"] = v
           # TODO do this without .module
           unlabeled_features = model.module.backbone_io.output
-          unlabeled_rpn_out = model.module.rpn_io.output
           unlabeled_box_features = model.module.boxhead_io.output
+          unlabeled_roih_out = model.module.roih_io.output
 
      # handle any domain alignment modules
      if da_network is not None:
-          for img_features, rpn_results, instance_features, domain_label in zip([labeled_features_strong, labeled_features_weak, unlabeled_features],
-                                             [labeled_strong_rpn_out, labeled_weak_rpn_out, unlabeled_rpn_out],
+          for img_features, boxhead_results, roih_out, domain_label in zip([labeled_features_strong, labeled_features_weak, unlabeled_features],
                                              [labeled_strong_box_features, labeled_weak_box_features, unlabeled_box_features],
-                                             [0, 0, 1]): # source, source, target
-               if img_features is not None and rpn_results is not None and instance_features is not None:
-                    # currently:
-                    # instance_features (da_ins_features) shape: torch.Size([2048, 1024])
-                    # proposals: Instances, len = 1000
-                    #
-                    # in MIC repo,
-                    # img_features 5 torch.Size([2, 256, 400, 200])
-                    # da_ins_feature torch.Size([512, 1024])
-                    # da_ins_labels torch.Size([512])
-                    # da_proposals 2 256
-
+                                             [labeled_strong_roih_out, labeled_weak_roih_out, unlabeled_roih_out],
+                                             [1, 1, 0]): # source, source, target
+               if img_features is not None and boxhead_results is not None and roih_out is not None:
                     img_features = list(img_features.values())
                     device = img_features[0].device
                     img_targets = torch.ones(len(img_features), dtype=torch.long, device=device) * domain_label
 
-                    proposals = rpn_results[0]
-                    print("proposals", len(proposals))
-                    instance_targets = torch.ones(len(proposals), dtype=torch.long, device=device) * domain_label
+                    proposals = [x.proposal_boxes for x in roih_out[0]] # roih_out = proposals, losses
+                    instance_features = boxhead_results
+                    instance_targets = torch.ones(sum([len(b) for b in proposals]), dtype=torch.long, device=device) * domain_label
 
-                    # TODO sub-sample proposals and box_features; see SADA implementation
+                    # TODO sub-sample proposals and box_features? see SADA implementation
                     # da_losses = self.da_heads(result, features, da_ins_feas, da_ins_labels, da_proposals, targets)
                     da_losses = da_network(img_features, instance_features, instance_targets, proposals, img_targets)
 
+                    for k, v in da_losses.items():
+                         loss_dict[k] = v
      return loss_dict
 
 class DAAMPTrainer(AMPTrainer):
@@ -197,7 +189,7 @@ class DATrainer(DefaultTrainer):
           # build domain alignment network if applicable
           trainer.da_network = None
           if cfg.MODEL.DA_HEADS.ENABLED:
-               trainer.da_network = DomainAdaptationModule(cfg)
+               trainer.da_network = DomainAdaptationModule(cfg).to(cfg.MODEL.DEVICE)
 
           return trainer
      
