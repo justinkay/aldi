@@ -60,23 +60,6 @@ class DARCNN(GeneralizedRCNN):
         output = super().forward(batched_inputs)
 
         if self.training:
-            # handle any loss modifications
-            if not labeled:
-                # Some methods (Adaptive/Unbiased Teacher, MIC) disable the regression losses
-                if not self.do_reg_loss_unlabeled:
-                    output["loss_rpn_loc"] *= 0
-                    output["loss_box_reg"] *= 0
-
-                # Others weight classification losses by "quality" (implemented in MIC)
-                if self.do_quality_loss_weight_unlabeled:
-                    proposals, _ = self.roih_io.output
-                    predictions = self.boxpred_io.output
-                    scores, _ = predictions
-                    gt_classes = (cat([p.gt_classes for p in proposals], dim=0) if len(proposals) else torch.empty(0))
-                    quality = torch.max(torch.softmax(scores, dim=1), dim=1)[0]
-                    loss_cls = torch.mean(quality * cross_entropy(scores, gt_classes, reduction="none"))
-                    output["loss_cls"] = loss_cls * self.roi_heads.box_predictor.loss_weight.get("loss_cls", 1.0)
-
             # handle any domain alignment modules
             if self.da_heads is not None:
                 domain_label = 1 if labeled else 0
@@ -95,5 +78,24 @@ class DARCNN(GeneralizedRCNN):
 
                 for k, v in da_losses.items():
                     output[k] = v
+
+            # handle any loss modifications
+            if not labeled:
+                # Some methods (Adaptive/Unbiased Teacher, MIC) disable the regression losses
+                if not self.do_reg_loss_unlabeled:
+                    output["loss_rpn_loc"] *= 0
+                    output["loss_box_reg"] *= 0
+
+                # Others weight classification losses by "quality" (implemented in MIC)
+                if self.do_quality_loss_weight_unlabeled:
+                    proposals, _ = self.roih_io.output
+                    predictions = self.boxpred_io.output
+                    scores, _ = predictions
+                    gt_classes = (cat([p.gt_classes for p in proposals], dim=0) if len(proposals) else torch.empty(0))
+                    quality = torch.max(torch.softmax(scores, dim=1), dim=1)[0]
+                    loss_cls = torch.mean(quality * cross_entropy(scores, gt_classes, reduction="none"))
+                    output["loss_cls"] = loss_cls * self.roi_heads.box_predictor.loss_weight.get("loss_cls", 1.0)
+
+            
 
         return output
