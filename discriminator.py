@@ -18,6 +18,101 @@ from detectron2.modeling.poolers import ROIPooler, assign_boxes_to_levels
 #            da_losses = self.da_heads(result, features, da_ins_feas, da_ins_labels, da_proposals, targets)
 #            # da_losses = self.da_heads(result, res_feat, da_ins_feas, da_ins_labels, da_proposals, targets)
 
+class DomainAdaptationModule(torch.nn.Module):
+    """
+    Module for Domain Adaptation Component. Takes feature maps from the backbone and instance
+    feature vectors, domain labels and proposals. Works for both FPN and non-FPN.
+    """
+
+    def __init__(self, cfg):
+        super(DomainAdaptationModule, self).__init__()
+
+        self.cfg = cfg.clone()
+
+        stage_index = 4
+        # stage2_relative_factor = 2 ** (stage_index - 1)
+        # res2_out_channels = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS
+        num_ins_inputs = cfg.MODEL.ROI_BOX_HEAD.FC_DIM #.MLP_HEAD_DIM #if cfg.MODEL.RPN.USE_FPN else res2_out_channels * stage2_relative_factor
+
+        self.USE_FPN = True # cfg.MODEL.RPN.USE_FPN
+        self.avgpool = nn.AvgPool2d(kernel_size=7, stride=7)
+
+        self.consit_weight = self.cfg.MODEL.DA_HEADS.COS_WEIGHT
+
+        self.grl_img = GradientScalarLayer(-1.0 * self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
+        self.grl_ins = GradientScalarLayer(-1.0 * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
+        self.grl_img_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
+        self.grl_ins_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
+
+        # in_features       = cfg.MODEL.ROI_HEADS.IN_FEATURES
+        # pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
+        # pooler_scales     = tuple(1.0 / input_shape[k].stride for k in in_features)
+        # sampling_ratio    = cfg.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO
+        # pooler_type       = cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE
+
+        in_channels = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS # ? .MODEL.RESNETS.STEM_OUT_CHANNELS # ? cfg.MODEL.BACKBONE.OUT_CHANNELS
+
+        self.imghead = DAImgHead(in_channels)
+        self.loss_evaluator = make_da_heads_loss_evaluator(cfg)
+
+        # scales = cfg.MODEL.ROI_BOX_HEAD.POOLER_SCALES
+        self.lvl_min = self.loss_evaluator.pooler.min_level #-torch.log2(torch.tensor(scales[0], dtype=torch.float32)).item()
+        self.lvl_max = self.loss_evaluator.pooler.max_level #-torch.log2(torch.tensor(scales[-1], dtype=torch.float32)).item()
+        # self.map_levels = LevelMapper(lvl_min, lvl_max) #canonical_scale=224, canonical_level=4, eps=1e-6
+        self.inshead = DAInsHead(num_ins_inputs)
+
+    def forward(self, img_features, da_ins_feature, da_ins_labels, da_proposals, img_targets):
+        """
+        Arguments:
+            img_features (list[Tensor]): features computed from the images that are
+                used for computing the predictions. Each tensor in the list
+                correspond to different feature levels
+            da_ins_feature (Tensor): instance feature vectors extracted according to da_proposals
+            da_ins_labels (Tensor): domain labels for instance feature vectors
+            da_proposals (list[BoxList]): randomly selected proposal boxes
+            targets (list[BoxList): ground-truth boxes present in the image (optional)
+
+        Returns:
+            losses (dict[Tensor]): the losses for the model during training. During
+                testing, it is an empty dict.
+        """
+        if not self.USE_FPN:
+            da_ins_feature = self.avgpool(da_ins_feature)
+        da_ins_feature = da_ins_feature.view(da_ins_feature.size(0), -1)
+
+        img_grl_fea = [self.grl_img(fea) for fea in img_features]
+        ins_grl_fea = self.grl_ins(da_ins_feature)
+        img_grl_consist_fea = [self.grl_img_consist(fea) for fea in img_features]
+        ins_grl_consist_fea = self.grl_ins_consist(da_ins_feature)
+
+        # instance alignment
+        # levels = self.map_levels(da_proposals)
+        levels = assign_boxes_to_levels(da_proposals, self.lvl_min, self.lvl_max, 
+                                        canonical_box_size=224, canonical_level=4)
+        da_ins_features = self.inshead(ins_grl_fea, levels)
+        da_ins_consist_features = self.inshead(ins_grl_consist_fea, levels)
+
+        da_ins_consist_features = da_ins_consist_features.sigmoid()
+
+        # image alignment
+        da_img_features = self.imghead(img_grl_fea)
+        da_img_consist_features = self.imghead(img_grl_consist_fea)
+        da_img_consist_features = [fea.sigmoid() for fea in da_img_consist_features]
+        
+        if self.training:
+            da_img_loss, da_ins_loss, da_consistency_loss = self.loss_evaluator(
+                da_proposals, da_img_features, da_ins_features, da_img_consist_features, da_ins_consist_features,
+                da_ins_labels, img_targets)
+
+            losses = {
+                "loss_da_image": da_img_loss,
+                "loss_da_instance": da_ins_loss,
+                "loss_da_consistency": da_consistency_loss}
+
+            return losses
+
+        return {}
+
 class DALossComputation(object):
     """
     This class computes the DA loss.
@@ -164,7 +259,6 @@ class _GradientScalarLayer(torch.autograd.Function):
 
 gradient_scalar = _GradientScalarLayer.apply
 
-
 class GradientScalarLayer(torch.nn.Module):
     def __init__(self, weight):
         super(GradientScalarLayer, self).__init__()
@@ -221,8 +315,6 @@ class DAImgHead(nn.Module):
             img_features.append(getattr(self, conv2_block)(last_inner))
         return img_features
 
-
-
 class DAJointScaleHead(nn.Module):
     """
     Adds a simple Image-level Domain Classifier head
@@ -260,7 +352,6 @@ class DAJointScaleHead(nn.Module):
 
         return img_features
 
-
 class ScaleDiscriminator(nn.Module):
     def __init__(self, in_channels):
         """
@@ -283,7 +374,6 @@ class ScaleDiscriminator(nn.Module):
             img_features.append(self.conv2_da(t))
         return img_features
 
-
 class ScaleDiscriminatorIns(nn.Module):
     def __init__(self, in_channels):
         super(ScaleDiscriminatorIns, self).__init__()
@@ -297,7 +387,6 @@ class ScaleDiscriminatorIns(nn.Module):
     def forward(self, x):
         scores = self.scale_score(x)
         return scores
-
 
 class DAInsHead(nn.Module):
     """
@@ -334,7 +423,6 @@ class DAInsHead(nn.Module):
             self.da_ins_fc2_layers.append(fc2_block)
             self.da_ins_fc3_layers.append(fc3_block)
 
-
     def forward(self, x, levels=None):
 
         dtype, device = x.dtype, x.device
@@ -359,100 +447,7 @@ class DAInsHead(nn.Module):
 
                 result[idx_in_level] = getattr(self, fc3_da)(xs)
 
-            return result
+            # this return is here in sa-da-faster and MIC, but it seems like a bug?
+            # return result
+        return result
 
-
-class DomainAdaptationModule(torch.nn.Module):
-    """
-    Module for Domain Adaptation Component. Takes feature maps from the backbone and instance
-    feature vectors, domain labels and proposals. Works for both FPN and non-FPN.
-    """
-
-    def __init__(self, cfg):
-        super(DomainAdaptationModule, self).__init__()
-
-        self.cfg = cfg.clone()
-
-        stage_index = 4
-        stage2_relative_factor = 2 ** (stage_index - 1)
-        res2_out_channels = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS
-        num_ins_inputs = cfg.MODEL.ROI_BOX_HEAD.FC_DIM #.MLP_HEAD_DIM #if cfg.MODEL.RPN.USE_FPN else res2_out_channels * stage2_relative_factor
-
-        self.USE_FPN = True # cfg.MODEL.RPN.USE_FPN
-        self.avgpool = nn.AvgPool2d(kernel_size=7, stride=7)
-
-        self.consit_weight = self.cfg.MODEL.DA_HEADS.COS_WEIGHT
-
-        self.grl_img = GradientScalarLayer(-1.0 * self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
-        self.grl_ins = GradientScalarLayer(-1.0 * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
-        self.grl_img_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
-        self.grl_ins_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
-
-        # in_features       = cfg.MODEL.ROI_HEADS.IN_FEATURES
-        # pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
-        # pooler_scales     = tuple(1.0 / input_shape[k].stride for k in in_features)
-        # sampling_ratio    = cfg.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO
-        # pooler_type       = cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE
-
-        in_channels = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS # ? .MODEL.RESNETS.STEM_OUT_CHANNELS # ? cfg.MODEL.BACKBONE.OUT_CHANNELS
-
-        self.imghead = DAImgHead(in_channels)
-        self.loss_evaluator = make_da_heads_loss_evaluator(cfg)
-
-        # scales = cfg.MODEL.ROI_BOX_HEAD.POOLER_SCALES
-        self.lvl_min = self.loss_evaluator.pooler.min_level #-torch.log2(torch.tensor(scales[0], dtype=torch.float32)).item()
-        self.lvl_max = self.loss_evaluator.pooler.max_level #-torch.log2(torch.tensor(scales[-1], dtype=torch.float32)).item()
-        # self.map_levels = LevelMapper(lvl_min, lvl_max) #canonical_scale=224, canonical_level=4, eps=1e-6
-        self.inshead = DAInsHead(num_ins_inputs)
-
-    def forward(self, img_features, da_ins_feature, da_ins_labels, da_proposals, img_targets):
-        """
-        Arguments:
-            img_features (list[Tensor]): features computed from the images that are
-                used for computing the predictions. Each tensor in the list
-                correspond to different feature levels
-            da_ins_feature (Tensor): instance feature vectors extracted according to da_proposals
-            da_ins_labels (Tensor): domain labels for instance feature vectors
-            da_proposals (list[BoxList]): randomly selected proposal boxes
-            targets (list[BoxList): ground-truth boxes present in the image (optional)
-
-        Returns:
-            losses (dict[Tensor]): the losses for the model during training. During
-                testing, it is an empty dict.
-        """
-        if not self.USE_FPN:
-            da_ins_feature = self.avgpool(da_ins_feature)
-        da_ins_feature = da_ins_feature.view(da_ins_feature.size(0), -1)
-
-        img_grl_fea = [self.grl_img(fea) for fea in img_features]
-        ins_grl_fea = self.grl_ins(da_ins_feature)
-        img_grl_consist_fea = [self.grl_img_consist(fea) for fea in img_features]
-        ins_grl_consist_fea = self.grl_ins_consist(da_ins_feature)
-
-        # instance alignment
-        # levels = self.map_levels(da_proposals)
-        levels = assign_boxes_to_levels(da_proposals, self.lvl_min, self.lvl_max, 
-                                        canonical_box_size=224, canonical_level=4)
-        da_ins_features = self.inshead(ins_grl_fea, levels)
-        da_ins_consist_features = self.inshead(ins_grl_consist_fea, levels)
-
-        da_ins_consist_features = da_ins_consist_features.sigmoid()
-
-        # image alignment
-        da_img_features = self.imghead(img_grl_fea)
-        da_img_consist_features = self.imghead(img_grl_consist_fea)
-        da_img_consist_features = [fea.sigmoid() for fea in da_img_consist_features]
-
-        if self.training:
-            da_img_loss, da_ins_loss, da_consistency_loss = self.loss_evaluator(
-                da_proposals, da_img_features, da_ins_features, da_img_consist_features, da_ins_consist_features,
-                da_ins_labels, img_targets)
-
-            losses = {
-                "loss_da_image": da_img_loss,
-                "loss_da_instance": da_ins_loss,
-                "loss_da_consistency": da_consistency_loss}
-
-            return losses
-
-        return {}
