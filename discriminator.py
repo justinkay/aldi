@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from detectron2.layers import ShapeSpec, ROIAlign # not sure if this will work with maskrcnn code
+from detectron2.layers import ShapeSpec
 from detectron2.modeling.poolers import ROIPooler, assign_boxes_to_levels
 
 # Discriminator stuff from MIC:

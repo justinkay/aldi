@@ -12,7 +12,6 @@ from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-from discriminator import DomainAdaptationModule
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, TwoDataloaders
 from ema import EMA
 from pseudolabels import add_label, process_pseudo_label
@@ -41,27 +40,49 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           include_weak_in_batch: if True, add weakly-augmented source images to the batch
      """
      labeled, unlabeled = data
-
      loss_dict = {}
 
-     # run model on labeled data per usual
-     # these values are kept as the standard loss names (e.g. "loss_cls")
-     if labeled is not None:
-          loss_dict.update(model(labeled))
+     #### Weakly augmented source imagery
+     #### (Used for normal training and/or domain alignment)
+     do_sada = labeled is not None and model.module.da_heads is not None # TODO
+     do_weak = include_weak_in_batch or do_sada # TODO
+     if do_weak:
+          # swap in weakly augmented images
+          for img in labeled:
+               img["original_image"] = img["image"]
+               img["image"] = img[WEAK_IMG_KEY]
+          loss_weak = model(labeled, do_sada=do_sada)
+          for k, v in loss_weak.items():
+               if include_weak_in_batch or (do_sada and "_da_" in k):
+                    loss_dict[f"{k}_source_weak"] = v
+          # restore strongly augmented images
+          for img in labeled:
+               img["image"] = img["original_image"]
 
-          # run model on weakly-augmented labeled data if desired
-          if include_weak_in_batch:
-               for img in labeled:
-                    img["image"] = img[WEAK_IMG_KEY]
-               loss_weak = model(labeled)
-               for k, v in loss_weak.items():
-                    loss_dict[f"{k}_weak"] = v
+     #### Weakly augmented target imagery
+     #### (Only used for domain alignment)
+     if do_sada:
+          for img in unlabeled:
+               img["original_image"] = img["image"]
+               img["image"] = img[WEAK_IMG_KEY]
+          loss_sada = model(unlabeled, labeled=False, do_sada=True)
+          for k, v in loss_sada.items():
+               if "_da_" in k:
+                    loss_dict[f"{k}_target_weak"] = v
+          for img in unlabeled:
+               img["image"] = img["original_image"]
+
+     #### Strongly augmented source imagery
+     #### These values are kept as the standard loss names (e.g. "loss_cls")
+     do_strong = labeled is not None # TODO
+     if do_strong:
+          loss_dict.update(model(labeled, do_sada=False))
 
      if DEBUG and trainer is not None:
           trainer._last_labeled = copy.deepcopy(labeled)
           trainer._last_unlabeled = copy.deepcopy(unlabeled)
 
-     # run model on unlabeled data
+     #### Pseudo-labeled target imagery
      if unlabeled is not None:
           # are we using an (EMA) teacher model to generate pseudo-labels?
           # if not, the (student) model generates its own pseudo-labels
@@ -105,7 +126,7 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                          trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
                     model.train()
 
-          losses_unlabeled = model(unlabeled, labeled=False)
+          losses_unlabeled = model(unlabeled, labeled=False, do_sada=False)
           for k, v in losses_unlabeled.items():
                loss_dict[k + "_pseudo"] = v
      
