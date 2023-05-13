@@ -1,4 +1,3 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 from __future__ import print_function
 import torch
 import torch.nn.functional as F
@@ -6,17 +5,6 @@ from torch import nn
 
 from detectron2.layers import ShapeSpec
 from detectron2.modeling.poolers import ROIPooler, assign_boxes_to_levels
-
-# Discriminator stuff from MIC:
-# See maskrcnn_benchmark.modeling.roi_heads.box_head.box_head.py for da_ins_feas, da_ins_labels, da_proposals
-#    features = self.backbone(images.tensors)
-#    proposals, proposal_losses = self.rpn(images, features, targets, use_pseudo_labeling_weight=use_pseudo_labeling_weight)
-#    da_losses = {}
-#    if self.roi_heads:
-#        x, result, detector_losses, da_ins_feas, da_ins_labels, da_proposals = self.roi_heads(features, proposals, targets, use_pseudo_labeling_weight=use_pseudo_labeling_weight)
-#        if self.da_heads and with_DA_ON:
-#            da_losses = self.da_heads(result, features, da_ins_feas, da_ins_labels, da_proposals, targets)
-#            # da_losses = self.da_heads(result, res_feat, da_ins_feas, da_ins_labels, da_proposals, targets)
 
 class DomainAdaptationModule(torch.nn.Module):
     """
@@ -29,7 +17,7 @@ class DomainAdaptationModule(torch.nn.Module):
 
         self.cfg = cfg.clone()
 
-        stage_index = 4
+        # stage_index = 4
         # stage2_relative_factor = 2 ** (stage_index - 1)
         # res2_out_channels = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS
         num_ins_inputs = cfg.MODEL.ROI_BOX_HEAD.FC_DIM #.MLP_HEAD_DIM #if cfg.MODEL.RPN.USE_FPN else res2_out_channels * stage2_relative_factor
@@ -314,79 +302,6 @@ class DAImgHead(nn.Module):
             last_inner = F.relu(inner_lateral)
             img_features.append(getattr(self, conv2_block)(last_inner))
         return img_features
-
-class DAJointScaleHead(nn.Module):
-    """
-    Adds a simple Image-level Domain Classifier head
-    """
-
-    def __init__(self, in_channels):
-        """
-        Arguments:
-            in_channels (int): number of channels of the input feature
-            USE_FPN (boolean): whether FPN feature extractor is used
-        """
-        super(DAJointScaleHead, self).__init__()
-
-        self.conv1_da = nn.Conv2d(in_channels*5, 512, kernel_size=1, stride=1)
-        self.conv2_da = nn.Conv2d(512, 1, kernel_size=1, stride=1)
-        for l in [self.conv1_da, self.conv2_da]:
-            torch.nn.init.normal_(l.weight, std=0.001)
-            torch.nn.init.constant_(l.bias, 0)
-
-    def forward(self, da_img):
-
-        _, _, H, W = da_img[0].shape
-        up_sample = nn.Upsample(size=(H, W), mode='bilinear', align_corners=True)
-
-        upsampled_feat = []
-        for i, feat in enumerate(da_img):
-            feat = da_img[i]
-            upsampled_feat.append(up_sample(feat))
-
-        upsampled_feat = torch.cat(upsampled_feat, dim=1)
-
-        img_features = []
-        t = F.relu(self.conv1_da(upsampled_feat))
-        img_features.append(self.conv2_da(t))
-
-        return img_features
-
-class ScaleDiscriminator(nn.Module):
-    def __init__(self, in_channels):
-        """
-        Arguments:
-            in_channels (int): number of channels of the input feature
-            USE_FPN (boolean): whether FPN feature extractor is used
-        """
-        super(ScaleDiscriminator, self).__init__()
-
-        self.conv1_da = nn.Conv2d(in_channels, 512, kernel_size=1, stride=1)
-        self.conv2_da = nn.Conv2d(512, 5, kernel_size=1, stride=1)
-        for l in [self.conv1_da, self.conv2_da]:
-            torch.nn.init.normal_(l.weight, std=0.001)
-            torch.nn.init.constant_(l.bias, 0)
-
-    def forward(self, x):
-        img_features = []
-        for feature in x:
-            t = F.relu(self.conv1_da(feature))
-            img_features.append(self.conv2_da(t))
-        return img_features
-
-class ScaleDiscriminatorIns(nn.Module):
-    def __init__(self, in_channels):
-        super(ScaleDiscriminatorIns, self).__init__()
-
-        self.scale_score = nn.Linear(in_channels, 5)
-
-        nn.init.normal_(self.scale_score.weight, std=0.01)
-        for l in [self.scale_score]:
-            nn.init.constant_(l.bias, 0)
-
-    def forward(self, x):
-        scores = self.scale_score(x)
-        return scores
 
 class DAInsHead(nn.Module):
     """

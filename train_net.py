@@ -21,7 +21,11 @@ def setup(args):
     Copied directly from detectron2/tools/train_net.py
     """
     cfg = get_cfg()
+
+    ## Change here
     add_da_config(cfg)
+    ## End change
+
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()

@@ -1,12 +1,14 @@
 import os
 import torch
 import copy
+import logging
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.engine import hooks, BestCheckpointer
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
 from detectron2.modeling.meta_arch.build import build_model
+from detectron2.solver import build_optimizer
 from detectron2.utils.events import get_event_storage
 from detectron2.utils import comm
 
@@ -86,6 +88,8 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
      if unlabeled is not None:
           # are we using an (EMA) teacher model to generate pseudo-labels?
           # if not, the (student) model generates its own pseudo-labels
+          # TODO: this would probably be cleaner to just pass in the student model as teacher
+          #         and track whether teacher was in train mode before (in that case, revert after inference)
           training_with_student = teacher is None
           if training_with_student:
                teacher = model.module if type(model) == DDP else model
@@ -130,6 +134,13 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           for k, v in losses_unlabeled.items():
                loss_dict[k + "_pseudo"] = v
      
+     # scale the loss to account for the gradient accumulation we've done
+     # TODO: this does not include SADA - how should the DA loss be modified?
+     # TODO: loss_box_reg is actually normalized by number of gt boxes, so this isn't a perfect solution
+     num_grad_accum_steps = int(labeled is not None) + int(unlabeled is not None) + int(include_weak_in_batch)
+     for k, v in loss_dict.items():
+          loss_dict[k] = v / num_grad_accum_steps
+
      return loss_dict
 
 class DAAMPTrainer(AMPTrainer):
@@ -171,7 +182,7 @@ class DATrainer(DefaultTrainer):
           return trainer
      
      def _create_checkpointer(self, model, cfg):
-          checkpointer = super()._create_checkpointer(model, cfg)
+          checkpointer = super(DATrainer, self)._create_checkpointer(model, cfg)
           if cfg.EMA.ENABLED:
                checkpointer.add_checkpointable("ema", self._trainer.ema.model)
           return checkpointer
@@ -184,7 +195,7 @@ class DATrainer(DefaultTrainer):
         return DatasetEvaluators([COCOEvaluator(dataset_name, output_dir=output_folder)])
 
      def build_hooks(self):
-          ret = super().build_hooks()
+          ret = super(DATrainer, self).build_hooks()
 
           # add hooks to evaluate/save teacher model if applicable
           if self.cfg.EMA.ENABLED:
@@ -205,6 +216,23 @@ class DATrainer(DefaultTrainer):
 
           return ret
      
+     @classmethod
+     def build_optimizer(cls, cfg, model):
+          """
+          Change the learning rate to account for the fact that we are doing gradient accumulation in order
+          to run multiple batches of labeled and unlabeled data each training step.
+          """
+          logger = logging.getLogger("detectron2")
+          num_grad_accum = (sum(cfg.DATASETS.LABELED_UNLABELED_RATIO) + int(cfg.DATASETS.INCLUDE_WEAK_IN_BATCH))
+          effective_batch_size = cfg.SOLVER.IMS_PER_BATCH * num_grad_accum
+          logger.info(f"Effective batch size is {effective_batch_size} due to {num_grad_accum} gradient accumulation steps.")
+          lr_scale = effective_batch_size / cfg.SOLVER.IMS_PER_BATCH
+          logger.info(f"Scaling LR from {cfg.SOLVER.BASE_LR} to {lr_scale * cfg.SOLVER.BASE_LR}.")
+          cfg.defrost()
+          cfg.SOLVER.BASE_LR = lr_scale * cfg.SOLVER.BASE_LR
+          cfg.freeze()
+          return super(DATrainer, cls).build_optimizer(cfg, model)
+
      @classmethod
      def build_train_loader(cls, cfg):
           total_batch_size = cfg.SOLVER.IMS_PER_BATCH
@@ -229,6 +257,6 @@ class DATrainer(DefaultTrainer):
           return TwoDataloaders(labeled_loader, unlabeled_loader)
      
      def before_step(self):
-          super().before_step()
+          super(DATrainer, self).before_step()
           if self.cfg.EMA.ENABLED:
                self._trainer.ema.update_weights(self._trainer.model, self.iter)
