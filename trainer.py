@@ -44,36 +44,33 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
      labeled, unlabeled = data
      loss_dict = {}
 
+     # get weakly augmented version of batch
+     # TODO: not intuitive that labeled might already be weakly-augmented
+     labeled_weak = copy.deepcopy(labeled)
+     for img in labeled_weak:
+          img["image"] = img[WEAK_IMG_KEY]
+     unlabeled_weak = copy.deepcopy(unlabeled)
+     for img in unlabeled_weak:
+          img["image"] = img[WEAK_IMG_KEY]
+
      #### Weakly augmented source imagery
      #### (Used for normal training and/or domain alignment)
      _model = model.module if type(model) == DDP else model
      do_sada = labeled is not None and _model.da_heads is not None # TODO
      do_weak = include_weak_in_batch or do_sada # TODO
      if do_weak:
-          # swap in weakly augmented images
-          for img in labeled:
-               img["original_image"] = img["image"]
-               img["image"] = img[WEAK_IMG_KEY]
-          loss_weak = model(labeled, do_sada=do_sada)
+          loss_weak = model(labeled_weak, do_sada=do_sada)
           for k, v in loss_weak.items():
                if include_weak_in_batch or (do_sada and "_da_" in k):
                     loss_dict[f"{k}_source_weak"] = v
-          # restore strongly augmented images
-          for img in labeled:
-               img["image"] = img["original_image"]
 
      #### Weakly augmented target imagery
      #### (Only used for domain alignment)
      if do_sada:
-          for img in unlabeled:
-               img["original_image"] = img["image"]
-               img["image"] = img[WEAK_IMG_KEY]
-          loss_sada = model(unlabeled, labeled=False, do_sada=True)
-          for k, v in loss_sada.items():
+          loss_sada_target = model(unlabeled_weak, labeled=False, do_sada=True)
+          for k, v in loss_sada_target.items():
                if "_da_" in k:
                     loss_dict[f"{k}_target_weak"] = v
-          for img in unlabeled:
-               img["image"] = img["original_image"]
 
      #### Strongly augmented source imagery
      #### These values are kept as the standard loss names (e.g. "loss_cls")
@@ -95,12 +92,6 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           if training_with_student:
                teacher = model.module if type(model) == DDP else model
 
-          # img["image"] currently contains strongly augmented images;
-          # we want to generate pseudo-labels using the weakly augmented images
-          for img in unlabeled:
-               img["original_image"] = img["image"]
-               img["image"] = img[WEAK_IMG_KEY]
-
           with torch.no_grad():
                if DEBUG and trainer is not None:
                     trainer._last_unlabeled_before_teacher = copy.deepcopy(unlabeled)
@@ -108,7 +99,7 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                # run teacher on weakly augmented data
                # do_postprocess=False to disable transforming outputs back into original image space
                teacher.eval()
-               teacher_preds = teacher.inference(unlabeled, do_postprocess=False)
+               teacher_preds = teacher.inference(unlabeled_weak, do_postprocess=False)
                if training_with_student: teacher.train()
 
                # postprocess pseudo labels (thresholding)
@@ -116,10 +107,6 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                
                # add pseudo labels back as "ground truth"
                unlabeled = add_label(unlabeled, teacher_preds)
-
-               # restore strongly augmented images for student
-               for img in unlabeled:
-                    img["image"] = img["original_image"]
 
           if DEBUG and trainer is not None:
                trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled)
@@ -131,8 +118,8 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                          trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
                     model.train()
 
-          losses_unlabeled = model(unlabeled, labeled=False, do_sada=False)
-          for k, v in losses_unlabeled.items():
+          losses_pseudolabeled = model(unlabeled, labeled=False, do_sada=False)
+          for k, v in losses_pseudolabeled.items():
                loss_dict[k + "_pseudo"] = v
      
      # scale the loss to account for the gradient accumulation we've done
