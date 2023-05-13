@@ -6,7 +6,7 @@ from detectron2.modeling.meta_arch import GeneralizedRCNN
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 from detectron2.layers import cat, cross_entropy
 
-from discriminator import DomainAdaptationModule
+from sada import DomainAdaptationModule
 
 class SaveIO:
     """Simple PyTorch hook to save the output of a nn.module."""
@@ -30,7 +30,7 @@ class DARCNN(GeneralizedRCNN):
         da_heads: DomainAdaptationModule = None,
         **kwargs
     ):
-        super().__init__(**kwargs)
+        super(DARCNN, self).__init__(**kwargs)
         self.do_reg_loss_unlabeled = do_reg_loss_unlabeled
         self.do_quality_loss_weight_unlabeled = do_quality_loss_weight_unlabeled
         self.da_heads = da_heads
@@ -45,7 +45,7 @@ class DARCNN(GeneralizedRCNN):
 
     @classmethod
     def from_config(cls, cfg):
-        ret = super().from_config(cfg)
+        ret = super(DARCNN, cls).from_config(cfg)
 
         # loss modifications
         ret.update({"do_reg_loss_unlabeled": cfg.DOMAIN_ADAPT.LOSSES.LOC_LOSS_ENABLED,
@@ -58,7 +58,7 @@ class DARCNN(GeneralizedRCNN):
         return ret
 
     def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], labeled=True, do_sada=False):
-        output = super().forward(batched_inputs)
+        output = super(DARCNN, self).forward(batched_inputs)
 
         if self.training:
             # handle any domain alignment modules
@@ -98,7 +98,5 @@ class DARCNN(GeneralizedRCNN):
         instance_features = self.boxhead_io.output
         instance_targets = torch.ones(sum([len(b) for b in proposals]), dtype=torch.long, device=device) * domain_label
 
-        # TODO sub-sample proposals differently? see SADA implementation
         da_losses = self.da_heads(img_features, instance_features, instance_targets, proposals, img_targets)
-
         return da_losses

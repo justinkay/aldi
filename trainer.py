@@ -46,7 +46,8 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
 
      #### Weakly augmented source imagery
      #### (Used for normal training and/or domain alignment)
-     do_sada = labeled is not None and model.module.da_heads is not None # TODO
+     _model = model.module if type(model) == DDP else model
+     do_sada = labeled is not None and _model.da_heads is not None # TODO
      do_weak = include_weak_in_batch or do_sada # TODO
      if do_weak:
           # swap in weakly augmented images
