@@ -47,11 +47,13 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
      # get weakly augmented version of batch
      # TODO: not intuitive that labeled might already be weakly-augmented
      labeled_weak = copy.deepcopy(labeled)
-     for img in labeled_weak:
-          img["image"] = img[WEAK_IMG_KEY]
+     if labeled is not None:
+          for img in labeled_weak:
+               img["image"] = img[WEAK_IMG_KEY]
      unlabeled_weak = copy.deepcopy(unlabeled)
-     for img in unlabeled_weak:
-          img["image"] = img[WEAK_IMG_KEY]
+     if unlabeled is not None:
+          for img in unlabeled_weak:
+               img["image"] = img[WEAK_IMG_KEY]
 
      #### Weakly augmented source imagery
      #### (Used for normal training and/or domain alignment)
