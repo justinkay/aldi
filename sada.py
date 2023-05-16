@@ -6,14 +6,9 @@ from torch import nn
 from detectron2.layers import ShapeSpec
 from detectron2.modeling.poolers import ROIPooler, assign_boxes_to_levels
 
-class DomainAdaptationModule(torch.nn.Module):
-    """
-    Module for Domain Adaptation Component. Takes feature maps from the backbone and instance
-    feature vectors, domain labels and proposals. Works for both FPN and non-FPN.
-    """
-
+class SADA(torch.nn.Module):
     def __init__(self, cfg):
-        super(DomainAdaptationModule, self).__init__()
+        super(SADA, self).__init__()
 
         self.cfg = cfg.clone()
 
@@ -25,12 +20,12 @@ class DomainAdaptationModule(torch.nn.Module):
         self.USE_FPN = True # cfg.MODEL.RPN.USE_FPN
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=7)
 
-        self.consit_weight = self.cfg.MODEL.DA_HEADS.COS_WEIGHT
+        self.consit_weight = self.cfg.MODEL.SADA.COS_WEIGHT
 
-        self.grl_img = GradientScalarLayer(-1.0 * self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
-        self.grl_ins = GradientScalarLayer(-1.0 * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
-        self.grl_img_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
-        self.grl_ins_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
+        self.grl_img = GradientScalarLayer(-1.0 * self.cfg.MODEL.SADA.DA_IMG_GRL_WEIGHT)
+        self.grl_ins = GradientScalarLayer(-1.0 * self.cfg.MODEL.SADA.DA_INS_GRL_WEIGHT)
+        self.grl_img_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.SADA.DA_IMG_GRL_WEIGHT)
+        self.grl_ins_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.SADA.DA_INS_GRL_WEIGHT)
 
         # in_features       = cfg.MODEL.ROI_HEADS.IN_FEATURES
         # pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
@@ -40,14 +35,14 @@ class DomainAdaptationModule(torch.nn.Module):
 
         in_channels = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS # ? .MODEL.RESNETS.STEM_OUT_CHANNELS # ? cfg.MODEL.BACKBONE.OUT_CHANNELS
 
-        self.imghead = DAImgHead(in_channels)
+        self.imghead = SADAImgHead(in_channels)
         self.loss_evaluator = make_da_heads_loss_evaluator(cfg)
 
         # scales = cfg.MODEL.ROI_BOX_HEAD.POOLER_SCALES
         self.lvl_min = self.loss_evaluator.pooler.min_level #-torch.log2(torch.tensor(scales[0], dtype=torch.float32)).item()
         self.lvl_max = self.loss_evaluator.pooler.max_level #-torch.log2(torch.tensor(scales[-1], dtype=torch.float32)).item()
         # self.map_levels = LevelMapper(lvl_min, lvl_max) #canonical_scale=224, canonical_level=4, eps=1e-6
-        self.inshead = DAInsHead(num_ins_inputs)
+        self.inshead = SADAInsHead(num_ins_inputs)
 
     def forward(self, img_features, da_ins_feature, da_ins_labels, da_proposals, img_targets):
         """
@@ -101,7 +96,7 @@ class DomainAdaptationModule(torch.nn.Module):
 
         return {}
 
-class DALossComputation(object):
+class SADALossComputation(object):
     """
     This class computes the DA loss.
     """
@@ -231,7 +226,7 @@ class DALossComputation(object):
         return da_img_loss, da_ins_loss, da_consist_loss
 
 def make_da_heads_loss_evaluator(cfg):
-    loss_evaluator = DALossComputation(cfg)
+    loss_evaluator = SADALossComputation(cfg)
     return loss_evaluator
 
 class _GradientScalarLayer(torch.autograd.Function):
@@ -261,7 +256,7 @@ class GradientScalarLayer(torch.nn.Module):
         tmpstr += ")"
         return tmpstr
 
-class DAImgHead(nn.Module):
+class SADAImgHead(nn.Module):
     """
     Adds a simple Image-level Domain Classifier head
     """
@@ -272,7 +267,7 @@ class DAImgHead(nn.Module):
             in_channels (int): number of channels of the input feature
             USE_FPN (boolean): whether FPN feature extractor is used
         """
-        super(DAImgHead, self).__init__()
+        super(SADAImgHead, self).__init__()
 
         self.da_img_conv1_layers = []
         self.da_img_conv2_layers = []
@@ -303,7 +298,7 @@ class DAImgHead(nn.Module):
             img_features.append(getattr(self, conv2_block)(last_inner))
         return img_features
 
-class DAInsHead(nn.Module):
+class SADAInsHead(nn.Module):
     """
     Adds a simple Instance-level Domain Classifier head
     """
@@ -313,7 +308,7 @@ class DAInsHead(nn.Module):
         Arguments:
             in_channels (int): number of channels of the input feature
         """
-        super(DAInsHead, self).__init__()
+        super(SADAInsHead, self).__init__()
 
         self.da_ins_fc1_layers = []
         self.da_ins_fc2_layers = []

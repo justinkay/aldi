@@ -19,8 +19,7 @@ from torch import nn
 
 from detectron2.config import configurable
 from detectron2.layers import ShapeSpec
-from detectron2.structures import Boxes, RotatedBoxes
-from detectron2.utils.registry import Registry
+from detectron2.structures import Boxes
 from torch.nn.parameter import Parameter
 
 from detectron2.modeling.anchor_generator import (ANCHOR_GENERATOR_REGISTRY,
