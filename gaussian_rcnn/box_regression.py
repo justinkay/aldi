@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
 import math
 from typing import List, Tuple
 import torch
@@ -20,7 +21,7 @@ from fvcore.nn import giou_loss, smooth_l1_loss
 
 from detectron2.layers import cat
 from detectron2.structures import Boxes
-import numpy as np
+from detectron2.modeling.box_regression import _dense_box_regression_loss as _d2_dense_box_regression_loss
 
 # Value for clamping large dw and dh predictions. The heuristic is that we clamp
 # such that dw and dh are no larger than what would transform a 16px box into a
@@ -168,15 +169,15 @@ def _dense_box_regression_loss(
         gt_anchor_deltas = torch.stack(gt_anchor_deltas)  # (N, R, 4)
 
         if model_type == "GAUSSIAN":
-            sigma_xywh = torch.sigmoid(cat(pred_anchor_deltas)[..., -4:])[fg_mask]
-            mean_xywh = cat(pred_anchor_deltas)[..., :4][fg_mask]
+            sigma_xywh = torch.sigmoid(cat(pred_anchor_deltas, dim=1)[..., -4:])[fg_mask]
+            mean_xywh = cat(pred_anchor_deltas, dim=1)[..., :4][fg_mask]
             gaussian = gaussian_dist_pdf(mean_xywh,
                                          gt_anchor_deltas[fg_mask], sigma_xywh)
             loss_box_reg_gaussian = - torch.log(gaussian + 1e-9).sum()
             loss_box_reg = loss_box_reg_gaussian
         elif model_type == "LAPLACE":
-            sigma_xywh = torch.sigmoid(cat(pred_anchor_deltas)[..., -4:])[fg_mask]
-            mean_xywh = cat(pred_anchor_deltas)[..., :4][fg_mask]
+            sigma_xywh = torch.sigmoid(cat(pred_anchor_deltas, dim=1)[..., -4:])[fg_mask]
+            mean_xywh = cat(pred_anchor_deltas, dim=1)[..., :4][fg_mask]
             laplace = laplace_dist_pdf(mean_xywh,
                                        gt_anchor_deltas[fg_mask], sigma_xywh)
             loss_box_reg_laplace = - torch.log(laplace + 1e-9).sum()
@@ -188,14 +189,7 @@ def _dense_box_regression_loss(
                 beta=smooth_l1_beta,
                 reduction="sum",
             )
-
-    elif box_reg_loss_type == "giou":
-        pred_boxes = [
-            box2box_transform.apply_deltas(k, anchors) for k in cat(pred_anchor_deltas, dim=1)
-        ]
-        loss_box_reg = giou_loss(
-            torch.stack(pred_boxes)[fg_mask], torch.stack(gt_boxes)[fg_mask], reduction="sum"
-        )
+        return loss_box_reg
     else:
-        raise ValueError(f"Invalid dense box regression loss type '{box_reg_loss_type}'")
-    return loss_box_reg
+        return _d2_dense_box_regression_loss(anchors, box2box_transform, pred_anchor_deltas, gt_boxes, 
+                                             fg_mask, box_reg_loss_type, smooth_l1_beta)

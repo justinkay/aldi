@@ -137,7 +137,7 @@ class GaussianROIHead(StandardROIHeads):
                                                                            mean_p, sigma_p,
                                                                            entropy_weight,
                                                                            weight_lambda, tau))
-            return losses, predictions
+            return losses #, predictions # JK commented out -- but maybe we need it!
 
         elif self.training: # and compute_loss:
             losses = self.box_predictor.losses(predictions, proposals)
@@ -151,7 +151,7 @@ class GaussianROIHead(StandardROIHeads):
                             proposals, pred_boxes
                     ):
                         proposals_per_image.proposal_boxes = Boxes(pred_boxes_per_image)
-            return losses, predictions
+            return losses #, predictions # JK commented out -- but maybe we need it!
         else:
 
             pred_instances, _ = self.box_predictor.inference(predictions, proposals)
