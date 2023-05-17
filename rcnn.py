@@ -58,6 +58,16 @@ class DARCNN(GeneralizedRCNN):
         return ret
 
     def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], labeled: Bool = True, do_sada: Bool = False):
+        # hack in PT related stuff as needed
+        # our Trainer handles the "unsup_data_weak" case as a separate inference step
+        if labeled:
+            self.roi_heads.branch = "supervised"
+            self.proposal_generator.danchor = False
+        else:
+            self.roi_heads.branch = "unsupervised"
+            self.proposal_generator.danchor = True
+
+        # run forward pass as usual
         output = super(DARCNN, self).forward(batched_inputs)
 
         if self.training:

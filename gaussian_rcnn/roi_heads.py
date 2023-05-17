@@ -13,27 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
 import torch
 from typing import Dict, List, Optional, Tuple, Union
+
 from detectron2.structures import Boxes, ImageList, pairwise_iou
 from detectron2.utils.events import get_event_storage
 from detectron2.modeling.roi_heads.box_head import build_box_head
 from detectron2.layers import ShapeSpec
-from detectron2.modeling.roi_heads import (
-    ROI_HEADS_REGISTRY,
-    StandardROIHeads,
-)
-from fast_rcnn import GuassianFastRCNNOutputLayers
-from instances import FreeInstances
-from proposal_utils import (
-    add_ground_truth_to_proposals,
-)
+from detectron2.modeling.roi_heads import ROI_HEADS_REGISTRY, StandardROIHeads
 
-import numpy as np
-from detectron2.modeling.poolers import ROIPooler
-
-from torch.nn import functional as F
 from detectron2.config import configurable
+
+from instances import FreeInstances
+from proposal_utils import add_ground_truth_to_proposals
 
 
 @ROI_HEADS_REGISTRY.register()
@@ -44,84 +37,23 @@ class GuassianROIHead(StandardROIHeads):
         del kwargs["cfg"]
         super().__init__(*args, **kwargs)
 
+        # added to get around branch parameter in forward method of PT
+        self.branch = None
+
     @classmethod
     def from_config(cls, cfg, input_shape: Dict[str, ShapeSpec]):
         ret = super().from_config(cfg, input_shape)
         ret["cfg"] = cfg
         return ret
 
-    @classmethod
-    def _init_box_head(cls, cfg, input_shape):
-        # fmt: off
-        in_features = cfg.MODEL.ROI_HEADS.IN_FEATURES
-        pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
-        pooler_scales = tuple(1.0 / input_shape[k].stride for k in in_features)
-        sampling_ratio = cfg.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO
-        pooler_type = cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE
-        # fmt: on
-
-        in_channels = [input_shape[f].channels for f in in_features]
-        # Check all channel counts are equal
-        assert len(set(in_channels)) == 1, in_channels
-        in_channels = in_channels[0]
-
-        box_pooler = ROIPooler(
-            output_size=pooler_resolution,
-            scales=pooler_scales,
-            sampling_ratio=sampling_ratio,
-            pooler_type=pooler_type,
-        )
-        box_head = build_box_head(
-            cfg,
-            ShapeSpec(
-                channels=in_channels, height=pooler_resolution, width=pooler_resolution
-            ),
-        )
-        box_predictor = GuassianFastRCNNOutputLayers(cfg, box_head.output_shape)
-
-        return {
-            "box_in_features": in_features,
-            "box_pooler": box_pooler,
-            "box_head": box_head,
-            "box_predictor": box_predictor,
-        }
-
-    def forward(
-            self,
-            images: ImageList,
-            features: Dict[str, torch.Tensor],
-            proposals: List[FreeInstances],
-            targets: Optional[List[FreeInstances]] = None,
-            compute_loss=True,
-            branch=""
-    ) -> Tuple[List[FreeInstances], Dict[str, torch.Tensor]]:
-
-        del images
-        if self.training and compute_loss:  # apply if training loss
-            assert targets
-            proposals = self.label_and_sample_proposals(
-                proposals, targets, branch=branch
-            )
-        del targets
-
-        if self.training and compute_loss:
-            losses, _ = self._forward_box(
-                features, proposals, compute_loss, branch
-            )
-            return proposals, losses
-        else:
-            pred_instances, predictions = self._forward_box(
-                features, proposals, compute_loss, branch
-            )
-
-            return pred_instances, predictions
-
     def _forward_box(self,
                      features: Dict[str, torch.Tensor],
                      proposals: List[FreeInstances],
-                     compute_loss: bool = True,
-                     branch: str = "",
+                     #compute_loss: bool = True,
+                     #branch: str = "",
                      ) -> Union[Dict[str, torch.Tensor], List[FreeInstances]]:
+        branch = self.branch
+
         features = [features[f] for f in self.box_in_features]
         box_features = self.box_pooler(features, [x.proposal_boxes for x in proposals])
         box_features = self.box_head(box_features)
@@ -171,7 +103,7 @@ class GuassianROIHead(StandardROIHeads):
                                                                            weight_lambda, tau))
             return losses, predictions
 
-        elif self.training and compute_loss:
+        elif self.training: # and compute_loss:
             losses = self.box_predictor.losses(predictions, proposals)
 
             if self.train_on_pred_boxes:
