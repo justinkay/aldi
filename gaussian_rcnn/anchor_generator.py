@@ -113,7 +113,7 @@ class DifferentiableAnchorGenerator(nn.Module):
         # buffers() not supported by torchscript. use named_buffers() instead
         buffers = self.cell_anchors
         for size, stride, base_anchors in zip(grid_sizes, self.strides, buffers):
-            shift_x, shift_y = _create_grid_offsets(size, stride, self.offset, base_anchors.device)
+            shift_x, shift_y = _create_grid_offsets(size, stride, self.offset, base_anchors) #.device)
             shifts = torch.stack((shift_x, shift_y, shift_x, shift_y), dim=1)
 
             anchors.append((shifts.view(-1, 1, 4) + base_anchors.view(1, -1, 4)).reshape(-1, 4))

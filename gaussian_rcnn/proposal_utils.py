@@ -20,7 +20,8 @@ import math
 from detectron2.layers import batched_nms, cat
 from detectron2.structures import Boxes
 from detectron2.modeling.proposal_generator.proposal_utils import _is_tracing
-from instances import FreeInstances
+
+from .instances import FreeInstances
 
 
 def find_top_rpn_proposals(

@@ -1,5 +1,5 @@
 import torch
-from typing import Dict, List, Bool
+from typing import Dict, List
 
 from detectron2.config import configurable
 from detectron2.modeling.meta_arch import GeneralizedRCNN
@@ -27,12 +27,18 @@ class DARCNN(GeneralizedRCNN):
         *,
         do_reg_loss_unlabeled: bool = True,
         do_quality_loss_weight_unlabeled: bool = False,
+        do_danchor_labeled: bool = False,
+        do_danchor_unlabeled: bool = False,
         sada_heads: SADA = None,
         **kwargs
     ):
         super(DARCNN, self).__init__(**kwargs)
+
+        # TODO: can we autoset these with locals()?
         self.do_reg_loss_unlabeled = do_reg_loss_unlabeled
         self.do_quality_loss_weight_unlabeled = do_quality_loss_weight_unlabeled
+        self.do_danchor_labeled = do_danchor_labeled
+        self.do_danchor_unlabeled = do_danchor_unlabeled
         self.sada_heads = sada_heads
 
         # register hooks so we can grab output of sub-modules
@@ -47,25 +53,28 @@ class DARCNN(GeneralizedRCNN):
     def from_config(cls, cfg):
         ret = super(DARCNN, cls).from_config(cfg)
 
-        # loss modifications
         ret.update({"do_reg_loss_unlabeled": cfg.DOMAIN_ADAPT.LOSSES.LOC_LOSS_ENABLED,
-                    "do_quality_loss_weight_unlabeled": cfg.DOMAIN_ADAPT.LOSSES.QUALITY_LOSS_WEIGHT_ENABLED})
+                    "do_quality_loss_weight_unlabeled": cfg.DOMAIN_ADAPT.LOSSES.QUALITY_LOSS_WEIGHT_ENABLED,
+                    "do_danchor_labeled": cfg.GRCNN.LEARN_ANCHORS_LABELED,
+                    "do_danchor_unlabeled": cfg.GRCNN.LEARN_ANCHORS_UNLABELED,
+                    })
 
-        # domain alighment modules
         if cfg.MODEL.SADA.ENABLED:
             ret.update({"sada_heads": SADA(cfg)})
 
         return ret
 
-    def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], labeled: Bool = True, do_sada: Bool = False):
+    def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], labeled: bool = True, do_sada: bool = False):
         # hack in PT related stuff as needed
         # our Trainer handles the "unsup_data_weak" case as a separate inference step
         if labeled:
             self.roi_heads.branch = "supervised"
-            self.proposal_generator.danchor = False
+            self.proposal_generator.branch = "supervised"
+            self.proposal_generator.danchor = self.do_danchor_labeled
         else:
             self.roi_heads.branch = "unsupervised"
-            self.proposal_generator.danchor = True
+            self.proposal_generator.branch = "unsupervised"
+            self.proposal_generator.danchor = self.do_danchor_unlabeled
 
         # run forward pass as usual
         output = super(DARCNN, self).forward(batched_inputs)
@@ -97,7 +106,7 @@ class DARCNN(GeneralizedRCNN):
 
         return output
 
-    def get_sada_losses(self, labeled: Bool):
+    def get_sada_losses(self, labeled: bool):
         domain_label = 1 if labeled else 0
 
         img_features = list(self.backbone_io.output.values())

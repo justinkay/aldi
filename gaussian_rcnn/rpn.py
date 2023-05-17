@@ -32,14 +32,14 @@ from detectron2.structures import Boxes, ImageList, pairwise_iou
 from detectron2.utils.events import get_event_storage
 from detectron2.utils.memory import retry_if_cuda_oom
 
-from box_regression import Box2BoxTransform, _dense_box_regression_loss
-from instances import FreeInstances
-from proposal_utils import find_top_rpn_proposals
-from utils import grad_zero
+from .box_regression import Box2BoxTransform, _dense_box_regression_loss
+from .instances import FreeInstances
+from .proposal_utils import find_top_rpn_proposals
+from .utils import grad_zero
 
 
 @RPN_HEAD_REGISTRY.register()
-class GuassianRPNHead(StandardRPNHead):
+class GaussianRPNHead(StandardRPNHead):
     """
     Same as StandardRPNHead
     """
@@ -47,13 +47,13 @@ class GuassianRPNHead(StandardRPNHead):
     @classmethod
     def from_config(cls, cfg, input_shape):
         ret = super().from_config(cfg, input_shape)
-        if cfg.UNSUPNET.MODEL_TYPE == "GUASSIAN" or "LAPLACE":
+        if cfg.GRCNN.MODEL_TYPE == "GAUSSIAN" or "LAPLACE":
             ret["box_dim"] = ret["box_dim"] * 2
         return ret
 
 
 @PROPOSAL_GENERATOR_REGISTRY.register()
-class GuassianRPN(RPN):
+class GaussianRPN(RPN):
     """
     Region Proposal Network, introduced by :paper:`Faster R-CNN`.
     """
@@ -78,9 +78,13 @@ class GuassianRPN(RPN):
                 images: ImageList,
                 features: Dict[str, torch.Tensor],
                 gt_instances: Optional[FreeInstances] = None,
-                compute_loss: bool = True,
-                branch: str = '',
-                danchor=False):
+                # compute_loss: bool = True,
+                # branch: str = '',
+                # danchor=False
+                ):
+        branch = self.branch
+        danchor = self.danchor
+
         features = [features[f] for f in self.in_features]
 
         anchors = self.anchor_generator(features)
@@ -97,7 +101,7 @@ class GuassianRPN(RPN):
             for score in pred_objectness_logits
         ]
         box_dim = self.anchor_generator.box_dim
-        if self.cfg.UNSUPNET.MODEL_TYPE == "GUASSIAN" or "LAPLACE":
+        if self.cfg.GRCNN.MODEL_TYPE == "GAUSSIAN" or "LAPLACE":
             box_dim = box_dim * 2
         pred_anchor_deltas = [
             # (N, A*B, Hi, Wi) -> (N, A, B, Hi, Wi) -> (N, Hi, Wi, A, B) -> (N, Hi*Wi*A, B)
@@ -119,9 +123,9 @@ class GuassianRPN(RPN):
                                               gt_instances,
                                               use_ignore=True,
                                               use_soft_label=True)
-            entropy_weight = self.cfg.UNSUPNET.EFL
-            weight_lambda = self.cfg.UNSUPNET.EFL_LAMBDA
-            tau = self.cfg.UNSUPNET.TAU
+            entropy_weight = self.cfg.GRCNN.EFL
+            weight_lambda = self.cfg.GRCNN.EFL_LAMBDA
+            tau = self.cfg.GRCNN.TAU
             box = gt_instances[0].has('boxes_sigma')
             losses = self.loss_rpn_unsupervised(
                 pred_objectness_logits,
@@ -130,7 +134,7 @@ class GuassianRPN(RPN):
                 matched_boxes_sigma, anchors,
                 entropy_weight, weight_lambda, tau, box
             )
-        elif self.training and compute_loss:
+        elif self.training: # and compute_loss:
             gt_labels, gt_boxes = self.label_and_sample_anchors(anchors, gt_instances)
             losses = self.losses(
                 anchors, pred_objectness_logits, gt_labels, pred_anchor_deltas, gt_boxes
@@ -232,7 +236,7 @@ class GuassianRPN(RPN):
             pos_mask,
             box_reg_loss_type=self.box_reg_loss_type,
             smooth_l1_beta=self.smooth_l1_beta,
-            model_type=self.cfg.UNSUPNET.MODEL_TYPE,
+            model_type=self.cfg.GRCNN.MODEL_TYPE,
         )
 
         valid_mask = gt_labels >= 0
@@ -314,10 +318,10 @@ class GuassianRPN(RPN):
             sigma_p = torch.sigmoid(matched_boxes_sigma).detach()
 
             if entropy_weight:
-                if self.cfg.UNSUPNET.MODEL_TYPE == "GUASSIAN":
+                if self.cfg.GRCNN.MODEL_TYPE == "GAUSSIAN":
                     entropy = 0.5 * torch.log(2 * np.pi * np.e * sigma_p)
                     max_entropy = 0.5 * math.log(2 * np.pi * np.e)
-                elif self.cfg.UNSUPNET.MODEL_TYPE == "LAPLACE":
+                elif self.cfg.GRCNN.MODEL_TYPE == "LAPLACE":
                     entropy = 1 + 0.5 * torch.log(4 * sigma_p)
                     max_entropy = 1 + math.log(2)
                 weight = (1 - entropy / max_entropy) ** weight_lamuda[1]
@@ -331,10 +335,10 @@ class GuassianRPN(RPN):
             sigma_p = sigma_p[fg_mask]
             mean_q = mean_q[fg_mask]
             sigma_q = sigma_q[fg_mask]
-            if self.cfg.UNSUPNET.MODEL_TYPE == "GUASSIAN":
+            if self.cfg.GRCNN.MODEL_TYPE == "GAUSSIAN":
                 loss_rpn_consist_box = 0.5 * torch.log(sigma_q / sigma_p) - 0.5 \
                                        + (sigma_p + (mean_q - mean_p) ** 2) / (2 * sigma_q)
-            elif self.cfg.UNSUPNET.MODEL_TYPE == "LAPLACE":
+            elif self.cfg.GRCNN.MODEL_TYPE == "LAPLACE":
                 loss_rpn_consist_box = torch.sqrt(sigma_p) * torch.exp(
                     -(torch.abs(mean_q - mean_p) / torch.sqrt(sigma_p))) / torch.sqrt(sigma_q) + \
                              torch.abs(mean_q - mean_p) / torch.sqrt(sigma_q) + \

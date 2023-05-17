@@ -22,15 +22,15 @@ from detectron2.utils.events import get_event_storage
 from detectron2.modeling.roi_heads.box_head import build_box_head
 from detectron2.layers import ShapeSpec
 from detectron2.modeling.roi_heads import ROI_HEADS_REGISTRY, StandardROIHeads
-
+from detectron2.modeling.poolers import ROIPooler
 from detectron2.config import configurable
 
-from instances import FreeInstances
-from proposal_utils import add_ground_truth_to_proposals
-
+from .instances import FreeInstances
+from .proposal_utils import add_ground_truth_to_proposals
+from .fast_rcnn import GaussianFastRCNNOutputLayers
 
 @ROI_HEADS_REGISTRY.register()
-class GuassianROIHead(StandardROIHeads):
+class GaussianROIHead(StandardROIHeads):
     @configurable
     def __init__(self, *args, **kwargs):
         self.cfg = kwargs["cfg"]
@@ -45,6 +45,42 @@ class GuassianROIHead(StandardROIHeads):
         ret = super().from_config(cfg, input_shape)
         ret["cfg"] = cfg
         return ret
+
+    @classmethod
+    def _init_box_head(cls, cfg, input_shape):
+        # fmt: off
+        in_features = cfg.MODEL.ROI_HEADS.IN_FEATURES
+        pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
+        pooler_scales = tuple(1.0 / input_shape[k].stride for k in in_features)
+        sampling_ratio = cfg.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO
+        pooler_type = cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE
+        # fmt: on
+
+        in_channels = [input_shape[f].channels for f in in_features]
+        # Check all channel counts are equal
+        assert len(set(in_channels)) == 1, in_channels
+        in_channels = in_channels[0]
+
+        box_pooler = ROIPooler(
+            output_size=pooler_resolution,
+            scales=pooler_scales,
+            sampling_ratio=sampling_ratio,
+            pooler_type=pooler_type,
+        )
+        box_head = build_box_head(
+            cfg,
+            ShapeSpec(
+                channels=in_channels, height=pooler_resolution, width=pooler_resolution
+            ),
+        )
+        box_predictor = GaussianFastRCNNOutputLayers(cfg, box_head.output_shape)
+
+        return {
+            "box_in_features": in_features,
+            "box_pooler": box_pooler,
+            "box_head": box_head,
+            "box_predictor": box_predictor,
+        }
 
     def _forward_box(self,
                      features: Dict[str, torch.Tensor],
@@ -64,9 +100,9 @@ class GuassianROIHead(StandardROIHeads):
             pseudo_boxes = torch.cat([x.pseudo_boxes.tensor for x in proposals])
             soft_label = torch.cat([x.soft_label for x in proposals])
 
-            entropy_weight = self.cfg.UNSUPNET.EFL
-            weight_lambda = self.cfg.UNSUPNET.EFL_LAMBDA
-            tau = self.cfg.UNSUPNET.TAU
+            entropy_weight = self.cfg.GRCNN.EFL
+            weight_lambda = self.cfg.GRCNN.EFL_LAMBDA
+            tau = self.cfg.GRCNN.TAU
 
             # unsupervised cls loss
             losses = self.box_predictor.cls_loss_unsupervised(predictions[0], soft_label,
@@ -94,9 +130,9 @@ class GuassianROIHead(StandardROIHeads):
                 mean_q = mean_q_new[:, :4]
                 sigma_q = mean_q_new[:, -4:]
 
-                entropy_weight = self.cfg.UNSUPNET.EFL
-                weight_lambda = self.cfg.UNSUPNET.EFL_LAMBDA
-                tau = self.cfg.UNSUPNET.TAU
+                entropy_weight = self.cfg.GRCNN.EFL
+                weight_lambda = self.cfg.GRCNN.EFL_LAMBDA
+                tau = self.cfg.GRCNN.TAU
                 losses.update(self.box_predictor.box_reg_loss_unsupervised(mean_q, sigma_q,
                                                                            mean_p, sigma_p,
                                                                            entropy_weight,
@@ -123,8 +159,10 @@ class GuassianROIHead(StandardROIHeads):
 
     @torch.no_grad()
     def label_and_sample_proposals(
-            self, proposals: List[FreeInstances], targets: List[FreeInstances], branch: str = ""
+            self, proposals: List[FreeInstances], targets: List[FreeInstances],# branch: str = ""
     ) -> List[FreeInstances]:
+        branch = self.branch
+
         if self.proposal_append_gt and branch != 'unsupervised':
             gt_boxes = [x.gt_boxes for x in targets]
             proposals = add_ground_truth_to_proposals(gt_boxes, proposals)

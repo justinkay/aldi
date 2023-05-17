@@ -17,18 +17,17 @@ import torch
 from fvcore.nn import giou_loss, smooth_l1_loss
 from torch import nn
 from torch.nn import functional as F
-
 import numpy as np
 import math
+from typing import Dict, List, Tuple
 
-from box_regression import Box2BoxTransform
 from detectron2.structures import Boxes
 from detectron2.config import configurable
 from detectron2.layers import batched_nms, cat, cross_entropy, nonzero_tuple
 from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers
-from typing import Dict, List, Tuple
-from box_regression import gaussian_dist_pdf, laplace_dist_pdf
-from instances import FreeInstances
+
+from .box_regression import gaussian_dist_pdf, laplace_dist_pdf, Box2BoxTransform
+from .instances import FreeInstances
 
 
 def fast_rcnn_inference_single_image(
@@ -141,8 +140,8 @@ def fast_rcnn_inference(
     return [x[0] for x in result_per_image], [x[1] for x in result_per_image]
 
 
-# Guassian modeling
-class GuassianFastRCNNOutputLayers(FastRCNNOutputLayers):
+# Gaussian modeling
+class GaussianFastRCNNOutputLayers(FastRCNNOutputLayers):
     """
     Same as FastRCNNOutputLayers
     """
@@ -154,7 +153,7 @@ class GuassianFastRCNNOutputLayers(FastRCNNOutputLayers):
         del kwargs["cfg"]
         del kwargs["model_type"]
         super().__init__(*args, **kwargs)
-        if self.model_type == "GUASSIAN" or "LAPLACE":
+        if self.model_type == "GAUSSIAN" or "LAPLACE":
             input_shape = kwargs["input_shape"]
             input_size = input_shape.channels * (input_shape.width or 1) * (input_shape.height or 1)
             # prediction layer for num_classes foreground classes and one background class (hence + 1)
@@ -172,7 +171,7 @@ class GuassianFastRCNNOutputLayers(FastRCNNOutputLayers):
     def from_config(cls, cfg, input_shape):
         ret = super().from_config(cfg, input_shape)
         ret["box2box_transform"] = Box2BoxTransform(weights=cfg.MODEL.ROI_BOX_HEAD.BBOX_REG_WEIGHTS)
-        ret["model_type"] = cfg.UNSUPNET.MODEL_TYPE
+        ret["model_type"] = cfg.GRCNN.MODEL_TYPE
         ret["cfg"] = cfg
         return ret
 
@@ -236,7 +235,7 @@ class GuassianFastRCNNOutputLayers(FastRCNNOutputLayers):
         sigma_p = torch.sigmoid(sigma_p).detach()
 
         if entropy_weight:
-            if self.model_type == "GUASSIAN":
+            if self.model_type == "GAUSSIAN":
                 entropy = 0.5 * torch.log(2 * np.pi * np.e * sigma_p)
                 max_entropy = 0.5 * math.log(2 * np.pi * np.e)
             elif self.model_type == "LAPLACE":
@@ -246,7 +245,7 @@ class GuassianFastRCNNOutputLayers(FastRCNNOutputLayers):
 
         sigma_p = sigma_p * tau[1]
         sigma_q = torch.sigmoid(sigma_q)
-        if self.model_type == "GUASSIAN":
+        if self.model_type == "GAUSSIAN":
             total_loss = 0.5 * torch.log(sigma_q / sigma_p) - 0.5 \
                          + (sigma_p + (mean_q - mean_p) ** 2) / (2 * sigma_q)
         elif self.model_type == "LAPLACE":
@@ -274,7 +273,7 @@ class GuassianFastRCNNOutputLayers(FastRCNNOutputLayers):
         fg_inds = nonzero_tuple((gt_classes >= 0) & (gt_classes < self.num_classes))[0]
         if pred_deltas.shape[1] == box_dim:  # cls-agnostic regression
             fg_pred_deltas = pred_deltas[fg_inds]
-        elif self.model_type == "GUASSIAN" or "LAPLACE":
+        elif self.model_type == "GAUSSIAN" or "LAPLACE":
             box_dim *= 2
             fg_pred_deltas = pred_deltas.view(-1, self.num_classes, box_dim)[
                 fg_inds, gt_classes[fg_inds]
@@ -284,7 +283,7 @@ class GuassianFastRCNNOutputLayers(FastRCNNOutputLayers):
                 fg_inds, gt_classes[fg_inds]
             ]
 
-        if self.model_type == "GUASSIAN":
+        if self.model_type == "GAUSSIAN":
             gt_pred_deltas = self.box2box_transform.get_deltas(
                 proposal_boxes[fg_inds],
                 gt_boxes[fg_inds],

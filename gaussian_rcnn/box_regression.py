@@ -167,7 +167,7 @@ def _dense_box_regression_loss(
         gt_anchor_deltas = [box2box_transform.get_deltas(anchors, k) for k in gt_boxes]
         gt_anchor_deltas = torch.stack(gt_anchor_deltas)  # (N, R, 4)
 
-        if model_type == "GUASSIAN":
+        if model_type == "GAUSSIAN":
             sigma_xywh = torch.sigmoid(cat(pred_anchor_deltas)[..., -4:])[fg_mask]
             mean_xywh = cat(pred_anchor_deltas)[..., :4][fg_mask]
             gaussian = gaussian_dist_pdf(mean_xywh,
