@@ -113,33 +113,34 @@ class GaussianRPN(RPN):
             for x in pred_anchor_deltas
         ]
 
-        if branch == 'unsupervised':
-            (
-                gt_labels,
-                anchor_masks,
-                matched_gt_boxes,
-                matched_boxes_sigma
-            ) = self.label_and_sample_anchors(anchors,
-                                              gt_instances,
-                                              use_ignore=True,
-                                              use_soft_label=True)
-            entropy_weight = self.cfg.GRCNN.EFL
-            weight_lambda = self.cfg.GRCNN.EFL_LAMBDA
-            tau = self.cfg.GRCNN.TAU
-            box = gt_instances[0].has('boxes_sigma')
-            losses = self.loss_rpn_unsupervised(
-                pred_objectness_logits,
-                gt_labels, pred_anchor_deltas,
-                anchor_masks, matched_gt_boxes,
-                matched_boxes_sigma, anchors,
-                entropy_weight, weight_lambda, tau, box
-            )
-        elif self.training: # and compute_loss:
-            gt_labels, gt_boxes = self.label_and_sample_anchors(anchors, gt_instances)
-            losses = self.losses(
-                anchors, pred_objectness_logits, gt_labels, pred_anchor_deltas, gt_boxes
-            )
-            losses = {k: v * self.loss_weight.get(k, 1.0) for k, v in losses.items()}
+        if self.training:
+            if branch == 'unsupervised':
+                (
+                    gt_labels,
+                    anchor_masks,
+                    matched_gt_boxes,
+                    matched_boxes_sigma
+                ) = self.label_and_sample_anchors(anchors,
+                                                gt_instances,
+                                                use_ignore=True,
+                                                use_soft_label=True)
+                entropy_weight = self.cfg.GRCNN.EFL
+                weight_lambda = self.cfg.GRCNN.EFL_LAMBDA
+                tau = self.cfg.GRCNN.TAU
+                box = gt_instances[0].has('boxes_sigma')
+                losses = self.loss_rpn_unsupervised(
+                    pred_objectness_logits,
+                    gt_labels, pred_anchor_deltas,
+                    anchor_masks, matched_gt_boxes,
+                    matched_boxes_sigma, anchors,
+                    entropy_weight, weight_lambda, tau, box
+                )
+            else: # and compute_loss:
+                gt_labels, gt_boxes = self.label_and_sample_anchors(anchors, gt_instances)
+                losses = self.losses(
+                    anchors, pred_objectness_logits, gt_labels, pred_anchor_deltas, gt_boxes
+                )
+                losses = {k: v * self.loss_weight.get(k, 1.0) for k, v in losses.items()}
         else:  # inference
             losses = {}
 

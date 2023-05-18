@@ -96,66 +96,66 @@ class GaussianROIHead(StandardROIHeads):
         predictions = self.box_predictor(box_features)
         del box_features
 
-        if branch == 'unsupervised' and self.training:
-            pseudo_boxes = torch.cat([x.pseudo_boxes.tensor for x in proposals])
-            soft_label = torch.cat([x.soft_label for x in proposals])
-
-            entropy_weight = self.cfg.GRCNN.EFL
-            weight_lambda = self.cfg.GRCNN.EFL_LAMBDA
-            tau = self.cfg.GRCNN.TAU
-
-            # unsupervised cls loss
-            losses = self.box_predictor.cls_loss_unsupervised(predictions[0], soft_label,
-                                                              entropy_weight, weight_lambda, tau)
-
-            # unsupervised box reg loss
-            if proposals[0].has('boxes_sigma'):
-                sigma_p = torch.cat([x.boxes_sigma for x in proposals])
-                proposals = torch.cat([x.proposal_boxes.tensor for x in proposals])
-                mean_p = self.box_predictor.box2box_transform.get_deltas(proposals,
-                                                                         pseudo_boxes)
-                box_dim = 8
-                _, pseudo_boxes_cls = torch.max(soft_label, -1)
-                mean_q = predictions[1].view(-1, self.num_classes, box_dim)
-
-                mask = pseudo_boxes_cls != (soft_label.shape[-1] - 1)
-                mean_q = mean_q[mask]
-                mean_p = mean_p[mask]
-                sigma_p = sigma_p[mask]
-                pseudo_boxes_cls = pseudo_boxes_cls[mask]
-
-                mean_q_new = mean_q.new(mean_q.shape[0], mean_q.shape[-1])
-                for j in range(mean_q.shape[0]):
-                    mean_q_new[j] = mean_q[j, pseudo_boxes_cls[j]]
-                mean_q = mean_q_new[:, :4]
-                sigma_q = mean_q_new[:, -4:]
+        if self.training:
+            if branch == 'unsupervised':
+                pseudo_boxes = torch.cat([x.pseudo_boxes.tensor for x in proposals])
+                soft_label = torch.cat([x.soft_label for x in proposals])
 
                 entropy_weight = self.cfg.GRCNN.EFL
                 weight_lambda = self.cfg.GRCNN.EFL_LAMBDA
                 tau = self.cfg.GRCNN.TAU
-                losses.update(self.box_predictor.box_reg_loss_unsupervised(mean_q, sigma_q,
-                                                                           mean_p, sigma_p,
-                                                                           entropy_weight,
-                                                                           weight_lambda, tau))
-            return losses #, predictions # JK commented out -- but maybe we need it!
 
-        elif self.training: # and compute_loss:
-            losses = self.box_predictor.losses(predictions, proposals)
+                # unsupervised cls loss
+                losses = self.box_predictor.cls_loss_unsupervised(predictions[0], soft_label,
+                                                                entropy_weight, weight_lambda, tau)
 
-            if self.train_on_pred_boxes:
-                with torch.no_grad():
-                    pred_boxes = self.box_predictor.predict_boxes_for_gt_classes(
-                        predictions, proposals
-                    )
-                    for proposals_per_image, pred_boxes_per_image in zip(
-                            proposals, pred_boxes
-                    ):
-                        proposals_per_image.proposal_boxes = Boxes(pred_boxes_per_image)
-            return losses #, predictions # JK commented out -- but maybe we need it!
+                # unsupervised box reg loss
+                if proposals[0].has('boxes_sigma'):
+                    sigma_p = torch.cat([x.boxes_sigma for x in proposals])
+                    proposals = torch.cat([x.proposal_boxes.tensor for x in proposals])
+                    mean_p = self.box_predictor.box2box_transform.get_deltas(proposals,
+                                                                            pseudo_boxes)
+                    box_dim = 8
+                    _, pseudo_boxes_cls = torch.max(soft_label, -1)
+                    mean_q = predictions[1].view(-1, self.num_classes, box_dim)
+
+                    mask = pseudo_boxes_cls != (soft_label.shape[-1] - 1)
+                    mean_q = mean_q[mask]
+                    mean_p = mean_p[mask]
+                    sigma_p = sigma_p[mask]
+                    pseudo_boxes_cls = pseudo_boxes_cls[mask]
+
+                    mean_q_new = mean_q.new(mean_q.shape[0], mean_q.shape[-1])
+                    for j in range(mean_q.shape[0]):
+                        mean_q_new[j] = mean_q[j, pseudo_boxes_cls[j]]
+                    mean_q = mean_q_new[:, :4]
+                    sigma_q = mean_q_new[:, -4:]
+
+                    entropy_weight = self.cfg.GRCNN.EFL
+                    weight_lambda = self.cfg.GRCNN.EFL_LAMBDA
+                    tau = self.cfg.GRCNN.TAU
+                    losses.update(self.box_predictor.box_reg_loss_unsupervised(mean_q, sigma_q,
+                                                                            mean_p, sigma_p,
+                                                                            entropy_weight,
+                                                                            weight_lambda, tau))
+                return losses #, predictions # JK commented out -- but maybe we need it!
+
+            else: # and compute_loss:
+                losses = self.box_predictor.losses(predictions, proposals)
+
+                if self.train_on_pred_boxes:
+                    with torch.no_grad():
+                        pred_boxes = self.box_predictor.predict_boxes_for_gt_classes(
+                            predictions, proposals
+                        )
+                        for proposals_per_image, pred_boxes_per_image in zip(
+                                proposals, pred_boxes
+                        ):
+                            proposals_per_image.proposal_boxes = Boxes(pred_boxes_per_image)
+                return losses #, predictions # JK commented out -- but maybe we need it!
         else:
-
             pred_instances, _ = self.box_predictor.inference(predictions, proposals)
-            return pred_instances, predictions
+            return pred_instances #, predictions # JK commented out -- but maybe we need it!
 
     @torch.no_grad()
     def label_and_sample_proposals(
