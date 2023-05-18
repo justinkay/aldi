@@ -1,9 +1,9 @@
-import copy
-
 from detectron2.structures.boxes import Boxes
-from detectron2.structures.instances import Instances
+# from detectron2.structures.instances import Instances
+from gaussian_rcnn.instances import FreeInstances as Instances # TODO: only when necessary
 
 # From Adaptive Teacher ATeacherTrainer
+# add scores_logists and boxes_sigma from PT if available
 def process_pseudo_label(proposals, cur_threshold, proposal_type, psedo_label_method=""):
     list_instances = []
     num_proposal_output = 0.0
@@ -19,6 +19,7 @@ def process_pseudo_label(proposals, cur_threshold, proposal_type, psedo_label_me
             raise ValueError("Unkown pseudo label boxes methods")
         num_proposal_output += len(proposal_bbox_inst)
         list_instances.append(proposal_bbox_inst)
+        
     num_proposal_output = num_proposal_output / len(proposals)
     return list_instances, num_proposal_output
 
@@ -55,6 +56,12 @@ def threshold_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih"):
         new_proposal_inst.gt_boxes = new_boxes
         new_proposal_inst.gt_classes = proposal_bbox_inst.pred_classes[valid_map]
         new_proposal_inst.scores = proposal_bbox_inst.scores[valid_map]
+
+        # add probabilistic outputs for gaussian RCNN
+        if proposal_bbox_inst.has('scores_logists'):
+            new_proposal_inst.scores_logists = proposal_bbox_inst.scores_logists
+        if proposal_bbox_inst.has('boxes_sigma'):
+            new_proposal_inst.boxes_sigma = proposal_bbox_inst.boxes_sigma
     else:
         raise ValueError("Unknown proposal type in threshold_bbox")
 

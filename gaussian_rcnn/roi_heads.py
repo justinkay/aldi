@@ -98,7 +98,7 @@ class GaussianROIHead(StandardROIHeads):
 
         if self.training:
             if branch == 'unsupervised':
-                pseudo_boxes = torch.cat([x.pseudo_boxes.tensor for x in proposals])
+                pseudo_boxes = torch.cat([x.gt_boxes.tensor for x in proposals]) #pseudo_boxes.tensor for x in proposals])
                 soft_label = torch.cat([x.soft_label for x in proposals])
 
                 entropy_weight = self.cfg.GRCNN.EFL
@@ -173,18 +173,18 @@ class GaussianROIHead(StandardROIHeads):
         num_bg_samples = []
         for proposals_per_image, targets_per_image in zip(proposals, targets):
             has_gt = len(targets_per_image) > 0
-            if branch == 'unsupervised':
-                match_quality_matrix = pairwise_iou(
-                    targets_per_image.pseudo_boxes, proposals_per_image.proposal_boxes
-                )
-            else:
-                match_quality_matrix = pairwise_iou(
-                    targets_per_image.gt_boxes, proposals_per_image.proposal_boxes
-                )
+            # if branch == 'unsupervised':
+            #     match_quality_matrix = pairwise_iou(
+            #         targets_per_image.pseudo_boxes, proposals_per_image.proposal_boxes
+            #     )
+            # else:
+            match_quality_matrix = pairwise_iou(
+                targets_per_image.gt_boxes, proposals_per_image.proposal_boxes
+            )
             matched_idxs, matched_labels = self.proposal_matcher(match_quality_matrix)
 
             if branch == 'unsupervised':
-                proposals_per_image = self._sample_proposals_unsup(
+                proposals_per_image = self._sample_proposals_unsup( # TODO: this might be mostly the same as _sample_proposals when using gt_boxes instead of pseudo_boxes
                     matched_idxs, matched_labels, targets_per_image, proposals_per_image
                 )
                 num_bg_samples.append(0)
@@ -247,13 +247,13 @@ class GaussianROIHead(StandardROIHeads):
 
         proposals.proposal_boxes = proposals.proposal_boxes[matched_labels == 1]
         # proposals.objectness_logits = proposals.objectness_logits[matched_idxs][matched_labels == 1]
-        if gt.pseudo_boxes.tensor.shape[0] == 0:
-            proposals.pseudo_boxes = gt.pseudo_boxes
+        if gt.gt_boxes.tensor.shape[0] == 0: #pseudo_boxes.tensor.shape[0] == 0:
+            proposals.gt_boxes = gt.gt_boxes #pseudo_boxes = gt.pseudo_boxes
             proposals.soft_label = gt.scores_logists
             if gt.has('boxes_sigma'):
                 proposals.boxes_sigma = gt.boxes_sigma
         else:
-            proposals.pseudo_boxes = gt.pseudo_boxes[matched_idxs][matched_labels == 1]
+            proposals.gt_boxes = gt.gt_boxes[matched_idxs][matched_labels == 1] #pseudo_boxes = gt.pseudo_boxes[matched_idxs][matched_labels == 1]
             proposals.soft_label = gt.scores_logists[matched_idxs][matched_labels == 1]
             if gt.has('boxes_sigma'):
                 proposals.boxes_sigma = gt.boxes_sigma[matched_idxs][matched_labels == 1]

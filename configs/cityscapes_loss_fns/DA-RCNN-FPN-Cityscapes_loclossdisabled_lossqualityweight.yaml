@@ -1,6 +1,5 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
 DOMAIN_ADAPT:
   LOSSES:
-    LOC_LOSS_ENABLED: True
     QUALITY_LOSS_WEIGHT_ENABLED: True
-OUTPUT_DIR: "output/cityscapes_meanteacher_lossqualityweight/"
+OUTPUT_DIR: "output/cityscapes_meanteacher_loclossdisabled_qualitylossweight/"

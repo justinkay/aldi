@@ -15,7 +15,6 @@
 
 import math
 from typing import Dict, List, Optional, Tuple
-
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -66,6 +65,8 @@ class GaussianRPN(RPN):
         self.cfg = kwargs['cfg']
         del kwargs['cfg']
         super().__init__(*args, **kwargs)
+        self.branch = None
+        self.danchor = False
 
     @classmethod
     def from_config(cls, cfg, input_shape: Dict[str, ShapeSpec]):
@@ -278,8 +279,6 @@ class GaussianRPN(RPN):
         matched_boxes_mean: list[tensor], len=bs, shape=torch.Size([k, 4]),
         matched_boxes_sigma: list[tensor], len=bs, shape=torch.Size([k, 4]),
         """
-        # from IPython import embed
-        # embed()
         if weight_lamuda is None:
             weight_lamuda = [0.5, 0.5]
         if tau is None:
@@ -299,10 +298,9 @@ class GaussianRPN(RPN):
         anchor_masks = torch.stack(anchor_masks, 0)
         cls_out = torch.cat(pred_objectness_logits, 1)[anchor_masks]
         cls_out = torch.sigmoid(torch.stack([1 - cls_out, cls_out], -1))
-        cls_out = - torch.log(cls_out + 1e-9)
-
-        # from IPython import embed
-        # embed()
+        # JK: this sometimes becomes inf when using FP16 when using 1e-9 (default in PT repo); 
+        # increasing epsilon gets around this
+        cls_out = - torch.log(cls_out + 1e-7) #1e-9)
 
         if entropy_weight:
             gt_labels = gt_labels * weight.unsqueeze(-1)
@@ -383,23 +381,32 @@ class GaussianRPN(RPN):
                 anchor. Values are undefined for those anchors not labeled as 1.
         """
         anchors = Boxes.cat(anchors)
-        has_pseudo_boxes = gt_instances[0].has('pseudo_boxes')
+        has_pseudo_boxes = self.branch == "unsupervised" # gt_instances[0].has('pseudo_boxes')
         image_sizes = [x.image_size for x in gt_instances]
-        if has_pseudo_boxes:
-            pseudo_boxes = [x.pseudo_boxes.tensor for x in gt_instances]
-            scores_logists = [x.scores_logists for x in gt_instances]
-            if gt_instances[0].has('boxes_sigma'):
-                boxes_sigmas = [x.boxes_sigma for x in gt_instances]
-            else:
-                boxes_sigmas = scores_logists
-            ind = 0
-        else:
-            scores_logists = boxes_sigmas = image_sizes  # hold the place
-        if use_ignore and has_pseudo_boxes:
-            gt_boxes = [x.pseudo_boxes for x in gt_instances]
-        else:
-            gt_boxes = [x.gt_boxes for x in gt_instances]
+
+        # This implementation always stores pseudo boxes in gt_boxes field
+        # if has_pseudo_boxes:
+        #     pseudo_boxes = [x.pseudo_boxes.tensor for x in gt_instances]
+        #     scores_logists = [x.scores_logists for x in gt_instances]
+        #     if gt_instances[0].has('boxes_sigma'):
+        #         boxes_sigmas = [x.boxes_sigma for x in gt_instances]
+        #     else:
+        #         boxes_sigmas = scores_logists
+        #     ind = 0
+        # else:
+        #     scores_logists = boxes_sigmas = image_sizes  # hold the place
+        # if use_ignore and has_pseudo_boxes:
+        #     gt_boxes = [x.pseudo_boxes for x in gt_instances]
+        # else:
+        #     gt_boxes = [x.gt_boxes for x in gt_instances]
         # del gt_instances
+
+        gt_boxes = [x.gt_boxes for x in gt_instances]
+        scores_logists = boxes_sigmas = image_sizes  # hold the place
+        if gt_instances[0].has('scores_logists'):
+            scores_logists = [x.scores_logists for x in gt_instances]
+        if gt_instances[0].has('boxes_sigma'):
+            boxes_sigmas = [x.boxes_sigma for x in gt_instances]
 
         gt_labels = []
         matched_gt_boxes = []
@@ -425,6 +432,7 @@ class GaussianRPN(RPN):
                 # NOTE: This is legacy functionality that is turned off by default in Detectron2
                 anchors_inside_image = anchors.inside_box(image_size_i, self.anchor_boundary_thresh)
                 gt_labels_i[~anchors_inside_image] = -1
+
             if has_pseudo_boxes and use_soft_label:
                 anchor_mask = gt_labels_i == 1
                 mask = matched_idxs[anchor_mask]
@@ -443,8 +451,11 @@ class GaussianRPN(RPN):
 
             if has_pseudo_boxes and use_soft_label:
                 anchor_masks.append(anchor_mask)
+
             gt_labels.append(gt_labels_i)  # N,AHW
             matched_gt_boxes.append(matched_gt_boxes_i)
+
         if has_pseudo_boxes and use_soft_label:
             return gt_labels, anchor_masks, matched_gt_boxes, matched_boxes_sigma
+        
         return gt_labels, matched_gt_boxes

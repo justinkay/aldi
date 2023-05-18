@@ -67,14 +67,9 @@ class DARCNN(GeneralizedRCNN):
     def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], labeled: bool = True, do_sada: bool = False):
         # hack in PT related stuff as needed
         # our Trainer handles the "unsup_data_weak" case as a separate inference step
-        if labeled:
-            self.roi_heads.branch = "supervised"
-            self.proposal_generator.branch = "supervised"
-            self.proposal_generator.danchor = self.do_danchor_labeled
-        else:
-            self.roi_heads.branch = "unsupervised"
-            self.proposal_generator.branch = "unsupervised"
-            self.proposal_generator.danchor = self.do_danchor_unlabeled
+        self.roi_heads.branch = "supervised" if labeled else "unsupervised"
+        self.proposal_generator.branch = "supervised" if labeled else "unsupervised"
+        self.proposal_generator.danchor = self.do_danchor_labeled if labeled else self.do_danchor_unlabeled
 
         # run forward pass as usual
         output = super(DARCNN, self).forward(batched_inputs)
@@ -105,6 +100,12 @@ class DARCNN(GeneralizedRCNN):
                     output["loss_cls"] = loss_cls * self.roi_heads.box_predictor.loss_weight.get("loss_cls", 1.0)
 
         return output
+    
+    def inference(self, *args, **kwargs):
+        # hack in PT stuff
+        self.roi_heads.branch = "supervised"
+        self.proposal_generator.branch = "supervised"
+        return super(DARCNN, self).inference(*args, **kwargs)
 
     def get_sada_losses(self, labeled: bool):
         domain_label = 1 if labeled else 0

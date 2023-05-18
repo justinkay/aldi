@@ -215,9 +215,10 @@ class DATrainer(DefaultTrainer):
           logger = logging.getLogger("detectron2")
           num_grad_accum = (sum(cfg.DATASETS.LABELED_UNLABELED_RATIO) + int(cfg.DATASETS.INCLUDE_WEAK_IN_BATCH))
           effective_batch_size = cfg.SOLVER.IMS_PER_BATCH * num_grad_accum
-          logger.info(f"Effective batch size is {effective_batch_size} due to {num_grad_accum} gradient accumulation steps.")
           lr_scale = effective_batch_size / cfg.SOLVER.IMS_PER_BATCH
+          logger.info(f"Effective batch size is {effective_batch_size} due to {num_grad_accum} gradient accumulation steps.")
           logger.info(f"Scaling LR from {cfg.SOLVER.BASE_LR} to {lr_scale * cfg.SOLVER.BASE_LR}.")
+
           cfg.defrost()
           cfg.SOLVER.BASE_LR = lr_scale * cfg.SOLVER.BASE_LR
           cfg.freeze()
