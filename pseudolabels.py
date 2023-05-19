@@ -4,12 +4,12 @@ from gaussian_rcnn.instances import FreeInstances as Instances # TODO: only when
 
 # From Adaptive Teacher ATeacherTrainer
 # add scores_logists and boxes_sigma from PT if available
-def process_pseudo_label(proposals, cur_threshold, proposal_type, psedo_label_method=""):
+def process_pseudo_label(proposals, cur_threshold, proposal_type, pseudo_label_method=""):
     list_instances = []
     num_proposal_output = 0.0
     for proposal_bbox_inst in proposals:
         # thresholding
-        if psedo_label_method == "thresholding":
+        if pseudo_label_method == "thresholding":
             proposal_bbox_inst = threshold_bbox(
                 proposal_bbox_inst,
                 thres=cur_threshold, 

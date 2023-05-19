@@ -1,0 +1,6 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+DATASETS:
+  LABELED_STRONG_AUG: False
+  UNLABELED_STRONG_AUG: False
+  INCLUDE_WEAK_IN_BATCH: False
+OUTPUT_DIR: "output/cityscapes_meanteacher_weakaug/"
