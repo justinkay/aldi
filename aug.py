@@ -38,8 +38,8 @@ def get_augs(cfg, labeled):
 def build_strong_augmentation(include_erasing=True):
     """
     Modified from Adaptive Teacher / Unbiased Teacher codebase
-        - Replace random "hue" of ColorJitter with RandomLighting (this has the advantage of being much faster)
-        - Use scipy implementation of gaussian blur
+        - Remove random hue transform (it was very slow)
+        - Use scipy implementation of gaussian blur to avoid converting from PIL to numpy and back
     """
     augs = [
         T.RandomApply(T.AugmentationList([

@@ -14,15 +14,15 @@ from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, TwoDataloaders
+from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, TwoDataloaders, process_data_weak_strong
 from ema import EMA
 from pseudolabels import add_label, process_pseudo_label
 
 
 DEBUG = False
 
-def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method="thresholding", trainer=None,
-                                   include_weak_in_batch=False):
+def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, 
+                                teacher=None, threshold=0.8, method="thresholding", trainer=None, include_weak_in_batch=False):
      """
      Main logic of running Mean Teacher style training for one iteration.
      - If no unlabeled data is supplied, run a training step as usual.
@@ -41,24 +41,12 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
           trainer: (optional) used for debugging purposes only
           include_weak_in_batch: if True, add weakly-augmented source images to the batch
      """
-     labeled, unlabeled = data
      loss_dict = {}
-
-     # get weakly augmented version of batch
-     # TODO: not intuitive that labeled might already be weakly-augmented
-     labeled_weak = copy.deepcopy(labeled)
-     if labeled is not None:
-          for img in labeled_weak:
-               img["image"] = img[WEAK_IMG_KEY]
-     unlabeled_weak = copy.deepcopy(unlabeled)
-     if unlabeled is not None:
-          for img in unlabeled_weak:
-               img["image"] = img[WEAK_IMG_KEY]
 
      #### Weakly augmented source imagery
      #### (Used for normal training and/or domain alignment)
      _model = model.module if type(model) == DDP else model
-     do_sada = labeled is not None and _model.sada_heads is not None # TODO
+     do_sada = labeled_weak is not None and _model.sada_heads is not None # TODO
      do_weak = include_weak_in_batch or do_sada # TODO
      if do_weak:
           loss_weak = model(labeled_weak, do_sada=do_sada)
@@ -76,16 +64,18 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
 
      #### Strongly augmented source imagery
      #### These values are kept as the standard loss names (e.g. "loss_cls")
-     do_strong = labeled is not None # TODO
+     do_strong = labeled_strong is not None # TODO
      if do_strong:
-          loss_dict.update(model(labeled, do_sada=False))
+          loss_strong = model(labeled_strong, do_sada=False)
+          for k, v in loss_strong.items():
+               loss_dict[f"{k}_source_strong"] = v
 
      if DEBUG and trainer is not None:
-          trainer._last_labeled = copy.deepcopy(labeled)
-          trainer._last_unlabeled = copy.deepcopy(unlabeled)
+          trainer._last_labeled = copy.deepcopy(labeled_strong)
+          trainer._last_unlabeled = copy.deepcopy(unlabeled_strong)
 
      #### Pseudo-labeled target imagery
-     if unlabeled is not None:
+     if unlabeled_weak is not None and unlabeled_strong is not None:
           # are we using an (EMA) teacher model to generate pseudo-labels?
           # if not, the (student) model generates its own pseudo-labels
           # TODO: this would probably be cleaner to just pass in the student model as teacher
@@ -96,7 +86,7 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
 
           with torch.no_grad():
                if DEBUG and trainer is not None:
-                    trainer._last_unlabeled_before_teacher = copy.deepcopy(unlabeled)
+                    trainer._last_unlabeled_before_teacher = copy.deepcopy(unlabeled_strong)
                     
                # run teacher on weakly augmented data
                # do_postprocess=False to disable transforming outputs back into original image space
@@ -108,26 +98,26 @@ def run_model_labeled_unlabeled(model, data, teacher=None, threshold=0.8, method
                teacher_preds, _ = process_pseudo_label(teacher_preds, threshold, "roih", method)
                
                # add pseudo labels back as "ground truth"
-               unlabeled = add_label(unlabeled, teacher_preds)
+               unlabeled_strong = add_label(unlabeled_strong, teacher_preds)
 
           if DEBUG and trainer is not None:
-               trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled)
+               trainer._last_unlabeled_after_teacher = copy.deepcopy(unlabeled_strong)
                with torch.no_grad():
                     model.eval()
                     if type(model) == DDP:
-                         trainer._last_student_preds = model.module.inference(unlabeled, do_postprocess=False)
+                         trainer._last_student_preds = model.module.inference(unlabeled_strong, do_postprocess=False)
                     else:
-                         trainer._last_student_preds = model.inference(unlabeled, do_postprocess=False)
+                         trainer._last_student_preds = model.inference(unlabeled_strong, do_postprocess=False)
                     model.train()
 
-          losses_pseudolabeled = model(unlabeled, labeled=False, do_sada=False)
+          losses_pseudolabeled = model(unlabeled_strong, labeled=False, do_sada=False)
           for k, v in losses_pseudolabeled.items():
                loss_dict[k + "_pseudo"] = v
      
      # scale the loss to account for the gradient accumulation we've done
      # TODO: this does not include SADA - how should the DA loss be modified?
      # TODO: loss_box_reg is actually normalized by number of gt boxes, so this isn't a perfect solution
-     num_grad_accum_steps = int(labeled is not None) + int(unlabeled is not None) + int(include_weak_in_batch)
+     num_grad_accum_steps = int(labeled_strong is not None) + int(unlabeled_strong is not None) + int(include_weak_in_batch)
      for k, v in loss_dict.items():
           loss_dict[k] = v / num_grad_accum_steps
 
@@ -142,8 +132,8 @@ class DAAMPTrainer(AMPTrainer):
 
      def run_model(self, data):
           teacher = self.ema.model if self.ema is not None else None
-          return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
-                                             threshold=self.pseudo_label_thresh, 
+          return run_model_labeled_unlabeled(self.model, *process_data_weak_strong(data), 
+                                             teacher=teacher, threshold=self.pseudo_label_thresh, 
                                              method=self.pseudo_label_method, trainer=self,
                                              include_weak_in_batch=self.include_weak_in_batch)
      
@@ -156,8 +146,8 @@ class DASimpleTrainer(SimpleTrainer):
 
      def run_model(self, data):
           teacher = self.ema.model if self.ema is not None else None
-          return run_model_labeled_unlabeled(self.model, data, teacher=teacher, 
-                                             threshold=self.pseudo_label_thresh, 
+          return run_model_labeled_unlabeled(self.model, *process_data_weak_strong(data), 
+                                             teacher=teacher, threshold=self.pseudo_label_thresh, 
                                              method=self.pseudo_label_method, trainer=self,
                                              include_weak_in_batch=self.include_weak_in_batch)
      

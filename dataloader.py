@@ -1,3 +1,4 @@
+import copy
 import torch
 import numpy as np
 
@@ -40,3 +41,25 @@ class TwoDataloaders:
     def __iter__(self):
         while True:
             yield (next(self.loader0), next(self.loader1))
+
+def process_data_weak_strong(data):
+    """
+    Postprocess data from a SaveWeakDatasetMapper to expose both weakly and strongly augmented images.
+    Return: (labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong)
+    """
+    assert len(data) == 2, "process_data_weak_strong expects a tuple of length 2: (labeled, unlabeled)"
+    labeled, unlabeled = data
+
+    labeled_weak = copy.deepcopy(labeled)
+    if labeled is not None:
+        for img in labeled_weak:
+            if WEAK_IMG_KEY in img:
+                img["image"] = img[WEAK_IMG_KEY]
+
+    unlabeled_weak = copy.deepcopy(unlabeled)
+    if unlabeled is not None:
+        for img in unlabeled_weak:
+            if WEAK_IMG_KEY in img:
+                img["image"] = img[WEAK_IMG_KEY]
+
+    return labeled_weak, labeled, unlabeled_weak, unlabeled
