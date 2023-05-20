@@ -36,7 +36,7 @@ class SADA(torch.nn.Module):
         in_channels = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS # ? .MODEL.RESNETS.STEM_OUT_CHANNELS # ? cfg.MODEL.BACKBONE.OUT_CHANNELS
 
         self.imghead = SADAImgHead(in_channels)
-        self.loss_evaluator = make_da_heads_loss_evaluator(cfg)
+        self.loss_evaluator = make_sada_heads_loss_evaluator(cfg)
 
         # scales = cfg.MODEL.ROI_BOX_HEAD.POOLER_SCALES
         self.lvl_min = self.loss_evaluator.pooler.min_level #-torch.log2(torch.tensor(scales[0], dtype=torch.float32)).item()
@@ -225,7 +225,7 @@ class SADALossComputation(object):
 
         return da_img_loss, da_ins_loss, da_consist_loss
 
-def make_da_heads_loss_evaluator(cfg):
+def make_sada_heads_loss_evaluator(cfg):
     loss_evaluator = SADALossComputation(cfg)
     return loss_evaluator
 
@@ -361,3 +361,26 @@ class SADAInsHead(nn.Module):
             # return result
         return result
 
+# The image-level discriminator used by Adaptive Teacher
+class FCDiscriminator_img(nn.Module):
+    def __init__(self, num_classes, ndf1=256, ndf2=128):
+        super(FCDiscriminator_img, self).__init__()
+
+        self.conv1 = nn.Conv2d(num_classes, ndf1, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(ndf1, ndf2, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(ndf2, ndf2, kernel_size=3, padding=1)
+        self.classifier = nn.Conv2d(ndf2, 1, kernel_size=3, padding=1)
+
+        self.leaky_relu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.leaky_relu(x)
+        x = self.conv2(x)
+        x = self.leaky_relu(x)
+        x = self.conv3(x)
+        x = self.leaky_relu(x)
+        x = self.classifier(x)
+        return x
+def grad_reverse(x):
+    return _GradientScalarLayer.apply(x, -1.0)

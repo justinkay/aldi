@@ -44,6 +44,12 @@ def add_da_config(cfg):
     _C.MODEL.SADA.DA_INS_GRL_WEIGHT = 0.1
     _C.MODEL.SADA.COS_WEIGHT = 0.1
 
+    # Adaptive Teacher style adverarial feature alignment
+    _C.MODEL.DA = CN()
+    _C.MODEL.DA.ENABLED = False
+    _C.MODEL.DA.DIS_TYPE = "p2"
+    _C.MODEL.DA.DIS_LOSS_WEIGHT = 0.05
+
     # Probabilistic Teacher (Gaussian RCNN) settings
     _C.GRCNN = CN()
     _C.GRCNN.LEARN_ANCHORS_LABELED = False
