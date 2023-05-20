@@ -1,18 +1,11 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
 DATASETS:
   INCLUDE_WEAK_IN_BATCH: False
-  LABELED_STRONG_AUG: False 
+  LABELED_STRONG_AUG: False
   INCLUDE_RANDOM_ERASING: False
   UNLABELED_MIC_AUG: True
 DOMAIN_ADAPT:
   LOSSES:
     LOC_LOSS_ENABLED: False
     QUALITY_LOSS_WEIGHT_ENABLED: True
-SOLVER:
-  BASE_LR: 0.01
-  IMS_PER_BATCH: 8
-  STEPS: (59999,)
-  MAX_ITER: 60000
-TEST:
-  EVAL_PERIOD: 625
-OUTPUT_DIR: "output/cityscapes_mic/"
+OUTPUT_DIR: "output/cityscapes_mic_no_sada/"

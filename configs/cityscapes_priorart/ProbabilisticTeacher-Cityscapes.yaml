@@ -1,4 +1,4 @@
-_BASE_: "./cityscapes_baseline/Probabilistic-RCNN-FPN-Cityscapes.yaml"
+_BASE_: "../cityscapes_baseline/Probabilistic-RCNN-FPN-Cityscapes.yaml"
 MODEL:
   WEIGHTS: "models/cityscapes_probabilistic_baseline_foggy_val_model_best_512.pth"
 EMA:
@@ -16,8 +16,8 @@ GRCNN:
 SOLVER:
   BASE_LR: 0.01
   IMS_PER_BATCH: 8
-  STEPS: (59999,)
-  MAX_ITER: 60000
+  STEPS: (99999,)
+  MAX_ITER: 100000
   CLIP_GRADIENTS:
     ENABLED: True
     CLIP_VALUE: 10.0 # this mimics PT trainer

@@ -300,7 +300,7 @@ class GaussianRPN(RPN):
         cls_out = torch.sigmoid(torch.stack([1 - cls_out, cls_out], -1))
         # JK: this sometimes becomes inf when using FP16 when using 1e-9 (default in PT repo); 
         # increasing epsilon gets around this
-        cls_out = - torch.log(cls_out + 1e-7) #1e-9)
+        cls_out = - torch.log(cls_out + 1e-6) #1e-9)
 
         if entropy_weight:
             gt_labels = gt_labels * weight.unsqueeze(-1)

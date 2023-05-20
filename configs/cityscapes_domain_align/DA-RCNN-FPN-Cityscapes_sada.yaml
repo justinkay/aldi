@@ -1,5 +1,5 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
 MODEL:
-  DA_HEADS:
+  SADA:
     ENABLED: True
 OUTPUT_DIR: "output/cityscapes_meanteacher_sada/"
