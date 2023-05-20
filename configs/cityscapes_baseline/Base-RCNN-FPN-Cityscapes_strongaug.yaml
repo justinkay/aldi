@@ -1,4 +1,4 @@
 _BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
 DATASETS:
-  LABELED_STRONG_AUG: True
+  BATCH_CONTENTS: ("labeled_strong", )
 OUTPUT_DIR: "output/cityscapes_baseline_strongaug/"

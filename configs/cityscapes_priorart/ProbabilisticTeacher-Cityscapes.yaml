@@ -5,10 +5,8 @@ EMA:
   ENABLED: True
 DATASETS:
   UNLABELED: ("cityscapes_foggy_train",)
-  LABELED_UNLABELED_RATIO: (1,1)
-  LABELED_STRONG_AUG: True
-  UNLABELED_STRONG_AUG: True
-  INCLUDE_WEAK_IN_BATCH: True
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
 GRCNN:
   LEARN_ANCHORS_LABELED: False
   LEARN_ANCHORS_UNLABELED: True

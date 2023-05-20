@@ -13,7 +13,7 @@ from fvcore.transforms.transform import Transform, NoOpTransform
 # key for weakly augmented image in aug_input object
 WEAK_IMG_KEY = "img_weak"
 
-def get_augs(cfg, labeled):
+def get_augs(cfg, labeled, include_strong_augs=True):
     """
     Get augmentations list for a dataset (labeled or unlabeled) according to settings in cfg.
     """
@@ -26,12 +26,12 @@ def get_augs(cfg, labeled):
     augs.append(SaveImgAug(WEAK_IMG_KEY))
 
     # add strong augmentation
-    if (labeled and cfg.DATASETS.LABELED_STRONG_AUG) or (not labeled and cfg.DATASETS.UNLABELED_STRONG_AUG):
-        augs += build_strong_augmentation(include_erasing=cfg.DATASETS.INCLUDE_RANDOM_ERASING)
+    if include_strong_augs:
+        augs += build_strong_augmentation(include_erasing=cfg.AUG.INCLUDE_RANDOM_ERASING)
 
-    # add MIC
-    if (labeled and cfg.DATASETS.LABELED_MIC_AUG) or (not labeled and cfg.DATASETS.UNLABELED_MIC_AUG):
-        augs.append(T.RandomApply(MICTransform(cfg.DATASETS.MIC_RATIO, cfg.DATASETS.MIC_BLOCK_SIZE), prob=1.0))
+        # add MIC
+        if (labeled and cfg.AUG.LABELED_MIC_AUG) or (not labeled and cfg.AUG.UNLABELED_MIC_AUG):
+            augs.append(T.RandomApply(MICTransform(cfg.AUG.MIC_RATIO, cfg.AUG.MIC_BLOCK_SIZE), prob=1.0))
 
     return augs
 

@@ -42,24 +42,39 @@ class TwoDataloaders:
         while True:
             yield (next(self.loader0), next(self.loader1))
 
-def process_data_weak_strong(data):
+class WeakStrongDataloader:
+    def __init__(self, labeled_loader, unlabeled_loader, batch_contents=("labeled_weak", "labeled_strong", "unlabeled_strong")):
+        self.loader = TwoDataloaders(labeled_loader, unlabeled_loader)
+        self.batch_contents = batch_contents
+    
+    def __iter__(self):
+        for batch in self.loader:
+            yield unpack_data_weak_strong(*batch, batch_contents=self.batch_contents)
+
+    def __len__(self):
+        return len(self.loader)
+
+def unpack_data_weak_strong(labeled, unlabeled, batch_contents=("labeled_weak", "labeled_strong", "unlabeled_strong")):
     """
     Postprocess data from a SaveWeakDatasetMapper to expose both weakly and strongly augmented images.
     Return: (labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong)
     """
-    assert len(data) == 2, "process_data_weak_strong expects a tuple of length 2: (labeled, unlabeled)"
-    labeled, unlabeled = data
-
-    labeled_weak = copy.deepcopy(labeled)
-    if labeled is not None:
+    labeled_weak = None
+    if "labeled_weak" in batch_contents and labeled is not None:
+        labeled_weak = copy.deepcopy(labeled)
         for img in labeled_weak:
             if WEAK_IMG_KEY in img:
                 img["image"] = img[WEAK_IMG_KEY]
+    labeled_strong = labeled if "labeled_strong" in batch_contents else None
 
-    unlabeled_weak = copy.deepcopy(unlabeled)
-    if unlabeled is not None:
+    # unlike labeled data, we always return unlabeled_weak if *any* unlabeled data is requested
+    # this allows us to do pseudo-labeling using the weakly augmented target data
+    unlabeled_weak = None
+    if ("unlabeled_weak" in batch_contents or "unlabeled_strong" in batch_contents) and unlabeled is not None:
+        unlabeled_weak = copy.deepcopy(unlabeled)
         for img in unlabeled_weak:
             if WEAK_IMG_KEY in img:
                 img["image"] = img[WEAK_IMG_KEY]
+    unlabeled_strong = unlabeled if "unlabeled_strong" in batch_contents else None
 
-    return labeled_weak, labeled, unlabeled_weak, unlabeled
+    return labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong

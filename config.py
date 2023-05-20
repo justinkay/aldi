@@ -11,16 +11,16 @@ def add_da_config(cfg):
 
     # Datasets and sampling
     _C.DATASETS.UNLABELED = tuple()
-    _C.DATASETS.LABELED_UNLABELED_RATIO = (1,0)
-    _C.DATASETS.LABELED_STRONG_AUG = False
-    _C.DATASETS.UNLABELED_STRONG_AUG = False
-    _C.DATASETS.INCLUDE_WEAK_IN_BATCH = False
-    _C.DATASETS.INCLUDE_RANDOM_ERASING = True
+    _C.DATASETS.BATCH_CONTENTS = ("labeled_weak", ) # one or more of: { "labeled_weak", "labeled_strong", "unlabeled_weak", "unlabeled_strong" }
+    _C.DATASETS.BATCH_RATIOS = (1,) # must match length of BATCH_CONTENTS
 
-    _C.DATASETS.LABELED_MIC_AUG = False
-    _C.DATASETS.UNLABELED_MIC_AUG = False
-    _C.DATASETS.MIC_RATIO = 0.5
-    _C.DATASETS.MIC_BLOCK_SIZE = 32
+    # Strong augmentations
+    _C.AUG = CN()
+    _C.AUG.INCLUDE_RANDOM_ERASING = True
+    _C.AUG.LABELED_MIC_AUG = False
+    _C.AUG.UNLABELED_MIC_AUG = False
+    _C.AUG.MIC_RATIO = 0.5
+    _C.AUG.MIC_BLOCK_SIZE = 32
 
     # EMA of student weights
     _C.EMA = CN()
