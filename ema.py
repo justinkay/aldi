@@ -1,6 +1,5 @@
 from collections import OrderedDict
 import copy 
-import torch
 from torch import nn
 
 import detectron2.utils.comm as comm
@@ -47,3 +46,6 @@ class EMA(nn.Module):
             self._init_ema_weights(model)
         if iter > 0:
             self._update_ema(model, iter)
+
+    def inference(self, data, **kwargs):
+        return self.model.inference(data, **kwargs)

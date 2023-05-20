@@ -21,7 +21,7 @@ SOLVER:
     CLIP_VALUE: 10.0 # this mimics PT trainer
 DOMAIN_ADAPT:
   TEACHER:
-    THRESHOLD: -1.0 # TODO this is kind of a hacky way to handle this
+    PSEUDO_LABEL_METHOD: "probabilistic"
 TEST:
   EVAL_PERIOD: 625
 OUTPUT_DIR: "output/cityscapes_probabilisticteacher/"

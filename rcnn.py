@@ -143,6 +143,6 @@ class DARCNN(GeneralizedRCNN):
             features = grad_reverse(features[self.dis_type])
             D_img_out = self.sada_heads(features)
             loss_D_img = F.binary_cross_entropy_with_logits(D_img_out, torch.FloatTensor(D_img_out.data.size()).fill_(domain_label).to(device))
-            da_losses = {"loss_D_img": self.dis_loss_weight * loss_D_img}
+            da_losses = {"loss_da_img": self.dis_loss_weight * loss_D_img}
 
         return da_losses

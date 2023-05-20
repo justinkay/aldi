@@ -16,13 +16,13 @@ from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from ema import EMA
-from pseudolabels import add_label, process_pseudo_label
+from pseudolabels import PseudoLabeler
 
 
 DEBUG = False
 
 def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, 
-                                teacher=None, threshold=0.8, method="thresholding", trainer=None):
+                                pseudo_labeler, trainer=None):
      """
      Main logic of running Mean Teacher style training for one iteration.
      - If no unlabeled data is supplied, run a training step as usual.
@@ -32,8 +32,8 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
 
      #### Weakly augmented source imagery
      #### (Used for normal training and/or domain alignment)
-     _model = model.module if type(model) == DDP else model
      do_weak = labeled_weak is not None
+     _model = model.module if type(model) == DDP else model
      do_sada = _model.sada_heads is not None
      if do_weak or do_sada:
           loss_weak = model(labeled_weak, do_sada=do_sada)
@@ -50,7 +50,6 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
                     loss_dict[f"{k}_target_weak"] = v
 
      #### Strongly augmented source imagery
-     #### These values are kept as the standard loss names (e.g. "loss_cls")
      do_strong = labeled_strong is not None
      if do_strong:
           loss_strong = model(labeled_strong, do_sada=False)
@@ -64,30 +63,12 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
      #### Pseudo-labeled target imagery
      do_unlabeled = unlabeled_weak is not None
      if do_unlabeled:
-          data_to_pseudolabel = unlabeled_strong if unlabeled_strong is not None else unlabeled_weak
+          if DEBUG and trainer is not None:
+               data_to_pseudolabel = unlabeled_strong if unlabeled_strong is not None else unlabeled_weak
+               trainer._last_unlabeled_before_teacher = copy.deepcopy(data_to_pseudolabel)
 
-          # are we using an (EMA) teacher model to generate pseudo-labels?
-          # if not, the (student) model generates its own pseudo-labels
-          training_with_student = teacher is None
-          if training_with_student:
-               teacher = model.module if type(model) == DDP else model
-
-          with torch.no_grad():
-               if DEBUG and trainer is not None:
-                    trainer._last_unlabeled_before_teacher = copy.deepcopy(data_to_pseudolabel)
-                    
-               # run teacher on weakly augmented data
-               # do_postprocess=False to disable transforming outputs back into original image space
-               teacher.eval()
-               teacher_preds = teacher.inference(unlabeled_weak, do_postprocess=False)
-               if training_with_student: teacher.train()
-
-               # postprocess pseudo labels (thresholding)
-               teacher_preds, _ = process_pseudo_label(teacher_preds, threshold, "roih", method)
+          pseudolabeled_data = pseudo_labeler(unlabeled_weak, unlabeled_strong)
                
-               # add pseudo labels back as "ground truth"
-               data_to_pseudolabel = add_label(data_to_pseudolabel, teacher_preds)
-
           if DEBUG and trainer is not None:
                trainer._last_unlabeled_after_teacher = copy.deepcopy(data_to_pseudolabel)
                with torch.no_grad():
@@ -98,7 +79,7 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
                          trainer._last_student_preds = model.inference(data_to_pseudolabel, do_postprocess=False)
                     model.train()
 
-          losses_pseudolabeled = model(data_to_pseudolabel, labeled=False, do_sada=False)
+          losses_pseudolabeled = model(pseudolabeled_data, labeled=False, do_sada=False)
           for k, v in losses_pseudolabeled.items():
                loss_dict[k + "_pseudo"] = v
      
@@ -110,37 +91,28 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
      return loss_dict
 
 class DAAMPTrainer(AMPTrainer):
-     def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh):
+     def __init__(self, model, data_loader, optimizer, pseudo_labeler):
           super().__init__(model, data_loader, optimizer)
-          self.pseudo_label_method = pseudo_label_method
-          self.pseudo_label_thresh = pseudo_label_thresh
+          self.pseudo_labeler = pseudo_labeler
 
      def run_model(self, data):
-          teacher = self.ema.model if self.ema is not None else None
-          return run_model_labeled_unlabeled(self.model, *data, 
-                                             teacher=teacher, threshold=self.pseudo_label_thresh, 
-                                             method=self.pseudo_label_method, trainer=self)
+          return run_model_labeled_unlabeled(self.model, *data, self.pseudo_labeler, trainer=self)
      
 class DASimpleTrainer(SimpleTrainer):
-     def __init__(self, model, data_loader, optimizer, pseudo_label_method, pseudo_label_thresh):
+     def __init__(self, model, data_loader, optimizer, pseudo_labeler):
           super().__init__(model, data_loader, optimizer)
-          self.pseudo_label_method = pseudo_label_method
-          self.pseudo_label_thresh = pseudo_label_thresh
+          self.pseudo_labeler = pseudo_labeler
 
      def run_model(self, data):
-          teacher = self.ema.model if self.ema is not None else None
-          return run_model_labeled_unlabeled(self.model, *data, 
-                                             teacher=teacher, threshold=self.pseudo_label_thresh, 
-                                             method=self.pseudo_label_method, trainer=self)
+          return run_model_labeled_unlabeled(self.model, *data, self.pseudo_labeler, trainer=self)
      
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
-          trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, 
-                              cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD, cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD)
           # build EMA model if applicable
-          trainer.ema = None
-          if cfg.EMA.ENABLED:
-               trainer.ema = EMA(build_model(cfg), cfg.EMA.ALPHA)
+          ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
+          pseudo_labeler = PseudoLabeler(cfg, ema or model) # if no EMA, student model creates its own pseudo-labels
+          trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler)
+          trainer.ema = ema
           return trainer
      
      def _create_checkpointer(self, model, cfg):
