@@ -31,12 +31,12 @@ _DEFAULT_SCALE_CLAMP = math.log(1000.0 / 16)
 __all__ = ["Box2BoxTransform", ]
 
 
-def gaussian_dist_pdf(val, mean, var, eps=1e-6): # 9): # careful with FP16
+def gaussian_dist_pdf(val, mean, var, eps=1e-7): # 9): # careful with FP16
     simga_constant = 0.3
     return torch.exp(-(val - mean) ** 2.0 / (var + eps) / 2.0) / torch.sqrt(2.0 * np.pi * (var + simga_constant))
 
 
-def laplace_dist_pdf(val, mean, var, eps=1e-6): # 9): # careful with FP16
+def laplace_dist_pdf(val, mean, var, eps=1e-7): # 9): # careful with FP16
     simga_constant = 0.3
     return torch.exp(-torch.abs(val - mean) / torch.sqrt(var + eps)) / torch.sqrt(4.0 * (var + simga_constant))
 
@@ -78,9 +78,10 @@ class Box2BoxTransform(object):
         """
         assert isinstance(src_boxes, torch.Tensor), type(src_boxes)
         assert isinstance(target_boxes, torch.Tensor), type(target_boxes)
+        eps = 1e-7
 
-        src_widths = src_boxes[:, 2] - src_boxes[:, 0]
-        src_heights = src_boxes[:, 3] - src_boxes[:, 1]
+        src_widths = src_boxes[:, 2] - src_boxes[:, 0] #+ eps
+        src_heights = src_boxes[:, 3] - src_boxes[:, 1] #+ eps
         src_ctr_x = src_boxes[:, 0] + 0.5 * src_widths
         src_ctr_y = src_boxes[:, 1] + 0.5 * src_heights
 
@@ -92,11 +93,12 @@ class Box2BoxTransform(object):
         wx, wy, ww, wh = self.weights
         dx = wx * (target_ctr_x - src_ctr_x) / src_widths
         dy = wy * (target_ctr_y - src_ctr_y) / src_heights
-        dw = ww * torch.log(target_widths / src_widths + 1e-6)
-        dh = wh * torch.log(target_heights / src_heights + 1e-6)
+        dw = ww * torch.log(target_widths / src_widths + eps)
+        dh = wh * torch.log(target_heights / src_heights + eps)
 
         deltas = torch.stack((dx, dy, dw, dh), dim=1)
-        assert (src_widths > 0).all().item(), "Input boxes to Box2BoxTransform are not valid!"
+        assert (src_widths > 0).all().item(), "Input boxes to Box2BoxTransform are not valid! (src_widths <= 0)"
+        assert (src_heights > 0).all().item(), "Input boxes to Box2BoxTransform are not valid! (src_heights <= 0)"
         return deltas
 
     def apply_deltas(self, deltas, boxes):
@@ -173,14 +175,14 @@ def _dense_box_regression_loss(
             mean_xywh = cat(pred_anchor_deltas, dim=1)[..., :4][fg_mask]
             gaussian = gaussian_dist_pdf(mean_xywh,
                                          gt_anchor_deltas[fg_mask], sigma_xywh)
-            loss_box_reg_gaussian = - torch.log(gaussian + 1e-6).sum()
+            loss_box_reg_gaussian = - torch.log(gaussian + 1e-7).sum()
             loss_box_reg = loss_box_reg_gaussian
         elif model_type == "LAPLACE":
             sigma_xywh = torch.sigmoid(cat(pred_anchor_deltas, dim=1)[..., -4:])[fg_mask]
             mean_xywh = cat(pred_anchor_deltas, dim=1)[..., :4][fg_mask]
             laplace = laplace_dist_pdf(mean_xywh,
                                        gt_anchor_deltas[fg_mask], sigma_xywh)
-            loss_box_reg_laplace = - torch.log(laplace + 1e-6).sum()
+            loss_box_reg_laplace = - torch.log(laplace + 1e-7).sum()
             loss_box_reg = loss_box_reg_laplace
         else:
             loss_box_reg = smooth_l1_loss(

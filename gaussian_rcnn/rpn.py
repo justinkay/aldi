@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import logging
 import math
 from typing import Dict, List, Optional, Tuple
 import numpy as np
@@ -36,6 +36,7 @@ from .instances import FreeInstances
 from .proposal_utils import find_top_rpn_proposals
 from .utils import grad_zero
 
+logger = logging.getLogger(__name__)
 
 @RPN_HEAD_REGISTRY.register()
 class GaussianRPNHead(StandardRPNHead):
@@ -300,7 +301,7 @@ class GaussianRPN(RPN):
         cls_out = torch.sigmoid(torch.stack([1 - cls_out, cls_out], -1))
         # JK: this sometimes becomes inf when using FP16 when using 1e-9 (default in PT repo); 
         # increasing epsilon gets around this
-        cls_out = - torch.log(cls_out + 1e-6) #1e-9)
+        cls_out = - torch.log(cls_out + 1e-7) #1e-9)
 
         if entropy_weight:
             gt_labels = gt_labels * weight.unsqueeze(-1)
@@ -358,6 +359,12 @@ class GaussianRPN(RPN):
             losses = {
                 "loss_rpn_cls": loss_rpn_consist_cls / normalizer,
             }
+
+        # check for inf/nan problems
+        # TODO: track down why these are occurring in the first place
+        if any([torch.isinf(v) or torch.isnan(v) for v in losses.values()]):
+            logger.warning(f"RPN loss is inf/nan, setting all to 0.")
+            losses = {k: torch.tensor(0, device="cuda") for k, v in losses.items()}
         return losses
 
     @torch.jit.unused

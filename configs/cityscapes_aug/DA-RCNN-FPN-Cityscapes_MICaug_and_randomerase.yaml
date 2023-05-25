@@ -1,5 +1,5 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
-DATASETS:
+AUG:
   INCLUDE_RANDOM_ERASING: True
   LABELED_MIC_AUG: True
   UNLABELED_MIC_AUG: True

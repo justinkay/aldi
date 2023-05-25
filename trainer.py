@@ -16,7 +16,7 @@ from aug import WEAK_IMG_KEY, get_augs
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from ema import EMA
-from pseudolabels import PseudoLabeler
+from pseudolabeler import PseudoLabeler
 
 
 DEBUG = False
@@ -36,7 +36,13 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
      _model = model.module if type(model) == DDP else model
      do_sada = _model.sada_heads is not None
      if do_weak or do_sada:
-          loss_weak = model(labeled_weak, do_sada=do_sada)
+          # Added try/catch for debugging Probabilistic Teacher - can hopefully remove later
+          try:
+               loss_weak = model(labeled_weak, do_sada=do_sada)
+          except FloatingPointError as e:
+               print("Floating point error in weak forward pass. Skipping batch.")
+               torch.save(labeled_weak, "labeled_weak_bad_batch.pt")
+               return {"bad_loss": torch.tensor(0, device="cuda")}
           for k, v in loss_weak.items():
                if do_weak or (do_sada and "_da_" in k):
                     loss_dict[f"{k}_source_weak"] = v
@@ -173,8 +179,10 @@ class DATrainer(DefaultTrainer):
           batch_contents = cfg.DATASETS.BATCH_CONTENTS
           batch_sizes = [ int(r * cfg.SOLVER.IMS_PER_BATCH) for r in cfg.DATASETS.BATCH_RATIOS ]
           assert len(batch_contents) == len(batch_sizes), "len(cfg.DATASETS.BATCH_CONTENTS) must equal len(cfg.DATASETS.BATCH_RATIOS)."
-          labeled_bs = max([batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("labeled")])
-          unlabeled_bs = max([batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("unlabeled")])
+          labeled_bs = [batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("labeled")]
+          labeled_bs = max(labeled_bs) if len(labeled_bs) else 0
+          unlabeled_bs = [batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("unlabeled")]
+          unlabeled_bs = max(unlabeled_bs) if len(unlabeled_bs) else 0
 
           # create labeled dataloader
           labeled_loader = None

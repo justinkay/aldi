@@ -17,6 +17,7 @@ from trainer import DATrainer
 import datasets # register datasets with Detectron2
 import rcnn # register DA R-CNN model with Detectron2
 import gaussian_rcnn # register Gaussian R-CNN model with Detectron2
+import backbone # register Swin-B FPN backbone with Detectron2
 
 def setup(args):
     """

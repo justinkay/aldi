@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import numpy as np
 import torch
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 from detectron2.structures import Boxes, ImageList, pairwise_iou
 from detectron2.utils.events import get_event_storage
@@ -28,6 +29,8 @@ from detectron2.config import configurable
 from .instances import FreeInstances
 from .proposal_utils import add_ground_truth_to_proposals
 from .fast_rcnn import GaussianFastRCNNOutputLayers
+
+logger = logging.getLogger(__name__)
 
 @ROI_HEADS_REGISTRY.register()
 class GaussianROIHead(StandardROIHeads):
@@ -138,7 +141,13 @@ class GaussianROIHead(StandardROIHeads):
                                                                             mean_p, sigma_p,
                                                                             entropy_weight,
                                                                             weight_lambda, tau))
-                return losses #, predictions # JK commented out -- but maybe we need it!
+                # check for inf/nan problems
+                # TODO: track down why these are occurring in the first place
+                if any([torch.isinf(v) or torch.isnan(v) for v in losses.values()]):
+                    logger.warning(f"ROI Heads loss is inf/nan, setting all to 0.")
+                    losses = {k: torch.tensor(0, device="cuda") for k, v in losses.items()}
+                    
+                return losses
 
             else: # and compute_loss:
                 losses = self.box_predictor.losses(predictions, proposals)
@@ -152,10 +161,10 @@ class GaussianROIHead(StandardROIHeads):
                                 proposals, pred_boxes
                         ):
                             proposals_per_image.proposal_boxes = Boxes(pred_boxes_per_image)
-                return losses #, predictions # JK commented out -- but maybe we need it!
+                return losses
         else:
             pred_instances, _ = self.box_predictor.inference(predictions, proposals)
-            return pred_instances #, predictions # JK commented out -- but maybe we need it!
+            return pred_instances
 
     @torch.no_grad()
     def label_and_sample_proposals(

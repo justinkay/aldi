@@ -2,6 +2,7 @@ _BASE_: "../MeanTeacher-Cityscapes.yaml"
 DATASETS:
   BATCH_CONTENTS: ("labeled_weak", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
+AUG:
   INCLUDE_RANDOM_ERASING: False
   UNLABELED_MIC_AUG: True
 DOMAIN_ADAPT:

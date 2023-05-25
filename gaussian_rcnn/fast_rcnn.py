@@ -291,7 +291,7 @@ class GaussianFastRCNNOutputLayers(FastRCNNOutputLayers):
             sigma_xywh = torch.sigmoid(fg_pred_deltas[..., -4:])
             gaussian = gaussian_dist_pdf(fg_pred_deltas[..., :4],
                                          gt_pred_deltas, sigma_xywh)
-            loss_box_reg_gaussian = - torch.log(gaussian + 1e-6).sum() #9).sum() # careful with FP16
+            loss_box_reg_gaussian = - torch.log(gaussian + 1e-7).sum() #9).sum() # careful with FP16
             loss_box_reg = loss_box_reg_gaussian
 
         elif self.model_type == "LAPLACE":
@@ -302,7 +302,7 @@ class GaussianFastRCNNOutputLayers(FastRCNNOutputLayers):
             sigma_xywh = torch.sigmoid(fg_pred_deltas[..., -4:])
             laplace = laplace_dist_pdf(fg_pred_deltas[..., :4],
                                         gt_pred_deltas, sigma_xywh)
-            loss_box_reg_laplace = - torch.log(laplace + 1e-6).sum() #9).sum() # careful with FP16
+            loss_box_reg_laplace = - torch.log(laplace + 1e-7).sum() #9).sum() # careful with FP16
             loss_box_reg = loss_box_reg_laplace
 
         else:

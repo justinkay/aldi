@@ -7,7 +7,6 @@ from gaussian_rcnn.instances import FreeInstances as Instances # TODO: only when
 
 class PseudoLabeler:
     def __init__(self, cfg, model):
-        self.cfg = cfg
         self.model = model
         self.threshold = cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD
         self.method = cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD

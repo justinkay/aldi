@@ -41,7 +41,7 @@ class SADA(torch.nn.Module):
         # scales = cfg.MODEL.ROI_BOX_HEAD.POOLER_SCALES
         self.lvl_min = self.loss_evaluator.pooler.min_level #-torch.log2(torch.tensor(scales[0], dtype=torch.float32)).item()
         self.lvl_max = self.loss_evaluator.pooler.max_level #-torch.log2(torch.tensor(scales[-1], dtype=torch.float32)).item()
-        # self.map_levels = LevelMapper(lvl_min, lvl_max) #canonical_scale=224, canonical_level=4, eps=1e-6
+        # self.map_levels = LevelMapper(lvl_min, lvl_max) #canonical_scale=224, canonical_level=4, eps=1e-7
         self.inshead = SADAInsHead(num_ins_inputs)
 
     def forward(self, img_features, da_ins_feature, da_ins_labels, da_proposals, img_targets):
