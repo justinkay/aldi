@@ -6,6 +6,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.engine import hooks, BestCheckpointer
+from detectron2.engine.defaults import create_ddp_model
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
 from detectron2.modeling.meta_arch.build import build_model
 from detectron2.solver import build_optimizer
@@ -22,58 +23,79 @@ from pseudolabeler import PseudoLabeler
 DEBUG = False
 
 def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, 
-                                pseudo_labeler, trainer=None):
+                                pseudo_labeler, trainer, backward_at_end=True):
      """
      Main logic of running Mean Teacher style training for one iteration.
      - If no unlabeled data is supplied, run a training step as usual.
      - If unlabeled data is supplied, use teacher to create pseudo-labels
+     Args:
+          backward_at_end (bool): If True, losses are summed and returned, persisting the entire computation graph.
+               This is memory intensive because we do gradient accumulation, but is faster.
+               If False, call backward() after each mini-batch. This is slower, but uses less memory.
      """
+     _model = model.module if type(model) == DDP else model
+     do_sada = _model.sada_heads is not None
+     do_weak = labeled_weak is not None
+     do_strong = labeled_strong is not None
+     do_unlabeled = unlabeled_weak is not None
+     num_grad_accum_steps = int(do_weak) + int(do_strong) + int(do_unlabeled)
+
      loss_dict = {}
+     def add_to_loss_dict(losses, suffix, key_conditional=lambda k: True):
+          """Helper method to add losses to loss_dict.
+          Args:
+               losses (dict): Dict of losses to add to loss_dict
+               suffix (str): Suffix to add to each key in losses
+               key_conditional (func): Function that takes a key and returns True/False whether to add it to loss_dict
+          """
+          for k, v in losses.items():
+               if key_conditional(k):
+                    v /= num_grad_accum_steps
+                    loss_dict[f"{k}_{suffix}"] = v if backward_at_end else v.detach()
+
+     def maybe_do_backward(losses):
+          """Helper method to do backward pass if not doing it at the end."""
+          if not backward_at_end:
+               trainer.do_backward(sum(losses.values()) / num_grad_accum_steps, override=True)
 
      #### Weakly augmented source imagery
      #### (Used for normal training and/or domain alignment)
-     do_weak = labeled_weak is not None
-     _model = model.module if type(model) == DDP else model
-     do_sada = _model.sada_heads is not None
      if do_weak or do_sada:
           # Added try/catch for debugging Probabilistic Teacher - can hopefully remove later
           try:
                loss_weak = model(labeled_weak, do_sada=do_sada)
+               maybe_do_backward(loss_weak)
+               add_to_loss_dict(loss_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k))
           except FloatingPointError as e:
                print("Floating point error in weak forward pass. Skipping batch.")
                torch.save(labeled_weak, "labeled_weak_bad_batch.pt")
                return {"bad_loss": torch.tensor(0, device="cuda")}
-          for k, v in loss_weak.items():
-               if do_weak or (do_sada and "_da_" in k):
-                    loss_dict[f"{k}_source_weak"] = v
-
+     
      #### Weakly augmented target imagery
      #### (Only used for domain alignment)
      if do_sada:
           loss_sada_target = model(unlabeled_weak, labeled=False, do_sada=True)
-          for k, v in loss_sada_target.items():
-               if "_da_" in k:
-                    loss_dict[f"{k}_target_weak"] = v
+          maybe_do_backward(loss_sada_target)
+          add_to_loss_dict(loss_sada_target, "target_weak", lambda k: "_da_" in k)
 
      #### Strongly augmented source imagery
-     do_strong = labeled_strong is not None
      if do_strong:
           loss_strong = model(labeled_strong, do_sada=False)
-          for k, v in loss_strong.items():
-               loss_dict[f"{k}_source_strong"] = v
+          maybe_do_backward(loss_strong)
+          add_to_loss_dict(loss_strong, "source_strong")
 
      if DEBUG and trainer is not None:
           trainer._last_labeled = copy.deepcopy(labeled_strong)
           trainer._last_unlabeled = copy.deepcopy(unlabeled_strong)
 
      #### Pseudo-labeled target imagery
-     do_unlabeled = unlabeled_weak is not None
      if do_unlabeled:
           if DEBUG and trainer is not None:
                data_to_pseudolabel = unlabeled_strong if unlabeled_strong is not None else unlabeled_weak
                trainer._last_unlabeled_before_teacher = copy.deepcopy(data_to_pseudolabel)
 
-          pseudolabeled_data = pseudo_labeler(unlabeled_weak, unlabeled_strong)
+          with torch.no_grad():
+               pseudolabeled_data = pseudo_labeler(unlabeled_weak, unlabeled_strong)
                
           if DEBUG and trainer is not None:
                trainer._last_unlabeled_after_teacher = copy.deepcopy(data_to_pseudolabel)
@@ -85,40 +107,59 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
                          trainer._last_student_preds = model.inference(data_to_pseudolabel, do_postprocess=False)
                     model.train()
 
-          losses_pseudolabeled = model(pseudolabeled_data, labeled=False, do_sada=False)
-          for k, v in losses_pseudolabeled.items():
-               loss_dict[k + "_pseudo"] = v
+          loss_pseudolabeled = model(pseudolabeled_data, labeled=False, do_sada=False)
+          maybe_do_backward(loss_pseudolabeled)
+          add_to_loss_dict(loss_pseudolabeled, "target_pseudolabeled")
      
-     # scale the loss to account for the gradient accumulation we've done
-     num_grad_accum_steps = int(do_weak) + int(do_strong) +  int(do_unlabeled)
-     for k, v in loss_dict.items():
-          loss_dict[k] = v / num_grad_accum_steps
-
      return loss_dict
 
 class DAAMPTrainer(AMPTrainer):
-     def __init__(self, model, data_loader, optimizer, pseudo_labeler):
-          super().__init__(model, data_loader, optimizer)
+     def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True):
+          super().__init__(model, data_loader, optimizer, zero_grad_before_forward=not backward_at_end)
           self.pseudo_labeler = pseudo_labeler
+          self.backward_at_end = backward_at_end
 
      def run_model(self, data):
-          return run_model_labeled_unlabeled(self.model, *data, self.pseudo_labeler, trainer=self)
+          return run_model_labeled_unlabeled(self.model, *data, self.pseudo_labeler, trainer=self,
+                                             backward_at_end=self.backward_at_end)
+     
+     def do_backward(self, losses, override=False):
+        """Disable the final backward pass if we are computing intermediate gradients in run_model.
+        Can be overridden by setting override=True to always call superclass method."""
+        if self.backward_at_end or override:
+             return super(DAAMPTrainer, self).do_backward(losses)
      
 class DASimpleTrainer(SimpleTrainer):
-     def __init__(self, model, data_loader, optimizer, pseudo_labeler):
-          super().__init__(model, data_loader, optimizer)
+     def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True):
+          super().__init__(model, data_loader, optimizer, zero_grad_before_forward=not backward_at_end)
           self.pseudo_labeler = pseudo_labeler
+          self.backward_at_end = backward_at_end
 
      def run_model(self, data):
-          return run_model_labeled_unlabeled(self.model, *data, self.pseudo_labeler, trainer=self)
+          return run_model_labeled_unlabeled(self.model, *data, self.pseudo_labeler, trainer=self,
+                                             backward_at_end=self.backward_at_end)
+     
+     def do_backward(self, losses, override=False):
+        """Disable the final backward pass if we are computing intermediate gradients in run_model.
+        Can be overridden by setting override=True to always call superclass method."""
+        if self.backward_at_end or override:
+             return super(DAAMPTrainer, self).do_backward(losses)
      
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
           ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
           pseudo_labeler = PseudoLabeler(cfg, ema or model) # if no EMA, student model creates its own pseudo-labels
-          trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler)
+          trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
+                                                                                  backward_at_end=cfg.SOLVER.BACKWARD_AT_END)
           trainer.ema = ema
+
+          # if using model parallelism, move models to appropriate devices
+          do_model_parallel = ema is not None and cfg.EMA.PARALLEL
+          if do_model_parallel:
+               model.to("cuda:0")
+               ema.to("cuda:1")
+
           return trainer
      
      def _create_checkpointer(self, model, cfg):

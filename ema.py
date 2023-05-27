@@ -18,7 +18,7 @@ class EMA(nn.Module):
                 key[7:]: value for key, value in model.state_dict().items()
             }
         else:
-            student_model_dict = model.state_dict()
+            student_model_dict = { k: v.to(self.model.device) for k,v in model.state_dict().items() }
         return student_model_dict
 
     def _init_ema_weights(self, model):

@@ -27,8 +27,9 @@ from detectron2.utils.events import get_event_storage
 
 class DefaultTrainer(_DefaultTrainer):
     """
-    Same as detectron2.engine.defaults.DefaultTrainer, but adds a _create_trainer method
-    to allow easier use of other trainers.
+    Same as detectron2.engine.defaults.DefaultTrainer, but adds:
+     - a _create_trainer method to allow easier use of other trainers.
+     - a _create_checkpointer method to allow for overwriting custom checkpointer logic
     """
     def __init__(self, cfg):
             """
@@ -79,9 +80,10 @@ class DefaultTrainer(_DefaultTrainer):
     
 class SimpleTrainer(_SimpleTrainer):
     """
-    Same as detectron2.engine.train_loop.SimpleTrainer, but adds a run_model method
-    that provides a way to change the model's forward pass without having to copy-paste
-    the entire run_step method.
+    Same as detectron2.engine.train_loop.SimpleTrainer, but:
+    - adds a run_model method that provides a way to change the model's forward pass without 
+    having to copy-paste the entire run_step method.
+    - adds a _do_backward method that provides a way to modify the backward pass
     """
     def run_step(self):
         assert self.model.training, "[SimpleTrainer] model was changed to eval mode!"
@@ -103,20 +105,28 @@ class SimpleTrainer(_SimpleTrainer):
             losses = sum(loss_dict.values())
         if not self.zero_grad_before_forward:
             self.optimizer.zero_grad()
-        losses.backward()
+
+        ## Change is here ##
+        self._do_backward(losses)
+        ##   End change   ##
+
         self.after_backward()
         self._write_metrics(loss_dict, data_time)
         self.optimizer.step()
     
     def run_model(self, data):
         return self.model(data)
+    
+    def _do_backward(self, losses):
+        losses.backward()
 
 
 class AMPTrainer(_AMPTrainer):
     """
-    Same as detectron2.engine.train_loop.AMPTrainer, but adds a run_model method
-    that provides a way to change the model's forward pass without having to copy-paste
-    the entire run_step method.
+    Same as detectron2.engine.train_loop.AMPTrainer, but:
+    - adds a run_model method that provides a way to change the model's forward pass without 
+    having to copy-paste the entire run_step method.
+    - adds a do_backward method that provides a way to modify the backward pass
     """
     def run_step(self):
         """
@@ -147,7 +157,9 @@ class AMPTrainer(_AMPTrainer):
         if not self.zero_grad_before_forward:
             self.optimizer.zero_grad()
 
-        self.grad_scaler.scale(losses).backward()
+        ## Change is here ##
+        self.do_backward(losses)
+        ##   End change   ##
 
         if self.log_grad_scaler:
             storage = get_event_storage()
@@ -163,6 +175,8 @@ class AMPTrainer(_AMPTrainer):
     def run_model(self, data):
         return self.model(data)
     
+    def do_backward(self, losses):
+        self.grad_scaler.scale(losses).backward()
     
 class DatasetMapper(_DatasetMapper):
     def __call__(self, dataset_dict):

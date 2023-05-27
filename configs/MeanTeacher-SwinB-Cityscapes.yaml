@@ -1,0 +1,22 @@
+_BASE_: "./cityscapes_baseline/Base-RCNN-FPN-SwinB-Cityscapes.yaml"
+MODEL:
+  WEIGHTS: "models/cityscapes_swinb_baseline_foggy_val_model_best_579.pth"
+EMA:
+  ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_foggy_train",)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
+DOMAIN_ADAPT:
+  LOSSES:
+    LOC_LOSS_ENABLED: False
+SOLVER:
+  BASE_LR:  0.005
+  IMS_PER_BATCH: 4
+  STEPS: (199999,)
+  MAX_ITER: 200000
+  CHECKPOINT_PERIOD: 12500
+  BACKWARD_AT_END: False # Need this to fit in memory
+TEST:
+  EVAL_PERIOD: 1250
+OUTPUT_DIR: "output/cityscapes_swinb_meanteacher/"

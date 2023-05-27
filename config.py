@@ -26,6 +26,7 @@ def add_da_config(cfg):
     _C.EMA = CN()
     _C.EMA.ENABLED = False
     _C.EMA.ALPHA = 0.9996 # From Adaptive Teacher settings
+    _C.EMA.PARALLEL = False # Whether to use model parallelism (put EMA model on a different GPU than the student model). Note this only works with 2 GPUs, and does not work with DDP (must launch with --num-gpus=1)
 
     # Teacher model provides pseudo labels
     _C.DOMAIN_ADAPT.TEACHER = CN()
@@ -58,3 +59,8 @@ def add_da_config(cfg):
     _C.GRCNN.EFL = False
     _C.GRCNN.EFL_LAMBDA = [0.5, 0.5]
     _C.GRCNN.MODEL_TYPE = "GAUSSIAN"
+
+    # We use gradient accumulation to run the weak/strong/unlabeled data separately
+    # Should we call backward intermittently during accumulation or at the end?
+    # The former is slower but less memory usage
+    _C.SOLVER.BACKWARD_AT_END = True
