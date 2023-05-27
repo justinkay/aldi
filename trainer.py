@@ -55,32 +55,31 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
                     v /= num_grad_accum_steps
                     loss_dict[f"{k}_{suffix}"] = v if backward_at_end else v.detach()
 
-     def maybe_do_backward(losses):
+     def maybe_do_backward(losses, key_conditional=lambda k: True):
           """Helper method to do backward pass if not doing it at the end."""
           if not backward_at_end:
+               losses = { k: v * 0 if not key_conditional(k) else v for k, v in losses.items() }
                trainer.do_backward(sum(losses.values()) / num_grad_accum_steps, override=True)
 
-     #### Weakly augmented source imagery
-     #### (Used for normal training and/or domain alignment)
+     #### Weakly-augmented source imagery (Used for normal training and/or domain alignment)
      if do_weak or do_sada:
           # Added try/catch for debugging Probabilistic Teacher - can hopefully remove later
           try:
                loss_weak = model(labeled_weak, do_sada=do_sada)
-               maybe_do_backward(loss_weak)
+               maybe_do_backward(loss_weak, lambda k: do_weak or (do_sada and "_da_" in k))
                add_to_loss_dict(loss_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k))
           except FloatingPointError as e:
                print("Floating point error in weak forward pass. Skipping batch.")
                torch.save(labeled_weak, "labeled_weak_bad_batch.pt")
                return {"bad_loss": torch.tensor(0, device="cuda")}
      
-     #### Weakly augmented target imagery
-     #### (Only used for domain alignment)
+     #### Weakly-augmented target imagery (Only used for domain alignment)
      if do_sada:
           loss_sada_target = model(unlabeled_weak, labeled=False, do_sada=True)
-          maybe_do_backward(loss_sada_target)
+          maybe_do_backward(loss_sada_target, lambda k: "_da_" in k)
           add_to_loss_dict(loss_sada_target, "target_weak", lambda k: "_da_" in k)
 
-     #### Strongly augmented source imagery
+     #### Strongly-augmented source imagery (Used for normal training)
      if do_strong:
           loss_strong = model(labeled_strong, do_sada=False)
           maybe_do_backward(loss_strong)
@@ -90,14 +89,13 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
           trainer._last_labeled = copy.deepcopy(labeled_strong)
           trainer._last_unlabeled = copy.deepcopy(unlabeled_strong)
 
-     #### Pseudo-labeled target imagery
+     #### Target imagery (Used for pseudo-labeling)
      if do_unlabeled:
           if DEBUG and trainer is not None:
                data_to_pseudolabel = unlabeled_strong if unlabeled_strong is not None else unlabeled_weak
                trainer._last_unlabeled_before_teacher = copy.deepcopy(data_to_pseudolabel)
 
-          with torch.no_grad():
-               pseudolabeled_data = pseudo_labeler(unlabeled_weak, unlabeled_strong)
+          pseudolabeled_data = pseudo_labeler(unlabeled_weak, unlabeled_strong)
                
           if DEBUG and trainer is not None:
                trainer._last_unlabeled_after_teacher = copy.deepcopy(data_to_pseudolabel)
@@ -154,10 +152,9 @@ class DATrainer(DefaultTrainer):
           pseudo_labeler = PseudoLabeler(cfg, ema or model) # if no EMA, student model creates its own pseudo-labels
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END)
-          trainer.ema = ema
 
           # if using model parallelism, move models to appropriate devices
-          do_model_parallel = ema is not None and cfg.EMA.PARALLEL
+          do_model_parallel = cfg.EMA.ENABLED and cfg.EMA.PARALLEL
           if do_model_parallel:
                model.to("cuda:0")
                ema.to("cuda:1")
@@ -167,7 +164,7 @@ class DATrainer(DefaultTrainer):
      def _create_checkpointer(self, model, cfg):
           checkpointer = super(DATrainer, self)._create_checkpointer(model, cfg)
           if cfg.EMA.ENABLED:
-               checkpointer.add_checkpointable("ema", self._trainer.ema.model)
+               checkpointer.add_checkpointable("ema", self._trainer.pseudo_labeler.model)
           return checkpointer
 
      @classmethod
@@ -183,7 +180,7 @@ class DATrainer(DefaultTrainer):
           # add hooks to evaluate/save teacher model if applicable
           if self.cfg.EMA.ENABLED:
                def test_and_save_results_ema():
-                    self._last_eval_results = self.test(self.cfg, self._trainer.ema.model)
+                    self._last_eval_results = self.test(self.cfg, self._trainer.pseudo_labeler.model)
                     return self._last_eval_results
                eval_hook = hooks.EvalHook(self.cfg.TEST.EVAL_PERIOD, test_and_save_results_ema)
                if comm.is_main_process():
@@ -248,4 +245,4 @@ class DATrainer(DefaultTrainer):
      def before_step(self):
           super(DATrainer, self).before_step()
           if self.cfg.EMA.ENABLED:
-               self._trainer.ema.update_weights(self._trainer.model, self.iter)
+               self._trainer.pseudo_labeler.model.update_weights(self._trainer.model, self.iter)

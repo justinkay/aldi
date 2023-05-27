@@ -98,6 +98,12 @@ class DARCNN(GeneralizedRCNN):
                 da_losses = self.get_sada_losses(labeled, method)
                 for k, v in da_losses.items():
                     output[k] = v
+            elif self.sada_heads is not None:
+                # need to utilize sada_heads at some point during the forward pass or PyTorch complains.
+                # this is only an issue when cfg.SOLVER.BACKWARD_AT_END=False, because intermediate backward()
+                # calls may not have used sada_heads
+                # see: https://github.com/pytorch/pytorch/issues/43259#issuecomment-964284292
+                output["loss_da_img"] = sum([p.sum() for p in self.sada_heads.parameters()]) * 0
 
             # handle any loss modifications
             if not labeled:
