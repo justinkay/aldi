@@ -31,7 +31,9 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
      Args:
           backward_at_end (bool): If True, losses are summed and returned, persisting the entire computation graph.
                This is memory intensive because we do gradient accumulation, but is faster.
-               If False, call backward() after each mini-batch. This is slower, but uses less memory.
+               If False, call backward() throughout this method any time data is passed to the model. 
+               This is slower, but uses less memory, allowing for larger batch sizes and training larger models that 
+               would OOM with backward_at_end=True. Usually, the larger batch size also makes up for the slowdown.
      """
      _model = model.module if type(model) == DDP else model
      do_sada = _model.sada_heads is not None
