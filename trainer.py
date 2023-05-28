@@ -42,6 +42,12 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
      do_unlabeled = unlabeled_weak is not None
      num_grad_accum_steps = int(do_weak) + int(do_strong) + int(do_unlabeled)
 
+     if DEBUG:
+          trainer._last_labeled_weak = copy.deepcopy(labeled_weak)
+          trainer._last_labeled_strong = copy.deepcopy(labeled_strong)
+          trainer._last_unlabeled_weak = copy.deepcopy(unlabeled_weak)
+          trainer._last_unlabeled_strong = copy.deepcopy(unlabeled_strong)
+
      loss_dict = {}
      def add_to_loss_dict(losses, suffix, key_conditional=lambda k: True):
           """Helper method to add losses to loss_dict.
@@ -85,31 +91,14 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
           maybe_do_backward(loss_strong)
           add_to_loss_dict(loss_strong, "source_strong")
 
-     if DEBUG and trainer is not None:
-          trainer._last_labeled = copy.deepcopy(labeled_strong)
-          trainer._last_unlabeled = copy.deepcopy(unlabeled_strong)
-
      #### Target imagery (Used for pseudo-labeling)
      if do_unlabeled:
-          if DEBUG and trainer is not None:
-               data_to_pseudolabel = unlabeled_strong if unlabeled_strong is not None else unlabeled_weak
-               trainer._last_unlabeled_before_teacher = copy.deepcopy(data_to_pseudolabel)
-
           pseudolabeled_data = pseudo_labeler(unlabeled_weak, unlabeled_strong)
-               
-          if DEBUG and trainer is not None:
-               trainer._last_unlabeled_after_teacher = copy.deepcopy(data_to_pseudolabel)
-               with torch.no_grad():
-                    model.eval()
-                    if type(model) == DDP:
-                         trainer._last_student_preds = model.module.inference(data_to_pseudolabel, do_postprocess=False)
-                    else:
-                         trainer._last_student_preds = model.inference(data_to_pseudolabel, do_postprocess=False)
-                    model.train()
-
           loss_pseudolabeled = model(pseudolabeled_data, labeled=False, do_sada=False)
           maybe_do_backward(loss_pseudolabeled)
           add_to_loss_dict(loss_pseudolabeled, "target_pseudolabeled")
+          if DEBUG: 
+               trainer._last_pseudolabeled = copy.deepcopy(pseudolabeled_data)
      
      return loss_dict
 
@@ -127,7 +116,7 @@ class DAAMPTrainer(AMPTrainer):
         """Disable the final backward pass if we are computing intermediate gradients in run_model.
         Can be overridden by setting override=True to always call superclass method."""
         if self.backward_at_end or override:
-             return super(DAAMPTrainer, self).do_backward(losses)
+             super(DAAMPTrainer, self).do_backward(losses)
      
 class DASimpleTrainer(SimpleTrainer):
      def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True):
@@ -143,7 +132,7 @@ class DASimpleTrainer(SimpleTrainer):
         """Disable the final backward pass if we are computing intermediate gradients in run_model.
         Can be overridden by setting override=True to always call superclass method."""
         if self.backward_at_end or override:
-             return super(DAAMPTrainer, self).do_backward(losses)
+             super(DAAMPTrainer, self).do_backward(losses)
      
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
@@ -180,7 +169,7 @@ class DATrainer(DefaultTrainer):
           # add hooks to evaluate/save teacher model if applicable
           if self.cfg.EMA.ENABLED:
                def test_and_save_results_ema():
-                    self._last_eval_results = self.test(self.cfg, self._trainer.pseudo_labeler.model)
+                    self._last_eval_results = self.test(self.cfg, self._trainer.pseudo_labeler.model.model)
                     return self._last_eval_results
                eval_hook = hooks.EvalHook(self.cfg.TEST.EVAL_PERIOD, test_and_save_results_ema)
                if comm.is_main_process():

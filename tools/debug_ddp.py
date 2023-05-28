@@ -6,8 +6,6 @@ par_dir = os.path.dirname(current_dir)
 if par_dir not in sys.path:
     sys.path.append(par_dir)
 
-import detectron2.utils.comm as comm
-from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 from detectron2.engine import default_argument_parser, default_setup, launch
@@ -18,6 +16,9 @@ from config import add_da_config
 from trainer import DATrainer
 import datasets # register datasets with Detectron2
 import rcnn # register DA R-CNN model with Detectron2
+import gaussian_rcnn # register Gaussian R-CNN model with Detectron2
+import backbone # register Swin-B FPN backbone with Detectron2
+
 
 def setup(args):
     """
@@ -53,16 +54,16 @@ def main(args):
     trainer.resume_or_load(resume=args.resume)
     trainer.train()
 
-    labeled, unlabeled = trainer._trainer._last_labeled, trainer._trainer._last_unlabeled
-    unlabeled_before, unlabeled_after = trainer._trainer._last_unlabeled_before_teacher, trainer._trainer._last_unlabeled_after_teacher
-    student_preds = trainer._trainer._last_student_preds
+    labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong = trainer._trainer._last_labeled_weak, trainer._trainer._last_labeled_strong, trainer._trainer._last_unlabeled_weak, trainer._trainer._last_unlabeled_strong
+    pseudolabeled = trainer._trainer._last_pseudolabeled
 
-    for i, (l, ul, ul_b, ul_a, sp) in enumerate(zip(labeled, unlabeled, unlabeled_before, unlabeled_after, student_preds)):
+    # for i, (lw, ls, uw, us, sp) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, student_preds)):
+    for i, (lw, ls, uw, pl) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, pseudolabeled)):
         fig, ax = plt.subplots(4,1, figsize=(20,20))
-        labeled_im = l['image'].permute(1,2,0).cpu().numpy()
-        unlabeled_im = ul['image'].permute(1,2,0).cpu().numpy()
-        unlabeled_before_im = ul_b['image'].permute(1,2,0).cpu().numpy()
-        unlabeled_after_im = ul_a['image'].permute(1,2,0).cpu().numpy()
+        labeled_im = lw['image'].permute(1,2,0).cpu().numpy()
+        unlabeled_im = ls['image'].permute(1,2,0).cpu().numpy()
+        unlabeled_before_im = uw['image'].permute(1,2,0).cpu().numpy()
+        unlabeled_after_im = pl['image'].permute(1,2,0).cpu().numpy()
 
         # plot images
         ax[0].imshow(labeled_im)
@@ -71,30 +72,26 @@ def main(args):
         ax[3].imshow(unlabeled_after_im)
 
         # plot instances as rectangles
-        for inst in l['instances'].gt_boxes.tensor:
+        for inst in lw['instances'].gt_boxes.tensor:
             x1,y1,x2,y2 = inst.cpu().numpy()
             x1,y1,x2,y2 = int(x1),int(y1),int(x2),int(y2)
             ax[0].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
-        for inst in ul['instances'].gt_boxes.tensor:
+        for inst in ls['instances'].gt_boxes.tensor:
             x1,y1,x2,y2 = inst.cpu().numpy()
             ax[1].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
-        for inst in ul_b['instances'].gt_boxes.tensor:
+        for inst in uw['instances'].gt_boxes.tensor:
             x1,y1,x2,y2 = inst.cpu().numpy()
             ax[2].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
-        for inst in ul_a['instances'].gt_boxes.tensor:
+        for inst in pl['instances'].gt_boxes.tensor:
             x1,y1,x2,y2 = inst.cpu().numpy()
             ax[3].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=3))
-        # add student instances in blue
-        for inst in sp.pred_boxes.tensor:
-            x1,y1,x2,y2 = inst.cpu().numpy()
-            ax[3].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='b', linewidth=1))
 
-        ax[0].set_title('Labeled')
-        ax[1].set_title('Unlabeled (raw)')
-        ax[2].set_title('Unlabeled before teacher')
-        ax[3].set_title('Unlabeled after teacher')
+        ax[0].set_title('Labeled Weak')
+        ax[1].set_title('Labeled Strong')
+        ax[2].set_title('Unlabeled Weak')
+        ax[3].set_title('Unlabeled Strong (w/ Pseudo boxes)')
 
-        plt.savefig(f'debug_{l["image_id"]}_{i}.png')
+        plt.savefig(f'debug_{lw["image_id"]}_{i}.png')
         plt.close()
 
 

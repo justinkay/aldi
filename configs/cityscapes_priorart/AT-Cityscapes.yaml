@@ -2,4 +2,4 @@ _BASE_: "../MeanTeacher-Cityscapes.yaml"
 MODEL:
   DA:
     ENABLED: True
-OUTPUT_DIR: "output/cityscapes_adaptiveteacher/"
+OUTPUT_DIR: "output/cityscapes_adaptiveteacher_nobackwardatend/"
