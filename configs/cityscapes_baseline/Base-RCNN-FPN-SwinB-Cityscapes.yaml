@@ -25,7 +25,8 @@ SOLVER:
   WARMUP_ITERS: 1250
   # just save a few checkpoints throughout because we will also use BestCheckpointer
   # every TEST.EVAL_PERIOD
-  CHECKPOINT_PERIOD: 12000
+  CHECKPOINT_PERIOD: 12500
 TEST:
   EVAL_PERIOD: 1250
+VIS_PERIOD: 1250
 OUTPUT_DIR: "output/cityscapes_swinb_baseline/"

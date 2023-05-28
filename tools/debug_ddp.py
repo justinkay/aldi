@@ -66,10 +66,10 @@ def main(args):
         unlabeled_after_im = pl['image'].permute(1,2,0).cpu().numpy()
 
         # plot images
-        ax[0].imshow(labeled_im)
-        ax[1].imshow(unlabeled_im)
-        ax[2].imshow(unlabeled_before_im)
-        ax[3].imshow(unlabeled_after_im)
+        ax[0].imshow(labeled_im[:,:,::-1])
+        ax[1].imshow(unlabeled_im[:,:,::-1])
+        ax[2].imshow(unlabeled_before_im[:,:,::-1])
+        ax[3].imshow(unlabeled_after_im[:,:,::-1])
 
         # plot instances as rectangles
         for inst in lw['instances'].gt_boxes.tensor:

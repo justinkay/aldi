@@ -26,6 +26,7 @@ SOLVER:
   # just save a few checkpoints throughout because we will also use BestCheckpointer
   # every TEST.EVAL_PERIOD
   CHECKPOINT_PERIOD: 3000
+VIS_PERIOD: 312
 TEST:
   EVAL_PERIOD: 312
 OUTPUT_DIR: "output/cityscapes_baseline/"

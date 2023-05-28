@@ -33,8 +33,8 @@ def do_pseudo_label(model, unlabeled_weak, unlabeled_strong, threshold, method):
     
     return data_to_pseudolabel
 
-# From Adaptive Teacher ATeacherTrainer
-# add scores_logists and boxes_sigma from PT if available
+# Modified from Adaptive Teacher ATeacherTrainer:
+# - Add scores_logists and boxes_sigma from PT if available
 def process_pseudo_label(proposals, cur_threshold, proposal_type, pseudo_label_method=""):
     list_instances = []
     num_proposal_output = 0.0
@@ -60,8 +60,9 @@ def process_pseudo_label(proposals, cur_threshold, proposal_type, pseudo_label_m
     num_proposal_output = num_proposal_output / len(proposals)
     return list_instances, num_proposal_output
 
-# From Adaptive Teacher ATeacherTrainer threshold_bbox, modified to be 
-# compatible with Proababilistic Teacher outputs
+# Modified from Adaptive Teacher ATeacherTrainer threshold_bbox:
+# - Compatible with Proababilistic Teacher outputs
+# - Put new labels on CPU (for compatibility with Visualizer, e.g.)
 def process_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih"):
     if proposal_type == "rpn":
         valid_map = proposal_bbox_inst.objectness_logits > thres
@@ -91,15 +92,15 @@ def process_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih"):
         new_boxes = Boxes(new_bbox_loc)
 
         # add boxes to instances
-        new_proposal_inst.gt_boxes = new_boxes
-        new_proposal_inst.gt_classes = proposal_bbox_inst.pred_classes[valid_map]
-        new_proposal_inst.scores = proposal_bbox_inst.scores[valid_map]
+        new_proposal_inst.gt_boxes = new_boxes.to("cpu")
+        new_proposal_inst.gt_classes = proposal_bbox_inst.pred_classes[valid_map].to("cpu")
+        new_proposal_inst.scores = proposal_bbox_inst.scores[valid_map].to("cpu")
 
         # add probabilistic outputs for gaussian RCNN
         if proposal_bbox_inst.has('scores_logists'):
-            new_proposal_inst.scores_logists = proposal_bbox_inst.scores_logists
+            new_proposal_inst.scores_logists = proposal_bbox_inst.scores_logists.to("cpu")
         if proposal_bbox_inst.has('boxes_sigma'):
-            new_proposal_inst.boxes_sigma = proposal_bbox_inst.boxes_sigma
+            new_proposal_inst.boxes_sigma = proposal_bbox_inst.boxes_sigma.to("cpu")
     else:
         raise ValueError("Unknown proposal type in threshold_bbox")
 
