@@ -64,3 +64,6 @@ def add_da_config(cfg):
     # Should we call backward intermittently during accumulation or at the end?
     # The former is slower but less memory usage
     _C.SOLVER.BACKWARD_AT_END = True
+
+    # Enable use of different optimizers (necessary to match VitDet settings)
+    _C.SOLVER.OPTIMIZER = "SGD"

@@ -14,6 +14,7 @@ from detectron2.utils.events import get_event_storage
 from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
+from backbone import get_adamw_optim
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from ema import EMA
@@ -188,8 +189,9 @@ class DATrainer(DefaultTrainer):
      @classmethod
      def build_optimizer(cls, cfg, model):
           """
-          Change the learning rate to account for the fact that we are doing gradient accumulation in order
+          - Change the learning rate to account for the fact that we are doing gradient accumulation in order
           to run multiple batches of labeled and unlabeled data each training step.
+          - Enable use of alternative optimizers (e.g. AdamW for ViTDet)
           """
           logger = logging.getLogger("detectron2")
           num_grad_accum = len(cfg.DATASETS.BATCH_CONTENTS)
@@ -201,7 +203,13 @@ class DATrainer(DefaultTrainer):
           cfg.defrost()
           cfg.SOLVER.BASE_LR = lr_scale * cfg.SOLVER.BASE_LR
           cfg.freeze()
-          return super(DATrainer, cls).build_optimizer(cfg, model)
+
+          if cfg.SOLVER.OPTIMIZER.upper() == "SGD":
+               return super(DATrainer, cls).build_optimizer(cfg, model)
+          elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW":
+               # TODO: different settings for SwinB etc.
+               # TODO: adjust LR? this uses defaults from paper (batch size of 64)
+               return get_adamw_optim(model)
 
      @classmethod
      def build_train_loader(cls, cfg):
