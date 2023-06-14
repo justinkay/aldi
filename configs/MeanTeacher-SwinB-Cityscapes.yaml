@@ -1,6 +1,7 @@
-_BASE_: "./cityscapes_baseline/Base-RCNN-FPN-SwinB-Cityscapes.yaml"
+_BASE_: "./cityscapes_baseline/Base-RCNN-SwinB-FPN-Cityscapes.yaml"
 MODEL:
-  WEIGHTS: "models/cityscapes_swinb_baseline_foggy_val_model_best_579.pth"
+  # WEIGHTS: "models/cityscapes_swinb_baseline_foggy_val_model_best_579.pth"
+  WEIGHTS: "models/cityscapes_swinb_adamw_baseline_foggy_val_model_best_563.pth"
 EMA:
   ENABLED: True
 DATASETS:
@@ -17,6 +18,7 @@ SOLVER:
   MAX_ITER: 200000
   CHECKPOINT_PERIOD: 12500
   BACKWARD_AT_END: False # Need this to fit in memory
+  # OPTIMIZER: "ADAMW"
 TEST:
   EVAL_PERIOD: 1250
 VIS_PERIOD: 1250

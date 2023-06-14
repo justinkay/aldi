@@ -1,0 +1,6 @@
+_BASE_: "./Base-RCNN-SwinB-FPN-Cityscapes.yaml"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+OUTPUT_DIR: "output/cityscapes_baseline_swinb_strongaug_ema/"

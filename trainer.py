@@ -14,7 +14,7 @@ from detectron2.utils.events import get_event_storage
 from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
-from backbone import get_adamw_optim
+from backbone import get_adamw_optim, get_swinb_optim
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from ema import EMA
@@ -22,9 +22,9 @@ from pseudolabeler import PseudoLabeler
 
 
 DEBUG = False
+debug_dict = {}
 
-def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, 
-                                pseudo_labeler, trainer, backward_at_end=True):
+def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong):
      """
      Main logic of running Mean Teacher style training for one iteration.
      - If no unlabeled data is supplied, run a training step as usual.
@@ -36,6 +36,10 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
                This is slower, but uses less memory, allowing for larger batch sizes and training larger models that 
                would OOM with backward_at_end=True. Usually, the larger batch size also makes up for the slowdown.
      """
+     model = trainer.model
+     pseudo_labeler = trainer.pseudo_labeler
+     backward_at_end = trainer.backward_at_end
+
      _model = model.module if type(model) == DDP else model
      do_sada = _model.sada_heads is not None
      do_weak = labeled_weak is not None
@@ -44,10 +48,10 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
      num_grad_accum_steps = int(do_weak) + int(do_strong) + int(do_unlabeled)
 
      if DEBUG:
-          trainer._last_labeled_weak = copy.deepcopy(labeled_weak)
-          trainer._last_labeled_strong = copy.deepcopy(labeled_strong)
-          trainer._last_unlabeled_weak = copy.deepcopy(unlabeled_weak)
-          trainer._last_unlabeled_strong = copy.deepcopy(unlabeled_strong)
+          debug_dict['last_labeled_weak'] = copy.deepcopy(labeled_weak)
+          debug_dict['last_labeled_strong'] = copy.deepcopy(labeled_strong)
+          debug_dict['last_unlabeled_weak'] = copy.deepcopy(unlabeled_weak)
+          debug_dict['last_unlabeled_strong'] = copy.deepcopy(unlabeled_strong)
 
      loss_dict = {}
      def add_to_loss_dict(losses, suffix, key_conditional=lambda k: True):
@@ -99,42 +103,30 @@ def run_model_labeled_unlabeled(model, labeled_weak, labeled_strong, unlabeled_w
           maybe_do_backward(loss_pseudolabeled)
           add_to_loss_dict(loss_pseudolabeled, "target_pseudolabeled")
           if DEBUG: 
-               trainer._last_pseudolabeled = copy.deepcopy(pseudolabeled_data)
+               debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
      
      return loss_dict
 
-class DAAMPTrainer(AMPTrainer):
+class _DATrainer:
      def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True):
           super().__init__(model, data_loader, optimizer, zero_grad_before_forward=not backward_at_end)
           self.pseudo_labeler = pseudo_labeler
           self.backward_at_end = backward_at_end
 
      def run_model(self, data):
-          return run_model_labeled_unlabeled(self.model, *data, self.pseudo_labeler, trainer=self,
-                                             backward_at_end=self.backward_at_end)
+          return run_model_labeled_unlabeled(self, *data)
      
      def do_backward(self, losses, override=False):
         """Disable the final backward pass if we are computing intermediate gradients in run_model.
         Can be overridden by setting override=True to always call superclass method."""
         if self.backward_at_end or override:
-             super(DAAMPTrainer, self).do_backward(losses)
-     
-class DASimpleTrainer(SimpleTrainer):
-     def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True):
-          super().__init__(model, data_loader, optimizer, zero_grad_before_forward=not backward_at_end)
-          self.pseudo_labeler = pseudo_labeler
-          self.backward_at_end = backward_at_end
+             super().do_backward(losses)
 
-     def run_model(self, data):
-          return run_model_labeled_unlabeled(self.model, *data, self.pseudo_labeler, trainer=self,
-                                             backward_at_end=self.backward_at_end)
-     
-     def do_backward(self, losses, override=False):
-        """Disable the final backward pass if we are computing intermediate gradients in run_model.
-        Can be overridden by setting override=True to always call superclass method."""
-        if self.backward_at_end or override:
-             super(DAAMPTrainer, self).do_backward(losses)
-     
+# Extend both Detectron2's AMPTrainer and SimpleTrainer classes with DA capabilities
+# Used by DATrainer below in the same way DefaultTrainer uses the original AMP and Simple Trainers
+class DAAMPTrainer(_DATrainer, AMPTrainer): pass
+class DASimpleTrainer(_DATrainer, SimpleTrainer): pass
+
 class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
@@ -207,9 +199,15 @@ class DATrainer(DefaultTrainer):
           if cfg.SOLVER.OPTIMIZER.upper() == "SGD":
                return super(DATrainer, cls).build_optimizer(cfg, model)
           elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW":
-               # TODO: different settings for SwinB etc.
-               # TODO: adjust LR? this uses defaults from paper (batch size of 64)
-               return get_adamw_optim(model)
+               # TOOD: this could be cleaner and maybe removed
+               if cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone":
+                    return get_adamw_optim(model)
+               elif cfg.MODEL.BACKBONE.NAME == "build_swinb_fpn_backbone":
+                    return get_swinb_optim(model)
+               else:
+                    raise ValueError(f"Unknown backbone {cfg.MODEL.BACKBONE.NAME}.")
+          else:
+               raise ValueError(f"Unknown optimizer {cfg.SOLVER.OPTIMIZER}.")
 
      @classmethod
      def build_train_loader(cls, cfg):

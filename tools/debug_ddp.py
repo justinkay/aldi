@@ -47,6 +47,7 @@ def main(args):
 
     import trainer
     trainer.DEBUG = True
+    debug_dict = trainer.debug_dict
 
     cfg = setup(args)
 
@@ -54,7 +55,7 @@ def main(args):
     trainer.resume_or_load(resume=args.resume)
     trainer.train()
 
-    labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong = trainer._trainer._last_labeled_weak, trainer._trainer._last_labeled_strong, trainer._trainer._last_unlabeled_weak, trainer._trainer._last_unlabeled_strong
+    labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong = debug_dict['last_labeled_weak'], debug_dict['last_labeled_strong'], debug_dict['last_unlabeled_weak'], debug_dict['last_unlabeled_strong']
     pseudolabeled = trainer._trainer._last_pseudolabeled
 
     # for i, (lw, ls, uw, us, sp) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, student_preds)):

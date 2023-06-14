@@ -26,6 +26,7 @@ SOLVER:
   # just save a few checkpoints throughout because we will also use BestCheckpointer
   # every TEST.EVAL_PERIOD
   CHECKPOINT_PERIOD: 12500
+  # OPTIMIZER: "ADAMW"
 TEST:
   EVAL_PERIOD: 1250
 VIS_PERIOD: 1250

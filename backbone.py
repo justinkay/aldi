@@ -37,7 +37,7 @@ def build_vitdet_b_backbone(cfg, input_shape):
     backbone.square_pad = 0 # disable square padding
     return instantiate(backbone)
 
-def get_adamw_optim(model, include_vit_lr_decay=False):
+def get_adamw_optim(model, params={}, include_vit_lr_decay=False):
     """See detectron2/projects/ViTDet/configs/COCO/mask_rcnn_vitdet_b_100ep.py
     and detectron2/projects/ViTDet/configs/COCO/cascade_mask_rcnn_swin_b_in21k_50ep.py"""
     optimizer = model_zoo.get_config("common/optim.py").AdamW
@@ -50,13 +50,11 @@ def get_adamw_optim(model, include_vit_lr_decay=False):
     optimizer.params.overrides = { "pos_embed": {"weight_decay": 0.0}, # VitDet
                                    "relative_position_bias_table": {"weight_decay": 0.0}, # Swin Transformer
                                 }
+    for p in params:
+        setattr(optimizer, p, params[p])
     optimizer.params.model = model
     return instantiate(optimizer)
 
-def get_swinb_optim():
-    """TODO: Not currently used; probably doesn't work.
-    But see detectron2/projects/ViTDet/configs/COCO/cascade_mask_rcnn_swin_b_in21k_50ep.py"""
-    optimizer = get_adamw_optim()
-    optimizer.lr = 4e-5
-    optimizer.weight_decay = 0.05
-    return optimizer
+def get_swinb_optim(model):
+    """See detectron2/projects/ViTDet/configs/COCO/cascade_mask_rcnn_swin_b_in21k_50ep.py"""
+    return get_adamw_optim(model, params={"lr": 4e-5, "weight_decay": 0.05})
