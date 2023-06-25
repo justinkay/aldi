@@ -1,0 +1,4 @@
+_BASE_: "./Base-RCNN-SwinB-FPN-Cityscapes_ema.yaml"
+MODEL:
+  WEIGHTS: "models/cityscapes_swinb_baseline_foggy_val_model_best_579.pth"
+OUTPUT_DIR: "output/cityscapes_baseline_swinb_ema_burnedin/"

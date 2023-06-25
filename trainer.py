@@ -3,10 +3,11 @@ import torch
 import copy
 import logging
 from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+from torch.distributed.fsdp.wrap import size_based_auto_wrap_policy, always_wrap_policy
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.engine import hooks, BestCheckpointer
-from detectron2.engine.defaults import create_ddp_model
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
 from detectron2.modeling.meta_arch.build import build_model
 from detectron2.solver import build_optimizer
@@ -131,16 +132,9 @@ class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
           ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
-          pseudo_labeler = PseudoLabeler(cfg, ema or model) # if no EMA, student model creates its own pseudo-labels
+          pseudo_labeler = PseudoLabeler(cfg, ema or model)
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END)
-
-          # if using model parallelism, move models to appropriate devices
-          do_model_parallel = cfg.EMA.ENABLED and cfg.EMA.PARALLEL
-          if do_model_parallel:
-               model.to("cuda:0")
-               ema.to("cuda:1")
-
           return trainer
      
      def _create_checkpointer(self, model, cfg):
@@ -241,3 +235,15 @@ class DATrainer(DefaultTrainer):
           super(DATrainer, self).before_step()
           if self.cfg.EMA.ENABLED:
                self._trainer.pseudo_labeler.model.update_weights(self._trainer.model, self.iter)
+
+     def create_ddp_model(self, model, broadcast_buffers, cfg):
+          """In progress: Add FSDP support.
+          Not currently working.
+          """
+          if cfg.MODEL.FSDP_ENABLED and comm.get_world_size() > 1:
+               return FSDP(model, 
+                           auto_wrap_policy=always_wrap_policy
+                           )
+          else:
+               return super(DATrainer, self).create_ddp_model(model, broadcast_buffers, cfg)
+               

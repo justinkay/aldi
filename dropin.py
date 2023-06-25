@@ -48,7 +48,9 @@ class DefaultTrainer(_DefaultTrainer):
             optimizer = self.build_optimizer(cfg, model)
             data_loader = self.build_train_loader(cfg)
 
-            model = create_ddp_model(model, broadcast_buffers=False)
+            ### Change is here ###
+            model = self.create_ddp_model(model, broadcast_buffers=False, cfg=cfg)
+            ###   End change   ###
 
             ## Change is here ##
             self._trainer = self._create_trainer(cfg, model, data_loader, optimizer)
@@ -77,6 +79,9 @@ class DefaultTrainer(_DefaultTrainer):
                 cfg.OUTPUT_DIR,
                 trainer=weakref.proxy(self),
             )
+
+    def create_ddp_model(self, model, broadcast_buffers, cfg):
+        return create_ddp_model(model, broadcast_buffers=broadcast_buffers)
     
 class SimpleTrainer(_SimpleTrainer):
     """

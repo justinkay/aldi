@@ -26,7 +26,6 @@ def add_da_config(cfg):
     _C.EMA = CN()
     _C.EMA.ENABLED = False
     _C.EMA.ALPHA = 0.9996 # From Adaptive Teacher settings
-    _C.EMA.PARALLEL = False # Whether to use model parallelism (put EMA model on a different GPU than the student model). Note this only works with 2 GPUs, and does not work with DDP (must launch with --num-gpus=1)
 
     # Teacher model provides pseudo labels
     _C.DOMAIN_ADAPT.TEACHER = CN()
@@ -67,3 +66,6 @@ def add_da_config(cfg):
 
     # Enable use of different optimizers (necessary to match VitDet settings)
     _C.SOLVER.OPTIMIZER = "SGD"
+
+    # Use fully sharded data parallelism to fit larger models
+    _C.MODEL.FSDP_ENABLED = False

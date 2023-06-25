@@ -1,5 +1,6 @@
 _BASE_: "../_Base-RCNN-VitDetB.yaml"
 MODEL:
+  FSDP_ENABLED: True # it's big
   ROI_HEADS:
     NUM_CLASSES: 8
 # This is similar to the setting used in Mask R-CNN paper, Appendix A
@@ -18,7 +19,7 @@ SOLVER:
   BASE_LR: 0.0025
   STEPS: (72000,)
   MAX_ITER: 96000
-  IMS_PER_BATCH: 2
+  IMS_PER_BATCH: 1 #2
   AMP:
     ENABLED: True
   WARMUP_FACTOR: 0.0004 # 1/2500
@@ -26,6 +27,8 @@ SOLVER:
   # just save a few checkpoints throughout because we will also use BestCheckpointer
   # every TEST.EVAL_PERIOD
   CHECKPOINT_PERIOD: 25000
+# DATALOADER:
+#   NUM_WORKERS: 0 # fixes 'too many open files' error but freezes
 TEST:
   EVAL_PERIOD: 2500
 VIS_PERIOD: 2500
