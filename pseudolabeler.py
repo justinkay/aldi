@@ -83,6 +83,12 @@ def process_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih"):
     elif proposal_type == "roih":
         valid_map = proposal_bbox_inst.scores > thres
 
+        # hacky way to put this
+        # TODO make cleaner
+        for k in ["erased_0", "erased_1", "erased_2"]:
+            if getattr(proposal_bbox_inst, k, None) is not None:
+                print("found", k, "in proposal_bbox_inst")
+
         # create instances containing boxes and gt_classes
         image_shape = proposal_bbox_inst.image_size
         new_proposal_inst = Instances(image_shape)

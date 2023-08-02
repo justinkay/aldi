@@ -56,7 +56,7 @@ def main(args):
     trainer.train()
 
     labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong = debug_dict['last_labeled_weak'], debug_dict['last_labeled_strong'], debug_dict['last_unlabeled_weak'], debug_dict['last_unlabeled_strong']
-    pseudolabeled = trainer._trainer._last_pseudolabeled
+    pseudolabeled = debug_dict['last_pseudolabeled']
 
     # for i, (lw, ls, uw, us, sp) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, student_preds)):
     for i, (lw, ls, uw, pl) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, pseudolabeled)):

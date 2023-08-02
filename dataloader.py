@@ -15,6 +15,13 @@ class SaveWeakDatasetMapper(DatasetMapper):
     def _after_call(self, dataset_dict, aug_input):
         weak_img = getattr(aug_input, WEAK_IMG_KEY)
         dataset_dict[WEAK_IMG_KEY] = torch.as_tensor(np.ascontiguousarray(weak_img.transpose(2, 0, 1)))
+
+        # hacky way of doing this
+        # TODO: move somewhere else
+        for k in ["erased_0", "erased_1", "erased_2"]:
+            if getattr(aug_input, k, None) is not None:
+                dataset_dict[k] = torch.as_tensor(getattr(aug_input, k))
+
         return dataset_dict
 
 class UnlabeledDatasetMapper(SaveWeakDatasetMapper):
