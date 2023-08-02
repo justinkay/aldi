@@ -1,17 +1,17 @@
 _BASE_: "../_Base-RCNN-VitDetB.yaml"
 MODEL:
-  FSDP_ENABLED: True # it's big
+  FSDP_ENABLED: False # it's big -- but this doesn't work yet
   ROI_HEADS:
     NUM_CLASSES: 8
 # This is similar to the setting used in Mask R-CNN paper, Appendix A
 # But there are some differences, e.g., we did not initialize the output
 # layer using the corresponding classes from COCO
 INPUT:
-  MIN_SIZE_TRAIN: (800, 832, 864, 896, 928, 960, 992, 1024)
+  MIN_SIZE_TRAIN: (800,) #(600,) #(800, 832, 864, 896, 928, 960, 992, 1024)
   MIN_SIZE_TRAIN_SAMPLING: "choice"
-  MIN_SIZE_TEST: 1024
-  MAX_SIZE_TRAIN: 2048
-  MAX_SIZE_TEST: 2048
+  MIN_SIZE_TEST: 800 #600 #1024
+  MAX_SIZE_TRAIN: 1600 #1024 #2048
+  MAX_SIZE_TEST: 1600 #1024 #2048
 DATASETS:
   TRAIN: ("cityscapes_train",)
   TEST: ("cityscapes_val", "cityscapes_foggy_val",)
@@ -19,7 +19,7 @@ SOLVER:
   BASE_LR: 0.0025
   STEPS: (72000,)
   MAX_ITER: 96000
-  IMS_PER_BATCH: 1 #2
+  IMS_PER_BATCH: 2
   AMP:
     ENABLED: True
   WARMUP_FACTOR: 0.0004 # 1/2500
@@ -28,8 +28,8 @@ SOLVER:
   # every TEST.EVAL_PERIOD
   CHECKPOINT_PERIOD: 25000
 # DATALOADER:
-#   NUM_WORKERS: 0 # fixes 'too many open files' error but freezes
+#   NUM_WORKERS: 0 # fixes 'too many open files' with FSDP error but freezes
 TEST:
   EVAL_PERIOD: 2500
 VIS_PERIOD: 2500
-OUTPUT_DIR: "output/cityscapes_vitdetb_baseline/"
+OUTPUT_DIR: "output/cityscapes_vitdetb_baseline_800/"

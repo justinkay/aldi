@@ -1,0 +1,4 @@
+_BASE_: "./Base-RCNN-VitDetB-Cityscapes.yaml"
+EMA:
+  ENABLED: True
+OUTPUT_DIR: "output/cityscapes_vitdetb_baseline_800_ema/"

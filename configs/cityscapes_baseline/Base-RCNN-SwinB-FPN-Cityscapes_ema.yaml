@@ -1,4 +1,4 @@
 _BASE_: "./Base-RCNN-SwinB-FPN-Cityscapes.yaml"
 EMA:
   ENABLED: True
-OUTPUT_DIR: "output/cityscapes_baseline_swinb_ema/"
+OUTPUT_DIR: "output/cityscapes_baseline_swinb_ema_800/"

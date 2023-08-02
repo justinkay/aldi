@@ -5,12 +5,18 @@ MODEL:
 # This is similar to the setting used in Mask R-CNN paper, Appendix A
 # But there are some differences, e.g., we did not initialize the output
 # layer using the corresponding classes from COCO
+# INPUT:
+#   MIN_SIZE_TRAIN: (800, 832, 864, 896, 928, 960, 992, 1024)
+#   MIN_SIZE_TRAIN_SAMPLING: "choice"
+#   MIN_SIZE_TEST: 1024
+#   MAX_SIZE_TRAIN: 2048
+#   MAX_SIZE_TEST: 2048
 INPUT:
-  MIN_SIZE_TRAIN: (800, 832, 864, 896, 928, 960, 992, 1024)
+  MIN_SIZE_TRAIN: (800,) #(600,) #(800, 832, 864, 896, 928, 960, 992, 1024)
   MIN_SIZE_TRAIN_SAMPLING: "choice"
-  MIN_SIZE_TEST: 1024
-  MAX_SIZE_TRAIN: 2048
-  MAX_SIZE_TEST: 2048
+  MIN_SIZE_TEST: 800 #600 #1024
+  MAX_SIZE_TRAIN: 1600 #1024 #2048
+  MAX_SIZE_TEST: 1600 #1024 #2048
 DATASETS:
   TRAIN: ("cityscapes_train",)
   TEST: ("cityscapes_val", "cityscapes_foggy_val",)
@@ -30,4 +36,4 @@ SOLVER:
 TEST:
   EVAL_PERIOD: 1250
 VIS_PERIOD: 1250
-OUTPUT_DIR: "output/cityscapes_swinb_baseline/"
+OUTPUT_DIR: "output/cityscapes_swinb_baseline_800/"

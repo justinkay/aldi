@@ -5,3 +5,5 @@ register_coco_instances("cityscapes_train", {},         "datasets/cityscapes/ann
 register_coco_instances("cityscapes_val",   {},         "datasets/cityscapes/annotations/cityscapes_val_instances.json",                    "cityscapes/")
 register_coco_instances("cityscapes_foggy_train", {},   "datasets/cityscapes_foggy/annotations/cityscapes_train_instances_foggyALL.json",   "cityscapes_foggy/")
 register_coco_instances("cityscapes_foggy_val", {},     "datasets/cityscapes_foggy/annotations/cityscapes_val_instances_foggyALL.json",     "cityscapes_foggy/")
+# for evaluating COCO-pretrained models: category IDs are remapped to match
+register_coco_instances("cityscapes_foggy_val_coco_ids", {},     "datasets/cityscapes_foggy/annotations/cityscapes_val_instances_foggyALL_coco.json",     "cityscapes_foggy/")

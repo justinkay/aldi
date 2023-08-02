@@ -45,7 +45,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      do_sada = _model.sada_heads is not None
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
-     do_unlabeled = unlabeled_weak is not None
+     do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
      num_grad_accum_steps = int(do_weak) + int(do_strong) + int(do_unlabeled)
 
      if DEBUG:
@@ -132,7 +132,8 @@ class DATrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
           ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
-          pseudo_labeler = PseudoLabeler(cfg, ema or model)
+          # build pseudo-labeler if applicable (pseudo-labels creaed by: EMA, student, or None based on cfg)
+          pseudo_labeler = PseudoLabeler(cfg, ema or model) # if cfg.DOMAIN_ADAPT.TEACHER.ENABLED else None
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END)
           return trainer

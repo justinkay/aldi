@@ -16,6 +16,7 @@ def add_da_config(cfg):
 
     # Strong augmentations
     _C.AUG = CN()
+    _C.AUG.WEAK_INCLUDES_MULTISCALE = True
     _C.AUG.INCLUDE_RANDOM_ERASING = True
     _C.AUG.LABELED_MIC_AUG = False
     _C.AUG.UNLABELED_MIC_AUG = False
@@ -29,6 +30,7 @@ def add_da_config(cfg):
 
     # Teacher model provides pseudo labels
     _C.DOMAIN_ADAPT.TEACHER = CN()
+    _C.DOMAIN_ADAPT.TEACHER.ENABLED = False
     _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # one of: { "thresholding", "probabilistic" }
     _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
 

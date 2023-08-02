@@ -3,8 +3,6 @@ MODEL:
   WEIGHTS: "models/cityscapes_probabilistic_baseline_foggy_val_model_best_512.pth"
 EMA:
   ENABLED: True
-TEACHER:
-  ENABLED: True
 DATASETS:
   UNLABELED: ("cityscapes_foggy_train",)
   BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")

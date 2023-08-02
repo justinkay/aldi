@@ -1,0 +1,7 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+MODEL:
+  WEIGHTS: "models/cityscapes_baseline_undertrained_485.pth"
+SOLVER:
+  STEPS: (74999,)
+  MAX_ITER: 75000
+OUTPUT_DIR: "output/cityscapes_meanteacher_undertrainedstart/"

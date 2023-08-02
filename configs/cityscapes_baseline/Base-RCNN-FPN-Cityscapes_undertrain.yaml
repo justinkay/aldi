@@ -1,0 +1,4 @@
+_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
+SOLVER:
+  MAX_ITER: 312
+OUTPUT_DIR: "output/cityscapes_baseline_undertrained/"

@@ -1,0 +1,4 @@
+_BASE_: "../cityscapes_priorart/ProbabilisticTeacher-Cityscapes.yaml"
+GRCNN:
+  LEARN_ANCHORS_UNLABELED: False
+OUTPUT_DIR: "output/cityscapes_probabilisticteacher_noanchorupdate/"
