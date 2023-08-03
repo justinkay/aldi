@@ -207,10 +207,28 @@ class RandomEraseTransform(Transform):
     @classmethod
     def modify_erased_annotation(cls, anno, erased_box_coords):
         x0, y0, x1, y1 = anno
+
+        # if completely enclosed, delete it
         if x0 >= erased_box_coords[0] and y0 >= erased_box_coords[1] and x1 <= erased_box_coords[2] and y1 <= erased_box_coords[3]:
             return np.asarray([-1,-1,-1,-1])
-        else:
-            return anno
+        
+        # if left side is inside erased_box, move it to be flush with the right side of erased_box
+        if x0 >= erased_box_coords[0] and x0 <= erased_box_coords[2] and y0 >= erased_box_coords[1] and y1 <= erased_box_coords[3]:
+            x0 = erased_box_coords[2]
+
+        # if right side is inside erased_box, move it to be flush with the left side of erased_box
+        if x1 >= erased_box_coords[0] and x1 <= erased_box_coords[2] and y0 >= erased_box_coords[1] and y1 <= erased_box_coords[3]:
+            x1 = erased_box_coords[0]
+
+        # if top side is inside erased_box, move it to be flush with the bottom side of erased_box
+        if x0 >= erased_box_coords[0] and x1 <= erased_box_coords[2] and y0 >= erased_box_coords[1] and y0 <= erased_box_coords[3]:
+            y0 = erased_box_coords[3]
+
+        # if bottom side is inside erased_box, move it to be flush with the top side of erased_box
+        if x0 >= erased_box_coords[0] and x1 <= erased_box_coords[2] and y1 >= erased_box_coords[1] and y1 <= erased_box_coords[3]:
+            y1 = erased_box_coords[1]
+
+        return np.asarray([x0, y0, x1, y1])
 
 class MICTransform(Transform):
     def __init__(self, ratio, block_size):

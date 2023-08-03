@@ -98,17 +98,22 @@ def process_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih", erased_reg
         ]
     elif proposal_type == "roih":
 
-        # remove boxes in erased regions
+        # remove/modify boxes in erased regions
         # TODO hacky
         if erased_regions is not None:
+            box_t = proposal_bbox_inst.pred_boxes.tensor.clone()
             for i, bbox in enumerate(proposal_bbox_inst.pred_boxes):
                 valid = True
+                modified = bbox.clone() # allow multiple modifications
                 for erased in erased_regions:
-                    if not all(RandomEraseTransform.modify_erased_annotation(bbox.cpu(), erased.cpu()) >= 0.0):
+                    modified = torch.Tensor(RandomEraseTransform.modify_erased_annotation(modified.cpu(), erased.cpu()))
+                    if not all(modified >= 0.0):
                         valid = False
                         break
+                box_t[i,:] = modified.to(box_t.device)
                 if not valid:
                     proposal_bbox_inst.scores[i] = 0
+            proposal_bbox_inst.pred_boxes = Boxes(box_t)
 
         valid_map = proposal_bbox_inst.scores > thres
 
