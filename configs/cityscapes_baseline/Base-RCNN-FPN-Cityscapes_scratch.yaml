@@ -1,0 +1,4 @@
+_BASE_: "./Base-RCNN-FPN-Cityscapes_ImageNet.yaml"
+MODEL:
+  WEIGHTS: ""
+OUTPUT_DIR: "output/cityscapes_baseline_scratch/"

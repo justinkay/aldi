@@ -1,4 +1,4 @@
-_BASE_: "../_Base-RCNN-SwinB-FPN.yaml"
+_BASE_: "../_Base-RCNN-VGG16.yaml"
 MODEL:
   ROI_HEADS:
     NUM_CLASSES: 8
@@ -15,19 +15,18 @@ DATASETS:
   TRAIN: ("cityscapes_train",)
   TEST: ("cityscapes_val", "cityscapes_foggy_val",)
 SOLVER:
-  BASE_LR: 0.005
-  STEPS: (36000,)
-  MAX_ITER: 48000
-  IMS_PER_BATCH: 4
+  BASE_LR: 0.02
+  STEPS: (9000,)
+  MAX_ITER: 12000
+  IMS_PER_BATCH: 16
   AMP:
     ENABLED: True
-  WARMUP_FACTOR: 0.0008 # 1/1250
-  WARMUP_ITERS: 1250
+  WARMUP_FACTOR: 0.0032 # roughly 1/312
+  WARMUP_ITERS: 312
   # just save a few checkpoints throughout because we will also use BestCheckpointer
   # every TEST.EVAL_PERIOD
-  CHECKPOINT_PERIOD: 12500
-  # OPTIMIZER: "ADAMW"
+  CHECKPOINT_PERIOD: 3000
+VIS_PERIOD: 312
 TEST:
-  EVAL_PERIOD: 1250
-VIS_PERIOD: 1250
-OUTPUT_DIR: "output/cityscapes_swinb_baseline/"
+  EVAL_PERIOD: 312
+OUTPUT_DIR: "output/cityscapes_baseline_vgg16/"
