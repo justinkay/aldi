@@ -1,0 +1,2 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+OUTPUT_DIR: "output/cityscapes_meanteacher_anno_aware/"
