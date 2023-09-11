@@ -26,7 +26,6 @@ class UnlabeledDatasetMapper(SaveWeakDatasetMapper):
         dataset_dict.pop("sem_seg_file_name", None)
         dataset_dict['instances'] = Instances(dataset_dict['instances'].image_size, gt_boxes=Boxes([]), 
                                               gt_classes=torch.tensor([], dtype=torch.int64))
-
         return dataset_dict
 
 class TwoDataloaders:

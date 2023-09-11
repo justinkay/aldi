@@ -3,6 +3,10 @@ MODEL:
   BACKBONE:
     NAME: "build_vgg_backbone"
   WEIGHTS: ""
+  RPN:
+    IN_FEATURES: ["vgg4"]
+  ROI_HEADS:
+    IN_FEATURES: ["vgg4"]
 SOLVER:
   IMS_PER_BATCH: 8
   BASE_LR: 0.01

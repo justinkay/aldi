@@ -181,10 +181,9 @@ class DATrainer(DefaultTrainer):
           - Enable use of alternative optimizers (e.g. AdamW for ViTDet)
           """
           logger = logging.getLogger("detectron2")
-          num_grad_accum = len(cfg.DATASETS.BATCH_CONTENTS)
-          effective_batch_size = cfg.SOLVER.IMS_PER_BATCH * num_grad_accum
+          effective_batch_size = sum([ int(r * cfg.SOLVER.IMS_PER_BATCH) for r in cfg.DATASETS.BATCH_RATIOS ])
           lr_scale = effective_batch_size / cfg.SOLVER.IMS_PER_BATCH
-          logger.info(f"Effective batch size is {effective_batch_size} due to {num_grad_accum} gradient accumulation steps.")
+          logger.info(f"Effective batch size is {effective_batch_size}.")
           logger.info(f"Scaling LR from {cfg.SOLVER.BASE_LR} to {lr_scale * cfg.SOLVER.BASE_LR}.")
 
           cfg.defrost()
