@@ -1,0 +1,5 @@
+_BASE_: "detectron2/Base-RCNN-FPN.yaml"
+MODEL:
+  META_ARCHITECTURE: "DARCNN"
+  WEIGHTS: "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl"
+  MASK_ON: False

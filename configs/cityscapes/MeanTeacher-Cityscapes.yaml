@@ -23,4 +23,4 @@ SOLVER:
   STEPS: (49999,)
   MAX_ITER: 50000
   BACKWARD_AT_END: False
-OUTPUT_DIR: "output/cityscapes_meanteacher_nobackwardatend_testingrefactor/"
+OUTPUT_DIR: "output/cityscapes_meanteacher/"

@@ -1,4 +1,4 @@
-_BASE_: "../_Base-RCNN-FPN.yaml"
+_BASE_: "../Base-RCNN-VGG16-FPN.yaml"
 MODEL:
   ROI_HEADS:
     NUM_CLASSES: 8
@@ -29,4 +29,4 @@ SOLVER:
 VIS_PERIOD: 312
 TEST:
   EVAL_PERIOD: 312
-OUTPUT_DIR: "output/cityscapes_baseline/"
+OUTPUT_DIR: "output/cityscapes_baseline_vgg16_fpn/"

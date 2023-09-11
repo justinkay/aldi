@@ -1,4 +1,4 @@
-_BASE_: "./_Base-RCNN-FPN.yaml"
+_BASE_: "./Base-RCNN-FPN.yaml"
 MODEL:
   ANCHOR_GENERATOR:
     NAME: "DifferentiableAnchorGenerator"

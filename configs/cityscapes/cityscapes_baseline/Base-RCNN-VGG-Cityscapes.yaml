@@ -1,4 +1,4 @@
-_BASE_: "../_Base-RCNN-VGG16.yaml"
+_BASE_: "../Base-RCNN-VGG16.yaml"
 MODEL:
   ROI_HEADS:
     NUM_CLASSES: 8

@@ -1,7 +1,7 @@
-_BASE_: "./_Base-RCNN-FPN.yaml"
+_BASE_: "./Base-RCNN-FPN.yaml"
 MODEL:
   BACKBONE:
-    NAME: "build_vgg_fpn_backbone"
+    NAME: "build_vgg_backbone"
   WEIGHTS: ""
   RPN:
     IN_FEATURES: ["vgg4"]
