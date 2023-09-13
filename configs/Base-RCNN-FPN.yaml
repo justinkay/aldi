@@ -3,3 +3,24 @@ MODEL:
   META_ARCHITECTURE: "DARCNN"
   WEIGHTS: "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl"
   MASK_ON: False
+INPUT:
+  MIN_SIZE_TRAIN: (800, 832, 864, 896, 928, 960, 992, 1024)
+  MIN_SIZE_TRAIN_SAMPLING: "choice"
+  MIN_SIZE_TEST: 1024
+  MAX_SIZE_TRAIN: 2048
+  MAX_SIZE_TEST: 2048
+SOLVER:
+  BASE_LR: 0.02
+  STEPS: (9000,)
+  MAX_ITER: 12000
+  IMS_PER_BATCH: 16
+  AMP:
+    ENABLED: True
+  WARMUP_FACTOR: 0.0032 # roughly 1/312
+  WARMUP_ITERS: 312
+  # just save a few checkpoints throughout because we will also use BestCheckpointer
+  # every TEST.EVAL_PERIOD
+  CHECKPOINT_PERIOD: 3000
+VIS_PERIOD: 312
+TEST:
+  EVAL_PERIOD: 312

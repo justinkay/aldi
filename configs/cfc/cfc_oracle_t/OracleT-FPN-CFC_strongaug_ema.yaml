@@ -1,0 +1,6 @@
+_BASE_: "./OracleT-RCNN-FPN-CFC.yaml"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+OUTPUT_DIR: "output/cfc_oraclet_strongaug_ema/"
