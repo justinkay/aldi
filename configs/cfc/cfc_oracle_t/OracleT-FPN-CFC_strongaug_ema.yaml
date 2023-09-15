@@ -3,4 +3,4 @@ DATASETS:
   BATCH_CONTENTS: ("labeled_strong", )
 EMA:
   ENABLED: True
-OUTPUT_DIR: "output/cfc_oraclet_strongaug_ema/"
+OUTPUT_DIR: "output/cfc/cfc_oraclet_strongaug_ema/"
