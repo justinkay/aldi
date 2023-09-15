@@ -1,0 +1,16 @@
+_BASE_: "../../Base-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("sim10k_cars_train",)
+  TEST: ("cityscapes_cars_val",)
+OUTPUT_DIR: "output/sim10k/sim10k_baseline/"
+
+# to start, try: double compared to Cityscapes train
+SOLVER:
+  STEPS: (3000,) #(18000,)
+  MAX_ITER: 5000 #24000
+  CHECKPOINT_PERIOD: 3000
+TEST:
+  EVAL_PERIOD: 312 # evaluate sooner; with 612 the best model was the first one
