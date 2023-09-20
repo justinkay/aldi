@@ -13,3 +13,16 @@ git checkout -b pullrequest FETCH_HEAD
 pip install -e .
 ```
 Once this is an official release, replace with `pip install`.
+
+### Downloading data
+
+TODO
+
+
+### Model zoo
+
+TODO
+
+You can download all models using `models/download_models.sh`
+
+You will need the Github CLI installed to do so. You can install with conda: `conda install gh --channel conda-forge`
