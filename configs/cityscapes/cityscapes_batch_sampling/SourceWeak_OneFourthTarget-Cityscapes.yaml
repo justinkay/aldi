@@ -1,5 +1,5 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
 DATASETS:
   BATCH_CONTENTS: ("labeled_weak", "unlabeled_strong")
-  BATCH_RATIOS: (1,0.125)
-OUTPUT_DIR: "output/cityscapes_eightninthssourceweak_oneninthtarget/"
+  BATCH_RATIOS: (3,1)
+OUTPUT_DIR: "output/cityscapes_sourceweak_onefourthtarget/"

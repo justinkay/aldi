@@ -1,32 +1,8 @@
-_BASE_: "../Base-RCNN-VGG16-FPN.yaml"
+_BASE_: "../../Base-RCNN-VGG16-FPN.yaml"
 MODEL:
   ROI_HEADS:
     NUM_CLASSES: 8
-# This is similar to the setting used in Mask R-CNN paper, Appendix A
-# But there are some differences, e.g., we did not initialize the output
-# layer using the corresponding classes from COCO
-INPUT:
-  MIN_SIZE_TRAIN: (800, 832, 864, 896, 928, 960, 992, 1024)
-  MIN_SIZE_TRAIN_SAMPLING: "choice"
-  MIN_SIZE_TEST: 1024
-  MAX_SIZE_TRAIN: 2048
-  MAX_SIZE_TEST: 2048
 DATASETS:
   TRAIN: ("cityscapes_train",)
   TEST: ("cityscapes_val", "cityscapes_foggy_val",)
-SOLVER:
-  BASE_LR: 0.02
-  STEPS: (9000,)
-  MAX_ITER: 12000
-  IMS_PER_BATCH: 16
-  AMP:
-    ENABLED: True
-  WARMUP_FACTOR: 0.0032 # roughly 1/312
-  WARMUP_ITERS: 312
-  # just save a few checkpoints throughout because we will also use BestCheckpointer
-  # every TEST.EVAL_PERIOD
-  CHECKPOINT_PERIOD: 3000
-VIS_PERIOD: 312
-TEST:
-  EVAL_PERIOD: 312
 OUTPUT_DIR: "output/cityscapes_baseline_vgg16_fpn/"

@@ -3,8 +3,6 @@ import torch
 import copy
 import logging
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
-from torch.distributed.fsdp.wrap import size_based_auto_wrap_policy, always_wrap_policy
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.engine import hooks, BestCheckpointer
@@ -40,13 +38,13 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      model = trainer.model
      pseudo_labeler = trainer.pseudo_labeler
      backward_at_end = trainer.backward_at_end
+     model_batch_size = trainer.model_batch_size # TODO this could be None
 
      _model = model.module if type(model) == DDP else model
      do_sada = _model.sada_heads is not None
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
      do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
-     num_grad_accum_steps = int(do_weak) + int(do_strong) + int(do_unlabeled)
 
      if DEBUG:
           debug_dict['last_labeled_weak'] = copy.deepcopy(labeled_weak)
@@ -64,22 +62,27 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           """
           for k, v in losses.items():
                if key_conditional(k):
-                    v /= num_grad_accum_steps
-                    loss_dict[f"{k}_{suffix}"] = v if backward_at_end else v.detach()
+                    # v /= num_grad_accum_steps
+                    if not backward_at_end: v = v.detach()
+                    if f"{k}_{suffix}" in loss_dict:
+                         loss_dict[f"{k}_{suffix}"] += v
+                    else:
+                         loss_dict[f"{k}_{suffix}"] = v
 
      def maybe_do_backward(losses, key_conditional=lambda k: True):
           """Helper method to do backward pass if not doing it at the end."""
           if not backward_at_end:
                losses = { k: v * 0 if not key_conditional(k) else v for k, v in losses.items() }
-               trainer.do_backward(sum(losses.values()) / num_grad_accum_steps, override=True)
+               trainer.do_backward(sum(losses.values()), override=True)
 
      #### Weakly-augmented source imagery (Used for normal training and/or domain alignment)
      if do_weak or do_sada:
           # Added try/catch for debugging Probabilistic Teacher - can hopefully remove later
           try:
-               loss_weak = model(labeled_weak, do_sada=do_sada)
-               maybe_do_backward(loss_weak, lambda k: do_weak or (do_sada and "_da_" in k))
-               add_to_loss_dict(loss_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k))
+               for batch_i in range(0, len(labeled_weak), model_batch_size):
+                    loss_weak = model(labeled_weak[batch_i:batch_i+model_batch_size], do_sada=do_sada)
+                    maybe_do_backward(loss_weak, lambda k: do_weak or (do_sada and "_da_" in k))
+                    add_to_loss_dict(loss_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k))
           except FloatingPointError as e:
                print("Floating point error in weak forward pass. Skipping batch.")
                torch.save(labeled_weak, "labeled_weak_bad_batch.pt")
@@ -87,32 +90,37 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      
      #### Weakly-augmented target imagery (Only used for domain alignment)
      if do_sada:
-          loss_sada_target = model(unlabeled_weak, labeled=False, do_sada=True)
-          maybe_do_backward(loss_sada_target, lambda k: "_da_" in k)
-          add_to_loss_dict(loss_sada_target, "target_weak", lambda k: "_da_" in k)
+          for batch_i in range(0, len(labeled_weak), model_batch_size):
+               loss_sada_target = model(unlabeled_weak[batch_i:batch_i+model_batch_size], labeled=False, do_sada=True)
+               maybe_do_backward(loss_sada_target, lambda k: "_da_" in k)
+               add_to_loss_dict(loss_sada_target, "target_weak", lambda k: "_da_" in k)
 
      #### Strongly-augmented source imagery (Used for normal training)
      if do_strong:
-          loss_strong = model(labeled_strong, do_sada=False)
-          maybe_do_backward(loss_strong)
-          add_to_loss_dict(loss_strong, "source_strong")
+          for batch_i in range(0, len(labeled_strong), model_batch_size):
+               loss_strong = model(labeled_strong[batch_i:batch_i+model_batch_size], do_sada=False)
+               maybe_do_backward(loss_strong)
+               add_to_loss_dict(loss_strong, "source_strong")
 
      #### Target imagery (Used for pseudo-labeling)
      if do_unlabeled:
-          pseudolabeled_data = pseudo_labeler(unlabeled_weak, unlabeled_strong)
-          loss_pseudolabeled = model(pseudolabeled_data, labeled=False, do_sada=False)
-          maybe_do_backward(loss_pseudolabeled)
-          add_to_loss_dict(loss_pseudolabeled, "target_pseudolabeled")
-          if DEBUG: 
-               debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
+          for batch_i in range(0, len(unlabeled_weak), model_batch_size):
+               pseudolabeled_data = pseudo_labeler(unlabeled_weak[batch_i:batch_i+model_batch_size], 
+                                                       unlabeled_strong[batch_i:batch_i+model_batch_size])
+               loss_pseudolabeled = model(pseudolabeled_data, labeled=False, do_sada=False)
+               maybe_do_backward(loss_pseudolabeled)
+               add_to_loss_dict(loss_pseudolabeled, "target_pseudolabeled")
+               if DEBUG: 
+                    debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
      
      return loss_dict
 
 class _DATrainer:
-     def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True):
+     def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True, model_batch_size=None):
           super().__init__(model, data_loader, optimizer, zero_grad_before_forward=not backward_at_end)
           self.pseudo_labeler = pseudo_labeler
           self.backward_at_end = backward_at_end
+          self.model_batch_size = model_batch_size
 
      def run_model(self, data):
           return run_model_labeled_unlabeled(self, *data)
@@ -135,7 +143,8 @@ class DATrainer(DefaultTrainer):
           # build pseudo-labeler if applicable (pseudo-labels creaed by: EMA, student, or None based on cfg)
           pseudo_labeler = PseudoLabeler(cfg, ema or model) # if cfg.DOMAIN_ADAPT.TEACHER.ENABLED else None
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
-                                                                                  backward_at_end=cfg.SOLVER.BACKWARD_AT_END)
+                                                                                  backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
+                                                                                  model_batch_size=cfg.SOLVER.IMS_PER_GPU*torch.distributed.get_world_size())
           return trainer
      
      def _create_checkpointer(self, model, cfg):
@@ -176,20 +185,8 @@ class DATrainer(DefaultTrainer):
      @classmethod
      def build_optimizer(cls, cfg, model):
           """
-          - Change the learning rate to account for the fact that we are doing gradient accumulation in order
-          to run multiple batches of labeled and unlabeled data each training step.
           - Enable use of alternative optimizers (e.g. AdamW for ViTDet)
           """
-          logger = logging.getLogger("detectron2")
-          effective_batch_size = sum([ int(r * cfg.SOLVER.IMS_PER_BATCH) for r in cfg.DATASETS.BATCH_RATIOS ])
-          lr_scale = effective_batch_size / cfg.SOLVER.IMS_PER_BATCH
-          logger.info(f"Effective batch size is {effective_batch_size}.")
-          logger.info(f"Scaling LR from {cfg.SOLVER.BASE_LR} to {lr_scale * cfg.SOLVER.BASE_LR}.")
-
-          cfg.defrost()
-          cfg.SOLVER.BASE_LR = lr_scale * cfg.SOLVER.BASE_LR
-          cfg.freeze()
-
           if cfg.SOLVER.OPTIMIZER.upper() == "SGD":
                return super(DATrainer, cls).build_optimizer(cfg, model)
           elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW":
@@ -206,8 +203,12 @@ class DATrainer(DefaultTrainer):
      @classmethod
      def build_train_loader(cls, cfg):
           batch_contents = cfg.DATASETS.BATCH_CONTENTS
-          batch_sizes = [ int(r * cfg.SOLVER.IMS_PER_BATCH) for r in cfg.DATASETS.BATCH_RATIOS ]
+          batch_ratios = cfg.DATASETS.BATCH_RATIOS
+          total_batch_size = cfg.SOLVER.IMS_PER_BATCH
+          batch_sizes = [ int(total_batch_size * r / sum(batch_ratios)) for r in batch_ratios ] 
           assert len(batch_contents) == len(batch_sizes), "len(cfg.DATASETS.BATCH_CONTENTS) must equal len(cfg.DATASETS.BATCH_RATIOS)."
+          assert sum(batch_sizes) == total_batch_size, "sum(batch_sizes) must equal total_batch_size"
+          
           labeled_bs = [batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("labeled")]
           labeled_bs = max(labeled_bs) if len(labeled_bs) else 0
           unlabeled_bs = [batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("unlabeled")]
@@ -232,18 +233,8 @@ class DATrainer(DefaultTrainer):
           return WeakStrongDataloader(labeled_loader, unlabeled_loader, batch_contents)
      
      def before_step(self):
+          """Update the EMA model every step."""
           super(DATrainer, self).before_step()
           if self.cfg.EMA.ENABLED:
                self._trainer.pseudo_labeler.model.update_weights(self._trainer.model, self.iter)
-
-     def create_ddp_model(self, model, broadcast_buffers, cfg):
-          """In progress: Add FSDP support.
-          Not currently working.
-          """
-          if cfg.MODEL.FSDP_ENABLED and comm.get_world_size() > 1:
-               return FSDP(model, 
-                           auto_wrap_policy=always_wrap_policy
-                           )
-          else:
-               return super(DATrainer, self).create_ddp_model(model, broadcast_buffers, cfg)
                

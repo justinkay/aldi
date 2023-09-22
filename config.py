@@ -61,6 +61,11 @@ def add_da_config(cfg):
     _C.GRCNN.EFL_LAMBDA = [0.5, 0.5]
     _C.GRCNN.MODEL_TYPE = "GAUSSIAN"
 
+    # We interpret SOLVER.IMS_PER_BATCH as the total batch size on all GPUs, for 
+    # experimental consistency. Gradient accumulation is used according to 
+    # num_gradient_accum_steps = IMS_PER_BATCH / (NUM_GPUS * IMS_PER_GPU)
+    _C.SOLVER.IMS_PER_GPU = 2
+
     # We use gradient accumulation to run the weak/strong/unlabeled data separately
     # Should we call backward intermittently during accumulation or at the end?
     # The former is slower but less memory usage
@@ -68,6 +73,3 @@ def add_da_config(cfg):
 
     # Enable use of different optimizers (necessary to match VitDet settings)
     _C.SOLVER.OPTIMIZER = "SGD"
-
-    # Use fully sharded data parallelism to fit larger models
-    _C.MODEL.FSDP_ENABLED = False

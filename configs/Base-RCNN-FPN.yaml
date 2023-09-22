@@ -10,17 +10,18 @@ INPUT:
   MAX_SIZE_TRAIN: 2048
   MAX_SIZE_TEST: 2048
 SOLVER:
-  BASE_LR: 0.02
-  STEPS: (9000,)
-  MAX_ITER: 12000
-  IMS_PER_BATCH: 16
+  BASE_LR: 0.12
+  STEPS: (2250,)
+  MAX_ITER: 1500
+  IMS_PER_BATCH: 96
+  IMS_PER_GPU: 2
   AMP:
     ENABLED: True
-  WARMUP_FACTOR: 0.0032 # roughly 1/312
-  WARMUP_ITERS: 312
+  WARMUP_ITERS: 50
+  WARMUP_FACTOR: 0.02
   # just save a few checkpoints throughout because we will also use BestCheckpointer
   # every TEST.EVAL_PERIOD
-  CHECKPOINT_PERIOD: 3000
-VIS_PERIOD: 312
+  CHECKPOINT_PERIOD: 500
+VIS_PERIOD: 50
 TEST:
-  EVAL_PERIOD: 312
+  EVAL_PERIOD: 50 # ~one epoch for Cityscapes
