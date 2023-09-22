@@ -34,6 +34,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
                If False, call backward() throughout this method any time data is passed to the model. 
                This is slower, but uses less memory, allowing for larger batch sizes and training larger models that 
                would OOM with backward_at_end=True. Usually, the larger batch size also makes up for the slowdown.
+          model_batch_size (int): batch size to feed to the model *per GPU*
      """
      model = trainer.model
      pseudo_labeler = trainer.pseudo_labeler
@@ -45,6 +46,8 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
      do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
+     total_batch_size = sum([len(s or []) for s in [labeled_weak, labeled_strong, unlabeled_weak]])
+     num_grad_accum_steps = total_batch_size // model_batch_size
 
      if DEBUG:
           debug_dict['last_labeled_weak'] = copy.deepcopy(labeled_weak)
@@ -62,18 +65,16 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           """
           for k, v in losses.items():
                if key_conditional(k):
-                    # v /= num_grad_accum_steps
-                    if not backward_at_end: v = v.detach()
-                    if f"{k}_{suffix}" in loss_dict:
-                         loss_dict[f"{k}_{suffix}"] += v
-                    else:
-                         loss_dict[f"{k}_{suffix}"] = v
+                    v /= num_grad_accum_steps
+                    if not backward_at_end: 
+                         v = v.detach()
+                    loss_dict[f"{k}_{suffix}"] = loss_dict.get(f"{k}_{suffix}", 0) + v
 
      def maybe_do_backward(losses, key_conditional=lambda k: True):
           """Helper method to do backward pass if not doing it at the end."""
           if not backward_at_end:
                losses = { k: v * 0 if not key_conditional(k) else v for k, v in losses.items() }
-               trainer.do_backward(sum(losses.values()), override=True)
+               trainer.do_backward(sum(losses.values()) / num_grad_accum_steps, override=True)
 
      #### Weakly-augmented source imagery (Used for normal training and/or domain alignment)
      if do_weak or do_sada:
@@ -144,7 +145,7 @@ class DATrainer(DefaultTrainer):
           pseudo_labeler = PseudoLabeler(cfg, ema or model) # if cfg.DOMAIN_ADAPT.TEACHER.ENABLED else None
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
-                                                                                  model_batch_size=cfg.SOLVER.IMS_PER_GPU*torch.distributed.get_world_size())
+                                                                                  model_batch_size=cfg.SOLVER.IMS_PER_GPU)
           return trainer
      
      def _create_checkpointer(self, model, cfg):
@@ -205,10 +206,10 @@ class DATrainer(DefaultTrainer):
           batch_contents = cfg.DATASETS.BATCH_CONTENTS
           batch_ratios = cfg.DATASETS.BATCH_RATIOS
           total_batch_size = cfg.SOLVER.IMS_PER_BATCH
-          batch_sizes = [ int(total_batch_size * r / sum(batch_ratios)) for r in batch_ratios ] 
+          batch_sizes = [ int(total_batch_size * r / sum(batch_ratios)) for r in batch_ratios ]
           assert len(batch_contents) == len(batch_sizes), "len(cfg.DATASETS.BATCH_CONTENTS) must equal len(cfg.DATASETS.BATCH_RATIOS)."
           assert sum(batch_sizes) == total_batch_size, "sum(batch_sizes) must equal total_batch_size"
-          
+
           labeled_bs = [batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("labeled")]
           labeled_bs = max(labeled_bs) if len(labeled_bs) else 0
           unlabeled_bs = [batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("unlabeled")]
