@@ -7,17 +7,9 @@ from detectron2.modeling.meta_arch import GeneralizedRCNN
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 from detectron2.layers import cat, cross_entropy
 
+from helpers import SaveIO
 from sada import grad_reverse, SADA, FCDiscriminator_img
 
-class SaveIO:
-    """Simple PyTorch hook to save the output of a nn.module."""
-    def __init__(self):
-        self.input = None
-        self.output = None
-        
-    def __call__(self, module, module_in, module_out):
-        self.input = module_in
-        self.output = module_out
 
 @META_ARCH_REGISTRY.register()
 class DARCNN(GeneralizedRCNN):
