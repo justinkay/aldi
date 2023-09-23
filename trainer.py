@@ -76,46 +76,43 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
                losses = { k: v * 0 if not key_conditional(k) else v for k, v in losses.items() }
                trainer.do_backward(sum(losses.values()) / num_grad_accum_steps, override=True)
 
-     #### Weakly-augmented source imagery (Used for normal training and/or domain alignment)
-     if do_weak or do_sada:
-          # Added try/catch for debugging Probabilistic Teacher - can hopefully remove later
-          try:
-               for batch_i in range(0, len(labeled_weak), model_batch_size):
-                    loss_weak = model(labeled_weak[batch_i:batch_i+model_batch_size], do_sada=do_sada)
-                    maybe_do_backward(loss_weak, lambda k: do_weak or (do_sada and "_da_" in k))
-                    add_to_loss_dict(loss_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k))
-          except FloatingPointError as e:
-               print("Floating point error in weak forward pass. Skipping batch.")
-               torch.save(labeled_weak, "labeled_weak_bad_batch.pt")
-               return {"bad_loss": torch.tensor(0, device="cuda")}
+     def do_training_step(data, name="", key_conditional=lambda k: True, **kwargs):
+          """Helper method to do a forward pass:
+               - Handle gradient accumulation and possible backward passes
+               - Handle Detectron2's loss dictionary
+          """
+          for batch_i in range(0, len(data), model_batch_size):
+               loss = model(data[batch_i:batch_i+model_batch_size], **kwargs)
+               maybe_do_backward(loss, key_conditional)
+               add_to_loss_dict(loss, name, key_conditional)
+
+     # Weakly-augmented source imagery (Used for normal training and/or domain alignment)
+     if do_weak or do_sada: 
+          do_training_step(labeled_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k), do_sada=do_sada)
      
-     #### Weakly-augmented target imagery (Only used for domain alignment)
-     if do_sada:
-          for batch_i in range(0, len(labeled_weak), model_batch_size):
-               loss_sada_target = model(unlabeled_weak[batch_i:batch_i+model_batch_size], labeled=False, do_sada=True)
-               maybe_do_backward(loss_sada_target, lambda k: "_da_" in k)
-               add_to_loss_dict(loss_sada_target, "target_weak", lambda k: "_da_" in k)
+     # Weakly-augmented target imagery (Only used for domain alignment)
+     if do_sada: 
+          do_training_step(unlabeled_weak, "target_weak", lambda k: "_da_" in k, labeled=False, do_sada=True)
 
-     #### Strongly-augmented source imagery (Used for normal training)
-     if do_strong:
-          for batch_i in range(0, len(labeled_strong), model_batch_size):
-               loss_strong = model(labeled_strong[batch_i:batch_i+model_batch_size], do_sada=False)
-               maybe_do_backward(loss_strong)
-               add_to_loss_dict(loss_strong, "source_strong")
+     # Strongly-augmented source imagery (Used for normal training)
+     if do_strong: 
+          do_training_step(labeled_strong, "source_strong", do_sada=False)
 
-     #### Target imagery (Used for pseudo-labeling)
+     # Target imagery (Used for pseudo-labeling)
      if do_unlabeled:
+          pseudolabeled_data = []
           for batch_i in range(0, len(unlabeled_weak), model_batch_size):
-               pseudolabeled_data = pseudo_labeler(unlabeled_weak[batch_i:batch_i+model_batch_size], 
-                                                       unlabeled_strong[batch_i:batch_i+model_batch_size])
-               loss_pseudolabeled = model(pseudolabeled_data, labeled=False, do_sada=False)
-               maybe_do_backward(loss_pseudolabeled)
-               add_to_loss_dict(loss_pseudolabeled, "target_pseudolabeled")
-               if DEBUG: 
-                    debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
-     
+               pseudolabeled_data.extend(pseudo_labeler(unlabeled_weak[batch_i:batch_i+model_batch_size], 
+                                             unlabeled_strong[batch_i:batch_i+model_batch_size]))
+          do_training_step(pseudolabeled_data, "target_pseudolabeled", labeled=False, do_sada=False)
+          if DEBUG: 
+               debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
+
      return loss_dict
 
+
+# Extend both Detectron2's AMPTrainer and SimpleTrainer classes with DA capabilities
+# Used by DATrainer below in the same way DefaultTrainer uses the original AMP and Simple Trainers
 class _DATrainer:
      def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True, model_batch_size=None):
           super().__init__(model, data_loader, optimizer, zero_grad_before_forward=not backward_at_end)
@@ -131,9 +128,6 @@ class _DATrainer:
         Can be overridden by setting override=True to always call superclass method."""
         if self.backward_at_end or override:
              super().do_backward(losses)
-
-# Extend both Detectron2's AMPTrainer and SimpleTrainer classes with DA capabilities
-# Used by DATrainer below in the same way DefaultTrainer uses the original AMP and Simple Trainers
 class DAAMPTrainer(_DATrainer, AMPTrainer): pass
 class DASimpleTrainer(_DATrainer, SimpleTrainer): pass
 

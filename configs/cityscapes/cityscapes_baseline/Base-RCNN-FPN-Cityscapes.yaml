@@ -5,6 +5,4 @@ MODEL:
 DATASETS:
   TRAIN: ("cityscapes_train",)
   TEST: ("cityscapes_val", "cityscapes_foggy_val",)
-SOLVER:
-  BACKWARD_AT_END: False
-OUTPUT_DIR: "output/cityscapes_baseline_nobackwardatend/"
+OUTPUT_DIR: "output/cityscapes_baseline/"
