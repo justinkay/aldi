@@ -14,6 +14,7 @@ from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
 from backbone import get_adamw_optim, get_swinb_optim
+from distill import Distiller
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from ema import EMA
@@ -108,6 +109,9 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           if DEBUG: 
                debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
 
+     # TODO 
+     trainer.distiller()
+
      return loss_dict
 
 
@@ -140,6 +144,9 @@ class DATrainer(DefaultTrainer):
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
+          # TODO
+          trainer.distiller = Distiller(teacher=ema.model, student=model.module)
+
           return trainer
      
      def _create_checkpointer(self, model, cfg):
