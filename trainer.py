@@ -87,6 +87,11 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
                maybe_do_backward(loss, key_conditional)
                add_to_loss_dict(loss, name, key_conditional)
 
+     def do_distill_step(teacher_data, student_data, name="", key_conditional=lambda k: True, **kwargs):
+          for batch_i in range(0, len(teacher_data), model_batch_size):
+               loss = trainer.distiller(teacher_data[batch_i:batch_i+model_batch_size], student_data[batch_i:batch_i+model_batch_size])
+               print("Distill loss", loss)
+
      # Weakly-augmented source imagery (Used for normal training and/or domain alignment)
      if do_weak or do_sada: 
           do_training_step(labeled_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k), do_sada=do_sada)
@@ -109,8 +114,8 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           if DEBUG: 
                debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
 
-     # TODO 
-     trainer.distiller()
+     # TODO HACK
+     do_distill_step(unlabeled_weak, unlabeled_strong)
 
      return loss_dict
 
@@ -136,6 +141,7 @@ class DAAMPTrainer(_DATrainer, AMPTrainer): pass
 class DASimpleTrainer(_DATrainer, SimpleTrainer): pass
 
 class DATrainer(DefaultTrainer):
+     """Modified DefaultTrainer to support Mean Teacher style training."""
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
           ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None

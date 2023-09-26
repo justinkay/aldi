@@ -1,5 +1,8 @@
 import copy
+import torch
 import torch.nn.functional as F
+
+from detectron2.structures import Instances
 
 from helpers import SaveIO
 
@@ -10,6 +13,9 @@ class Distiller:
         self.teacher = teacher
         self.student = student
         self.register_hooks()
+
+        # TODO
+        self.temperature = 1.0
 
     def register_hooks(self):
         self.teacher_io, self.teacher_backbone_io, self.teacher_rpn_io, self.teacher_roih_io, self.teacher_boxhead_io, self.teacher_boxpred_io = SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO()
@@ -29,41 +35,57 @@ class Distiller:
         self.teacher.roi_heads.box_head.register_forward_hook(self.teacher_boxhead_io)
         self.teacher.roi_heads.box_predictor.register_forward_hook(self.teacher_boxpred_io)
 
-    def __call__(self): #, data):
-        # first let's just see if we can hook into the right outputs
-        # get the class logits from each:
-        # TODO do we need to deepcopy?
-        student_cls_scores, student_proposal_deltas = self.student_boxpred_io.output
-        teacher_cls_scores, teacher_proposal_deltas = self.teacher_boxpred_io.output
-
-        # student RPN proposals
+    def __call__(self, teacher_batched_inputs, student_batched_inputs):
+        # get student outputs
+        self.student(student_batched_inputs)
+        student_features = self.student.backbone_io.output
         student_proposals = self.student_rpn_io.output[0]
-        print("student proposals", len(student_proposals)) 
-        print(student_proposals[0])
+        student_cls_logits, student_proposal_deltas = self.student_boxpred_io.output
 
-        # make a copy of the teacher second stage
-        teacher_copy = copy.deepcopy(self.teacher)
-        teacher_copy.proposal_generator = None
-        # add student proposals to input and get teacher predictions again
-        print("teacher input", self.teacher_io.input)
+        print("student proposals", len(student_proposals), type(student_proposals[0]))
 
-        # problem 1: train batch size is 1024, inference batch size is 2000
-        print(student_cls_scores.shape, teacher_cls_scores.shape)
-        print(student_proposal_deltas.shape, teacher_proposal_deltas.shape)
-        print(student_cls_scores[0], teacher_cls_scores[0])
+        # get end-to-end teacher outputs
+        with torch.no_grad():
+            was_training = self.teacher.training
+            self.teacher.eval()
+            teacher_preds = self.teacher.inference(teacher_batched_inputs, do_postprocess=False)
+            if was_training: self.teacher.train()
+        teacher_features = self.teacher.backbone_io.output
+
+        # get second-stage teacher outputs using student proposals
+        # has to be in training mode so proposal sizes match
+        with torch.no_grad():
+            preprocessed_images = self.teacher.preprocess_image(teacher_batched_inputs)
+            gt_instances = None
+            if "instances" in teacher_batched_inputs[0]:
+                gt_instances = [x["instances"].to(self.teacher.device) for x in teacher_batched_inputs]
+            was_eval = not self.teacher.training
+            self.teacher.train()
+            _teacher_preds, _ = self.teacher.roi_heads(preprocessed_images, teacher_features, student_proposals, gt_instances)
+            if was_eval: self.teacher.eval()
+        teacher_cls_logits, teacher_proposal_deltas = self.teacher_boxpred_io.output
+
+        # postprocess the outputs accordingly
+        # TODO centering?
+        # sharpening:
+        teacher_cls_probs = F.softmax(teacher_cls_logits / self.temperature, dim=1)
+        # TODO thresholding?
+
+        # now we can get distillation losses
         
-        # HACK
-        teacher_cls_scores = teacher_cls_scores[:student_cls_scores.shape[0]]
-        teacher_proposal_deltas = teacher_proposal_deltas[:student_proposal_deltas.shape[0]]
+        # RPN objectness loss 
+        # TODO
 
-        temperature = 1.0
-        teacher_cls_probs = F.softmax(teacher_cls_scores / temperature, dim=1)
-        print(teacher_cls_probs[0])
-        print(sum(teacher_cls_probs[0]))
-        cls_dst_loss = F.cross_entropy(student_cls_scores, teacher_cls_probs)
-        # cls_dist_loss = torch.nn.functional.kl_div(student_cls_scores, teacher_cls_probs, reduction='batchmean')
-        print(cls_dst_loss)
-        
+        # RPN box loss
+        # TODO
 
-        # proposal deltas shape: num_bbox_reg_classes * box_dim
-        # print(student_logits.shape, teacher_logits.shape)
+        # ROI classificaiton loss
+        cls_dst_loss = F.cross_entropy(student_cls_logits, teacher_cls_probs)
+
+        # ROI box loss
+        # TODO
+
+        # Feature losses
+        # TODO
+
+        return cls_dst_loss # + ...  TODO
