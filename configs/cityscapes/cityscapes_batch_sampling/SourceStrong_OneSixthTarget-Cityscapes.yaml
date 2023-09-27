@@ -1,0 +1,7 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (5,1)
+SOLVER:
+  IMS_PER_GPU: 1 # required to get this ratio on 8 GPUs
+OUTPUT_DIR: "output/cityscapes_sourcestrong_onesixthtarget/"

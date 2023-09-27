@@ -19,9 +19,9 @@ class UMTCapableDatasetMapper(DatasetMapper):
     """
     def __init__(self, cfg, *args, dataset_type: Literal["source", "target"]=None, **kwargs):
         super().__init__(cfg, *args, **kwargs)
-        if not cfg.MODEL.UMT.ENABLED:
-            return
         self.do_umt = cfg.MODEL.UMT.ENABLED
+        if not self.do_umt:
+            return
         if dataset_type is None:
             raise TypeError("dataset_type must be either 'source' or 'target'")
         assert len(cfg.DATASETS.TRAIN) == 1, "only the usage of a single labeled training dataset is currently implemented for UMT"

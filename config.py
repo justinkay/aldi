@@ -52,6 +52,10 @@ def add_da_config(cfg):
     _C.MODEL.DA.DIS_TYPE = "p2"
     _C.MODEL.DA.DIS_LOSS_WEIGHT = 0.05
 
+    # Unbiased Mean Teacher style feature alignment
+    _C.MODEL.UMT = CN()
+    _C.MODEL.UMT.ENABLED = False
+
     # Probabilistic Teacher (Gaussian RCNN) settings
     _C.GRCNN = CN()
     _C.GRCNN.LEARN_ANCHORS_LABELED = False
@@ -66,10 +70,6 @@ def add_da_config(cfg):
     # num_gradient_accum_steps = IMS_PER_BATCH / (NUM_GPUS * IMS_PER_GPU)
     _C.SOLVER.IMS_PER_GPU = 2
 
-    # Unbiased Mean Teacher style feature alignment
-    _C.MODEL.UMT = CN()
-    _C.MODEL.UMT.ENABLED = False
-
     # We use gradient accumulation to run the weak/strong/unlabeled data separately
     # Should we call backward intermittently during accumulation or at the end?
     # The former is slower but less memory usage
@@ -77,6 +77,3 @@ def add_da_config(cfg):
 
     # Enable use of different optimizers (necessary to match VitDet settings)
     _C.SOLVER.OPTIMIZER = "SGD"
-
-    # Use fully sharded data parallelism to fit larger models
-    _C.MODEL.FSDP_ENABLED = False
