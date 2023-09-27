@@ -22,7 +22,43 @@ from ema import EMA
 from pseudolabeler import PseudoLabeler
 
 
-DEBUG = False
+def visualize_batch(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, max_rows=-1, umt_labels=False):
+     """Helper method to visualize an entire or parts of a batch."""
+     
+     assert len(labeled_weak) == len(labeled_strong) == len(unlabeled_weak) == len(unlabeled_strong)
+     
+     from detectron2.utils.visualizer import Visualizer
+     import matplotlib.pyplot as plt
+     from mpl_toolkits.axes_grid1 import ImageGrid
+     
+     labels = ["target-like", "source", "source-like", "target"] if umt_labels else ["labeled weak", "labeled strong", "unlabeled weak", "unlabeled strong"]
+     
+     fig = plt.figure(figsize=(20., 20.))
+     grid = ImageGrid(fig, 111, 
+          nrows_ncols=(len(labeled_weak) if max_rows < 0 else min(max_rows, len(labeled_weak)), 4),
+          axes_pad=0.1,
+     )
+     grid_iter = iter(grid)
+     
+     for row_idx, (lw, ls, uw, us) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong)):
+          if max_rows >= 0 and row_idx >= max_rows:
+               break
+          for e, label in zip([lw, ls, uw, us], labels):
+               ax = next(grid_iter)
+               ax.imshow(Visualizer(e["image"].numpy().transpose(1, 2, 0)[..., ::-1]).draw_dataset_dict(e).get_image())
+               ax.tick_params(
+                    axis="both",
+                    which="both",
+                    left=False,
+                    bottom=False,
+                    labelleft=False,
+                    labelbottom=False)
+               if row_idx == 0:
+                    ax.set_title(label)
+     return fig
+
+
+DEBUG = True
 debug_dict = {}
 
 def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong):
@@ -72,6 +108,10 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           if not backward_at_end:
                losses = { k: v * 0 if not key_conditional(k) else v for k, v in losses.items() }
                trainer.do_backward(sum(losses.values()) / num_grad_accum_steps, override=True)
+
+     # if DEBUG:
+     #      # for debugging, visualize the contents of this batch
+     #      visualize_batch(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, max_rows=3, umt_labels=True).savefig("batch_vis.png", bbox_inches="tight", transparent=True)
 
      #### Weakly-augmented source imagery (Used for normal training and/or domain alignment)
      if do_weak or do_sada:
@@ -217,7 +257,8 @@ class DATrainer(DefaultTrainer):
           labeled_loader = None
           if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
                labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                    mapper=SaveWeakDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True, include_strong_augs="labeled_strong" in batch_contents)),
+                    mapper=SaveWeakDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True, include_strong_augs="labeled_strong" in batch_contents),
+                    dataset_type="source"),
                     num_workers=cfg.DATALOADER.NUM_WORKERS, 
                     total_batch_size=labeled_bs)
 
@@ -225,7 +266,8 @@ class DATrainer(DefaultTrainer):
           unlabeled_loader = None
           if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
                unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.UNLABELED, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                    mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=False, include_strong_augs="unlabeled_strong" in batch_contents)),
+                    mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=False, include_strong_augs="unlabeled_strong" in batch_contents),
+                    dataset_type="target"),
                     num_workers=cfg.DATALOADER.NUM_WORKERS,
                     total_batch_size=unlabeled_bs)
 
