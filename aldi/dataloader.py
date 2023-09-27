@@ -1,18 +1,52 @@
+from typing import Literal
 import copy
+import os
 import torch
 import numpy as np
 
 from detectron2.structures import Instances, Boxes
+from detectron2.data import detection_utils as utils, MetadataCatalog
 
 from aldi.aug import WEAK_IMG_KEY
 from aldi.dropin import DatasetMapper
 
-class SaveWeakDatasetMapper(DatasetMapper):
+TRANSLATED_IMG_KEY = "img_translated"
+
+class UMTCapableDatasetMapper(DatasetMapper):
+    """
+    DatasetMapper that enables loading source-like and target-like
+    samples corresponding to labeled target and unlabeled source samples.
+    """
+    def __init__(self, cfg, *args, dataset_type: Literal["source", "target"]=None, **kwargs):
+        super().__init__(cfg, *args, **kwargs)
+        if not cfg.MODEL.UMT.ENABLED:
+            return
+        self.do_umt = cfg.MODEL.UMT.ENABLED
+        if dataset_type is None:
+            raise TypeError("dataset_type must be either 'source' or 'target'")
+        assert len(cfg.DATASETS.TRAIN) == 1, "only the usage of a single labeled training dataset is currently implemented for UMT"
+        assert len(cfg.DATASETS.UNLABELED) == 1, "only the usage of a single unlabeled training dataset is currently implemented for UMT"
+        self.meta = MetadataCatalog.get(cfg.DATASETS.TRAIN[0] if dataset_type == "source" else cfg.DATASETS.UNLABELED[0])
+
+    def _after_call(self, dataset_dict, aug_input, transforms):
+        if not self.do_umt:
+            return dataset_dict
+
+        # load source-like or target-like samples for UMT
+        dataset_dict = copy.deepcopy(dataset_dict)
+        image_translated = utils.read_image(os.path.join(self.meta.translated_image_dir, os.path.relpath(dataset_dict["file_name"], self.meta.image_dir_prefix)), format=self.image_format)
+        image_translated = transforms.apply_image(image_translated)
+        dataset_dict[TRANSLATED_IMG_KEY] = torch.as_tensor(np.ascontiguousarray(image_translated.transpose(2, 0, 1)))
+
+        return dataset_dict
+
+class SaveWeakDatasetMapper(UMTCapableDatasetMapper):
     """
     DatasetMapper that retrieves the weakly augmented image from the aug_input object
     and saves it in the dataset_dict. See aug.SaveImgAug.
     """
-    def _after_call(self, dataset_dict, aug_input):
+    def _after_call(self, dataset_dict, aug_input, transforms):
+        dataset_dict = super()._after_call(dataset_dict, aug_input, transforms)
         weak_img = getattr(aug_input, WEAK_IMG_KEY)
         dataset_dict[WEAK_IMG_KEY] = torch.as_tensor(np.ascontiguousarray(weak_img.transpose(2, 0, 1)))
         return dataset_dict
@@ -62,7 +96,9 @@ def unpack_data_weak_strong(labeled, unlabeled, batch_contents=("labeled_weak", 
     if "labeled_weak" in batch_contents and labeled is not None:
         labeled_weak = copy.deepcopy(labeled)
         for img in labeled_weak:
-            if WEAK_IMG_KEY in img:
+            if TRANSLATED_IMG_KEY in img:
+                img["image"] = img[TRANSLATED_IMG_KEY]
+            elif WEAK_IMG_KEY in img:
                 img["image"] = img[WEAK_IMG_KEY]
     labeled_strong = labeled if "labeled_strong" in batch_contents else None
 
@@ -72,7 +108,9 @@ def unpack_data_weak_strong(labeled, unlabeled, batch_contents=("labeled_weak", 
     if ("unlabeled_weak" in batch_contents or "unlabeled_strong" in batch_contents) and unlabeled is not None:
         unlabeled_weak = copy.deepcopy(unlabeled)
         for img in unlabeled_weak:
-            if WEAK_IMG_KEY in img:
+            if TRANSLATED_IMG_KEY in img:
+                img["image"] = img[TRANSLATED_IMG_KEY]
+            elif WEAK_IMG_KEY in img:
                 img["image"] = img[WEAK_IMG_KEY]
     unlabeled_strong = unlabeled if "unlabeled_strong" in batch_contents else None
 

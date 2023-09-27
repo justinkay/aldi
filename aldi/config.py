@@ -73,6 +73,10 @@ def add_da_config(cfg):
     # num_gradient_accum_steps = IMS_PER_BATCH / (NUM_GPUS * IMS_PER_GPU)
     _C.SOLVER.IMS_PER_GPU = 2
 
+    # Unbiased Mean Teacher style feature alignment
+    _C.MODEL.UMT = CN()
+    _C.MODEL.UMT.ENABLED = False
+
     # We use gradient accumulation to run the weak/strong/unlabeled data separately
     # Should we call backward intermittently during accumulation or at the end?
     # The former is slower but less memory usage
