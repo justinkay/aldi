@@ -1,0 +1,10 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+MODEL:
+  UMT:
+    ENABLED: True
+DATASETS:
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_weak", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1,1)
+AUG:
+  INCLUDE_RANDOM_ERASING: False
+OUTPUT_DIR: "output/cityscapes_umt_nobackwardatend/"

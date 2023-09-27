@@ -187,8 +187,8 @@ class DatasetMapper(_DatasetMapper):
     def __call__(self, dataset_dict):
         """
         Same as detectron2.data.dataset_mapper.DatasetMapper, but adds a way to
-        access the aug_input object in subclasses without copy-pasting the entire
-        __call__ method.
+        access the aug_input and transforms object in subclasses without
+        copy-pasting the entire __call__ method.
         """
         dataset_dict = copy.deepcopy(dataset_dict)
         image = utils.read_image(dataset_dict["file_name"], format=self.image_format)
@@ -216,7 +216,7 @@ class DatasetMapper(_DatasetMapper):
             self._transform_annotations(dataset_dict, transforms, image_shape)
 
         ## Change is here ##
-        dataset_dict = self._after_call(dataset_dict, aug_input)
+        dataset_dict = self._after_call(dataset_dict, aug_input, transforms)
         ##   End change   ##
 
         return dataset_dict
