@@ -78,6 +78,10 @@ class Distiller:
         # RPN objectness loss
         # usually the RPN samples anchors based on known ground truth boxes
         # but we don't have that here, so we skip the sampling (?)
+        # without the sampling though, the background is going to dominate
+        # maybe we can:
+        #   - sample *student* proposals based on the teacher's predictions?
+        #   - use same sampling for teacher's proposals as targets
         objectness_loss = F.binary_cross_entropy_with_logits(
             cat([torch.flatten(t) for t in student_objectness_logits]),
             teacher_objectness_probs,
