@@ -20,7 +20,7 @@ DOMAIN_ADAPT:
   TEACHER:
     ENABLED: True
 SOLVER:
-  STEPS: (7999,)
-  MAX_ITER: 8000
+  STEPS: (59999,)
+  MAX_ITER: 60000
   BACKWARD_AT_END: False
 OUTPUT_DIR: "output/cityscapes_meanteacher/"
