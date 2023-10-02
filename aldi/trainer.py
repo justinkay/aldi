@@ -57,7 +57,7 @@ def visualize_batch(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_stro
      return fig
 
 
-DEBUG = True
+DEBUG = False
 debug_dict = {}
 
 
