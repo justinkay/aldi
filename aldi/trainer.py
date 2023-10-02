@@ -56,7 +56,7 @@ def visualize_batch(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_stro
      return fig
 
 
-DEBUG = True
+DEBUG = False
 debug_dict = {}
 
 def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong):
