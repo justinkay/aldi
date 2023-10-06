@@ -1,4 +1,4 @@
-_BASE_: "../MeanTeacher-Cityscapes.yaml"
+_BASE_: "../cityscapes_startingpoint/DA-RCNN-FPN-Cityscapes_strongaugemastart.yaml"
 DOMAIN_ADAPT:
   DISTILL:
     ROIH_CLS_ENABLED: True
