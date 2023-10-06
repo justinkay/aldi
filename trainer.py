@@ -15,7 +15,7 @@ from detectron2.utils import comm
 from aug import WEAK_IMG_KEY, get_augs
 from backbone import get_adamw_optim, get_swinb_optim
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
+from dataloader import SaveWeakDatasetMapper, UMTDatasetMapper, UnlabeledSaveWeakDatasetMapper, UnlabeledUMTDatasetMapper, WeakStrongDataloader
 from ema import EMA
 from pseudolabeler import PseudoLabeler
 
@@ -252,8 +252,9 @@ class DATrainer(DefaultTrainer):
           # create labeled dataloader
           labeled_loader = None
           if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
+               DatasetMapper = SaveWeakDatasetMapper if not cfg.MODEL.UMT.ENABLED else UMTDatasetMapper
                labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                    mapper=SaveWeakDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True, include_strong_augs="labeled_strong" in batch_contents),
+                    mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True, include_strong_augs="labeled_strong" in batch_contents),
                     dataset_type="source"),
                     num_workers=cfg.DATALOADER.NUM_WORKERS, 
                     total_batch_size=labeled_bs)
@@ -261,6 +262,7 @@ class DATrainer(DefaultTrainer):
           # create unlabeled dataloader
           unlabeled_loader = None
           if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
+               UnlabeledDatasetMapper = UnlabeledSaveWeakDatasetMapper if not cfg.MODEL.UMT.ENABLED else UnlabeledUMTDatasetMapper
                unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.UNLABELED, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
                     mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=False, include_strong_augs="unlabeled_strong" in batch_contents),
                     dataset_type="target"),

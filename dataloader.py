@@ -12,26 +12,30 @@ from dropin import DatasetMapper
 
 TRANSLATED_IMG_KEY = "img_translated"
 
-class UMTCapableDatasetMapper(DatasetMapper):
+class StoreImageDatasetMapper(DatasetMapper):
+    """
+    DatasetMapper that serves as superclass for UMTDatasetMapper and SaveWeakDatasetMapper.
+    Its primary purpose is to make the contructor signatures compatible along both subclasses.
+    """
+    def __init__(self, cfg, *args, dataset_type=None, **kwargs):
+        super().__init__(cfg, *args, **kwargs)
+
+
+class UMTDatasetMapper(StoreImageDatasetMapper):
     """
     DatasetMapper that enables loading source-like and target-like
     samples corresponding to labeled target and unlabeled source samples.
     """
     def __init__(self, cfg, *args, dataset_type: Literal["source", "target"]=None, **kwargs):
         super().__init__(cfg, *args, **kwargs)
-        self.do_umt = cfg.MODEL.UMT.ENABLED
-        if not self.do_umt:
-            return
+        assert cfg.MODEL.UMT.ENABLED, f"UMTDatasetMapper should only be used with UMT"
         if dataset_type is None:
             raise TypeError("dataset_type must be either 'source' or 'target'")
         assert len(cfg.DATASETS.TRAIN) == 1, "only the usage of a single labeled training dataset is currently implemented for UMT"
         assert len(cfg.DATASETS.UNLABELED) == 1, "only the usage of a single unlabeled training dataset is currently implemented for UMT"
         self.meta = MetadataCatalog.get(cfg.DATASETS.TRAIN[0] if dataset_type == "source" else cfg.DATASETS.UNLABELED[0])
 
-    def _after_call(self, dataset_dict, aug_input, transforms):
-        if not self.do_umt:
-            return dataset_dict
-
+    def _after_call(self, dataset_dict, _, transforms):
         # load source-like or target-like samples for UMT
         dataset_dict = copy.deepcopy(dataset_dict)
         image_translated = utils.read_image(os.path.join(self.meta.translated_image_dir, os.path.relpath(dataset_dict["file_name"], self.meta.image_dir_prefix)), format=self.image_format)
@@ -40,27 +44,36 @@ class UMTCapableDatasetMapper(DatasetMapper):
 
         return dataset_dict
 
-class SaveWeakDatasetMapper(UMTCapableDatasetMapper):
+class SaveWeakDatasetMapper(StoreImageDatasetMapper):
     """
     DatasetMapper that retrieves the weakly augmented image from the aug_input object
     and saves it in the dataset_dict. See aug.SaveImgAug.
     """
-    def _after_call(self, dataset_dict, aug_input, transforms):
-        dataset_dict = super()._after_call(dataset_dict, aug_input, transforms)
+    def _after_call(self, dataset_dict, aug_input, _):
+        dataset_dict = super()._after_call(dataset_dict, aug_input)
         weak_img = getattr(aug_input, WEAK_IMG_KEY)
         dataset_dict[WEAK_IMG_KEY] = torch.as_tensor(np.ascontiguousarray(weak_img.transpose(2, 0, 1)))
         return dataset_dict
 
-class UnlabeledDatasetMapper(SaveWeakDatasetMapper):
-    def __call__(self, dataset_dict):
-        dataset_dict = super().__call__(dataset_dict)
+def make_unlabeled_dataset_mapper(SuperClass):
+    """
+    Helper method to create UnlabeledDatasetMapper classes with different super classes.
+    """
+    class UnlabeledDatasetMapper(SuperClass):
+        def __call__(self, dataset_dict):
+            dataset_dict = super().__call__(dataset_dict)
 
-        # delete any gt boxes
-        dataset_dict.pop("annotations", None)
-        dataset_dict.pop("sem_seg_file_name", None)
-        dataset_dict['instances'] = Instances(dataset_dict['instances'].image_size, gt_boxes=Boxes([]), 
-                                              gt_classes=torch.tensor([], dtype=torch.int64))
-        return dataset_dict
+            # delete any gt boxes
+            dataset_dict.pop("annotations", None)
+            dataset_dict.pop("sem_seg_file_name", None)
+            dataset_dict['instances'] = Instances(dataset_dict['instances'].image_size, gt_boxes=Boxes([]), 
+                                                gt_classes=torch.tensor([], dtype=torch.int64))
+            return dataset_dict
+    
+    return UnlabeledDatasetMapper
+
+UnlabeledSaveWeakDatasetMapper = make_unlabeled_dataset_mapper(SaveWeakDatasetMapper)
+UnlabeledUMTDatasetMapper = make_unlabeled_dataset_mapper(UMTDatasetMapper)
 
 class TwoDataloaders:
     class NoneIterator:
