@@ -30,6 +30,9 @@ def do_pseudo_label(model, unlabeled_weak, unlabeled_strong, threshold, method):
         
         # add pseudo labels back as "ground truth"
         data_to_pseudolabel = add_label(data_to_pseudolabel, teacher_preds)
+
+        # TODO HACK to make RPN sampling compatible with distillation
+        add_label(unlabeled_weak, teacher_preds)
     
     return data_to_pseudolabel
 

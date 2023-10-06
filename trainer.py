@@ -89,8 +89,9 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
 
      def do_distill_step(teacher_data, student_data, name="", key_conditional=lambda k: True, **kwargs):
           for batch_i in range(0, len(teacher_data), model_batch_size):
-               loss = trainer.distiller(teacher_data[batch_i:batch_i+model_batch_size], student_data[batch_i:batch_i+model_batch_size])
-               print("Distill loss", loss)
+               distill_loss = trainer.distiller(teacher_data[batch_i:batch_i+model_batch_size], student_data[batch_i:batch_i+model_batch_size])
+               maybe_do_backward(distill_loss, key_conditional)
+               add_to_loss_dict(distill_loss, name, key_conditional)
 
      # Weakly-augmented source imagery (Used for normal training and/or domain alignment)
      if do_weak or do_sada: 
@@ -114,8 +115,9 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           if DEBUG: 
                debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
 
-     # TODO HACK
-     do_distill_step(unlabeled_weak, unlabeled_strong)
+     # Distillation losses
+     # TODO: Assumes already pseudo-labeled (need targets for proposal sampling)
+     do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
 
      return loss_dict
 
@@ -151,7 +153,7 @@ class DATrainer(DefaultTrainer):
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
           # TODO
-          trainer.distiller = Distiller(teacher=ema.model, student=model.module)
+          trainer.distiller = Distiller(teacher=ema.model, student=model.module if type(model) == DDP else model)
 
           return trainer
      
