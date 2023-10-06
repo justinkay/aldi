@@ -153,7 +153,12 @@ class DATrainer(DefaultTrainer):
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
           # TODO
-          trainer.distiller = Distiller(teacher=ema.model, student=model.module if type(model) == DDP else model)
+          trainer.distiller = Distiller(teacher=ema.model, student=model.module if type(model) == DDP else model,
+                                        do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED,
+                                        do_obj_dst=cfg.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED,
+                                        do_rpn_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED,
+                                        do_roi_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,
+                                        do_hint=cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED)
 
           return trainer
      

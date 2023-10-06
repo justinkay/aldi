@@ -34,6 +34,13 @@ def add_da_config(cfg):
     _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # one of: { "thresholding", "probabilistic" }
     _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
 
+    _C.DOMAIN_ADAPT.DISTILL = CN()
+    _C.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED = False
+    _C.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED = False
+    _C.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED = False
+    _C.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED = False
+    _C.DOMAIN_ADAPT.DISTILL.HINT_ENABLED = False
+
     # Custom loss functions/modifications
     _C.DOMAIN_ADAPT.LOSSES = CN()
     _C.DOMAIN_ADAPT.LOSSES.LOC_LOSS_ENABLED = True

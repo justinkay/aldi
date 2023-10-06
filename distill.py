@@ -55,9 +55,15 @@ def distill_forward(teacher, student, teacher_data, student_data):
 
 class Distiller:
 
-    def __init__(self, teacher, student):
+    def __init__(self, teacher, student, do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roi_reg_dst=False, do_hint=False):
         self.teacher = teacher
         self.student = student
+        self.do_cls_dst = do_cls_dst
+        self.do_obj_dst = do_obj_dst
+        self.do_rpn_reg_dst = do_rpn_reg_dst
+        self.do_roi_reg_dst = do_roi_reg_dst
+        self.do_hint = do_hint
+
         self.register_hooks()
 
         # TODO
@@ -85,6 +91,8 @@ class Distiller:
         self.teacher.roi_heads.box_predictor.register_forward_hook(self.teacher_boxpred_io)
 
     def __call__(self, teacher_batched_inputs, student_batched_inputs):
+        losses = {}
+        
         distill_forward(self.teacher, self.student, teacher_batched_inputs, student_batched_inputs)
         
         # get student outputs
@@ -102,17 +110,21 @@ class Distiller:
         teacher_cls_probs = F.softmax(teacher_cls_logits / self.cls_temperature, dim=1)
 
         # RPN objectness loss
-        objectness_loss = F.binary_cross_entropy_with_logits(
-            cat([torch.flatten(t) for t in student_objectness_logits]),
-            teacher_objectness_probs,
-            reduction="mean"
-        )
+        if self.do_obj_dst:
+            objectness_loss = F.binary_cross_entropy_with_logits(
+                cat([torch.flatten(t) for t in student_objectness_logits]),
+                teacher_objectness_probs,
+                reduction="mean"
+            )
+            losses["loss_obj_bce"] = objectness_loss
 
         # RPN box loss
         # TODO
 
         # ROI heads classification loss
-        cls_dst_loss = cross_entropy(student_cls_logits, teacher_cls_probs)
+        if self.do_cls_dst:
+            cls_dst_loss = cross_entropy(student_cls_logits, teacher_cls_probs)
+            losses["loss_cls_ce"] = cls_dst_loss
         
         # ROI box loss
         # TODO
@@ -120,7 +132,4 @@ class Distiller:
         # Feature losses/hints
         # TODO
 
-        return {
-            "loss_cls_ce": cls_dst_loss,
-            # "loss_obj_bce": objectness_loss,
-        }
+        return losses
