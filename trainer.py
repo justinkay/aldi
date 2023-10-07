@@ -47,6 +47,9 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
      do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
+     do_distill = True # TODO
+     do_pseudolabel = do_unlabeled or do_distill
+
      total_batch_size = sum([len(s or []) for s in [labeled_weak, labeled_strong, unlabeled_weak]])
      num_grad_accum_steps = total_batch_size // model_batch_size
 
@@ -105,19 +108,24 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      if do_strong: 
           do_training_step(labeled_strong, "source_strong", do_sada=False)
 
-     # Target imagery (Used for pseudo-labeling)
-     if do_unlabeled:
+     # Do pseudo-labeling
+     # NOTE: This modifies in-place
+     if do_pseudolabel:
           pseudolabeled_data = []
           for batch_i in range(0, len(unlabeled_weak), model_batch_size):
                pseudolabeled_data.extend(pseudo_labeler(unlabeled_weak[batch_i:batch_i+model_batch_size], 
                                              unlabeled_strong[batch_i:batch_i+model_batch_size]))
+               
+     # Target imagery (Used for pseudo-labeling)
+     if do_unlabeled:
           do_training_step(pseudolabeled_data, "target_pseudolabeled", labeled=False, do_sada=False)
           if DEBUG: 
                debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
 
      # Distillation losses
      # TODO: Assumes already pseudo-labeled (need targets for proposal sampling)
-     do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
+     if do_distill:
+          do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
 
      return loss_dict
 

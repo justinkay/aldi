@@ -8,6 +8,8 @@ from detectron2.layers.wrappers import cross_entropy
 
 from helpers import SaveIO
 
+DEBUG = False
+
 
 def distill_forward(teacher, student, teacher_data, student_data):
     """
@@ -24,20 +26,23 @@ def distill_forward(teacher, student, teacher_data, student_data):
     was_eval = not teacher.training
     if was_eval: teacher.train()
 
+    # prep data
     teacher_images = teacher.preprocess_image(teacher_data)
     student_images = student.preprocess_image(student_data)
     teacher_gt_instances = [x["instances"].to(teacher.device) for x in teacher_data] # assumes this is pseudolabeled already
     student_gt_instances = [x["instances"].to(student.device) for x in student_data] # assumes this is pseudolabeled already
 
     # do backbone forward
-    teacher_features = teacher.backbone(teacher_images.tensor)
+    with torch.no_grad():
+        teacher_features = teacher.backbone(teacher_images.tensor)
     student_features = student.backbone(student_images.tensor)
 
     # do RPN forward
     # reset RNG so that proposal sampling is the same for each, so we can directly compare
     rpn_seed = random.randint(0, 2**32 - 1)
     torch.manual_seed(rpn_seed)
-    teacher_proposals, teacher_proposal_losses = teacher.proposal_generator(teacher_images, teacher_features, teacher_gt_instances)
+    with torch.no_grad():
+        teacher_proposals, teacher_proposal_losses = teacher.proposal_generator(teacher_images, teacher_features, teacher_gt_instances)
     torch.manual_seed(rpn_seed)
     student_proposals, student_proposal_losses = student.proposal_generator(student_images, student_features, student_gt_instances)
 
@@ -45,7 +50,8 @@ def distill_forward(teacher, student, teacher_data, student_data):
     # reset RNG; and *also initialize teacher 2nd stage w/ student proposals*
     roih_seed = random.randint(0, 2**32 - 1)
     torch.manual_seed(roih_seed)
-    teacher_proposals, teacher_detector_losses = teacher.roi_heads(teacher_images, teacher_features, student_proposals, teacher_gt_instances)
+    with torch.no_grad():
+        teacher_proposals, teacher_detector_losses = teacher.roi_heads(teacher_images, teacher_features, student_proposals, teacher_gt_instances)
     torch.manual_seed(roih_seed)
     student_proposals, student_detector_losses = student.roi_heads(student_images, student_features, student_proposals, student_gt_instances)
 
@@ -123,8 +129,13 @@ class Distiller:
 
         # ROI heads classification loss
         if self.do_cls_dst:
-            cls_dst_loss = cross_entropy(student_cls_logits, teacher_cls_probs)
-            losses["loss_cls_ce"] = cls_dst_loss
+            # cls_dst_loss = cross_entropy(student_cls_logits, teacher_cls_probs)
+            # losses["loss_cls_ce"] = cls_dst_loss
+            cls_dst_loss = F.kl_div(F.log_softmax(student_cls_logits, dim=1),
+                                    F.log_softmax(teacher_cls_logits / self.cls_temperature, dim=1),
+                                    reduction="batchmean",
+                                    log_target=True)
+            losses["loss_cls_kl"] = cls_dst_loss
         
         # ROI box loss
         # TODO
@@ -132,4 +143,45 @@ class Distiller:
         # Feature losses/hints
         # TODO
 
+        if DEBUG:
+            self.visualize_batch()
+
         return losses
+
+    def visualize_batch(self):
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import time
+
+        student_cls_logits, _ = self.student_boxpred_io.output
+        teacher_cls_logits, _ = self.teacher_boxpred_io.output
+        teacher_cls_probs = F.softmax(teacher_cls_logits / self.cls_temperature, dim=1)
+
+        # Average logits across the batch for each class
+        student_avg_logits = student_cls_logits.mean(dim=0).detach().cpu().numpy()
+        teacher_avg_logits = teacher_cls_logits.mean(dim=0).detach().cpu().numpy()
+
+        # Compute the differences
+        differences = student_avg_logits - teacher_avg_logits
+
+        # Plotting
+        fig, axes = plt.subplots(2, 1, figsize=(10, 12))
+
+        # Plot average logits per class for both student and teacher
+        axes[0].bar(np.arange(student_avg_logits.shape[0]), student_avg_logits, alpha=0.7, label='Student')
+        axes[0].bar(np.arange(teacher_avg_logits.shape[0]), teacher_avg_logits, alpha=0.5, label='Teacher')
+        axes[0].set_title('Average Logits per Class')
+        axes[0].set_ylabel('Logit Value')
+        axes[0].set_xlabel('Class Index')
+        axes[0].legend()
+
+        # Plot differences
+        axes[1].bar(np.arange(differences.shape[0]), differences, color='r', alpha=0.7)
+        axes[1].set_title('Difference in Average Logits per Class (Student - Teacher)')
+        axes[1].set_ylabel('Difference')
+        axes[1].set_xlabel('Class Index')
+
+        # Save the plot
+        timestamp = int(time.time())  # Unix timestamp
+        plt.tight_layout()
+        plt.savefig(f"debug_{timestamp}.png")
