@@ -60,7 +60,6 @@ def main(args):
         labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong = debug_dict['last_labeled_weak'], debug_dict['last_labeled_strong'], debug_dict['last_unlabeled_weak'], debug_dict['last_unlabeled_strong']
         pseudolabeled = debug_dict['last_pseudolabeled']
 
-        # for i, (lw, ls, uw, us, sp) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, student_preds)):
         for i, (lw, ls, uw, pl) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, pseudolabeled)):
             fig, ax = plt.subplots(4,1, figsize=(20,20))
             labeled_im = lw['image'].permute(1,2,0).cpu().numpy()
@@ -96,7 +95,6 @@ def main(args):
 
             plt.savefig(f'debug_{lw["image_id"]}_{i}.png')
             plt.close()
-
 
 if __name__ == "__main__":
     parser = default_argument_parser()

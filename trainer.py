@@ -91,8 +91,10 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
                add_to_loss_dict(loss, name, key_conditional)
 
      def do_distill_step(teacher_data, student_data, name="", key_conditional=lambda k: True, **kwargs):
+          assert len(teacher_data) == len(student_data), "Teacher and student data must be the same length."
           for batch_i in range(0, len(teacher_data), model_batch_size):
-               distill_loss = trainer.distiller(teacher_data[batch_i:batch_i+model_batch_size], student_data[batch_i:batch_i+model_batch_size])
+               distill_loss = trainer.distiller(teacher_data[batch_i:batch_i+model_batch_size], 
+                                                student_data[batch_i:batch_i+model_batch_size])
                maybe_do_backward(distill_loss, key_conditional)
                add_to_loss_dict(distill_loss, name, key_conditional)
 
@@ -114,7 +116,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           pseudolabeled_data = []
           for batch_i in range(0, len(unlabeled_weak), model_batch_size):
                pseudolabeled_data.extend(pseudo_labeler(unlabeled_weak[batch_i:batch_i+model_batch_size], 
-                                             unlabeled_strong[batch_i:batch_i+model_batch_size]))
+                                                        unlabeled_strong[batch_i:batch_i+model_batch_size]))
                
      # Target imagery (Used for pseudo-labeling)
      if do_unlabeled:
@@ -125,7 +127,8 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      # Distillation losses
      # TODO: Assumes already pseudo-labeled (need targets for proposal sampling)
      if do_distill:
-          do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
+          # do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
+          do_distill_step(unlabeled_weak, pseudolabeled_data, "distill")
 
      return loss_dict
 
@@ -161,8 +164,9 @@ class DATrainer(DefaultTrainer):
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
           # TODO
-          trainer.distiller = Distiller(teacher=ema.model, student=model.module if type(model) == DDP else model,
-                                        do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED,
+          trainer.distiller = Distiller(teacher=ema.model,
+                                        student=model,
+                                        do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED, # TODO init with cfg
                                         do_obj_dst=cfg.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED,
                                         do_rpn_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED,
                                         do_roi_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,

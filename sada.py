@@ -382,5 +382,6 @@ class FCDiscriminator_img(nn.Module):
         x = self.leaky_relu(x)
         x = self.classifier(x)
         return x
+    
 def grad_reverse(x):
     return _GradientScalarLayer.apply(x, -1.0)
