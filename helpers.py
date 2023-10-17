@@ -24,6 +24,7 @@ class ManualSeed:
         torch.manual_seed(self.seed)
 
 class ReplaceProposalsOnce:
+    """PyTorch hook to replace the proposals with the student's proposals, but only once."""
     def __init__(self):
         self.proposals = None
 

@@ -126,6 +126,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
 
      # Distillation losses
      # TODO: Assumes already pseudo-labeled (need targets for proposal sampling)
+     # TODO: Pseudo-label losses are already baked into this as well
      if do_distill:
           # do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
           do_distill_step(unlabeled_weak, pseudolabeled_data, "distill")
