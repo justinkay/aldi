@@ -35,31 +35,30 @@ def build_swinb_fpn_backbone(cfg, input_shape):
     )
     return backbone
 
+# TODO: hacky: patch forward method of the ViT backbone to enable
+# vanilla PyTorch non-reantrant checkpointing which works with DDP
+def checkpointed_vit_forward(self, use_checkpointing, x):
+    x = self.patch_embed(x)
+    if self.pos_embed is not None:
+        x = x + get_abs_pos(
+            self.pos_embed, self.pretrain_use_cls_token, (x.shape[1], x.shape[2])
+        )
+
+    for blk in self.blocks:
+        if use_checkpointing and self.training:
+            x = checkpoint(blk, x, use_reentrant=False)
+        else:
+            x = blk(x)
+
+    outputs = {self._out_features[0]: x.permute(0, 3, 1, 2)}
+    return outputs
+
 @BACKBONE_REGISTRY.register()
 def build_vitdet_b_backbone(cfg, input_shape):
     backbone = model_zoo.get_config("common/models/mask_rcnn_vitdet.py").model.backbone
     backbone.square_pad = 0 # disable square padding
     backbone = instantiate(backbone)
-
-    # TODO: hacky: patch forward method of the ViT backbone to enable
-    # vanilla PyTorch non-reantrant checkpointing which works with DDP
-    def forward(self, x):
-        x = self.patch_embed(x)
-        if self.pos_embed is not None:
-            x = x + get_abs_pos(
-                self.pos_embed, self.pretrain_use_cls_token, (x.shape[1], x.shape[2])
-            )
-
-        for blk in self.blocks:
-            if cfg.VIT.USE_ACT_CHECKPOINT:
-                x = checkpoint(blk, x, use_reentrant=False)
-            else:
-                x = blk(x)
-
-        outputs = {self._out_features[0]: x.permute(0, 3, 1, 2)}
-        return outputs
-
-    backbone.net.forward = lambda x: forward(backbone.net, x)
+    backbone.net.forward = partial(checkpointed_vit_forward, backbone.net, cfg.VIT.USE_ACT_CHECKPOINT)
     return backbone
 
 def get_adamw_optim(model, params={}, include_vit_lr_decay=False):
