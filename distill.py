@@ -113,7 +113,7 @@ class Distiller:
         teacher_objectness_probs = torch.sigmoid(cat([torch.flatten(t) for t in teacher_objectness_logits]) / self.obj_temperature)
 
         # Objectness loss -- compute for the subsampled proposals
-        if True: #self.do_obj_dst:
+        if self.do_obj_dst:
             objectness_loss = F.binary_cross_entropy_with_logits(
                 cat([torch.flatten(t) for t in student_objectness_logits])[valid_mask],
                 teacher_objectness_probs[valid_mask],
