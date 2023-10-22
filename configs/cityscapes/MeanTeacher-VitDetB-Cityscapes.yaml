@@ -1,6 +1,6 @@
 _BASE_: "./cityscapes_baseline/Base-RCNN-VitDetB-Cityscapes.yaml"
 MODEL:
-  WEIGHTS: "models/cityscapes_baseline_vitdetb_foggy_val_model_best_519.pth" 
+  WEIGHTS: "models/cityscapes_vitdetb_baseline_foggy_val_model_best_1699.pth" 
 EMA:
   ENABLED: True
 DATASETS:

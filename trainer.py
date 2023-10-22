@@ -193,7 +193,7 @@ class DATrainer(DefaultTrainer):
           elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW":
                # TOOD: this could be cleaner and maybe removed
                if cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone":
-                    return get_adamw_optim(model)
+                    return get_adamw_optim(model, include_vit_lr_decay=True)
                elif cfg.MODEL.BACKBONE.NAME == "build_swinb_fpn_backbone":
                     return get_swinb_optim(model)
                else:
