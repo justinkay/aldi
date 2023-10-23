@@ -160,18 +160,25 @@ class DATrainer(DefaultTrainer):
           # build EMA model if applicable
           ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
           # build pseudo-labeler if applicable (pseudo-labels creaed by: EMA, student, or None based on cfg)
+          # TODO: don't pass cfg to other classes to make them more framework-agnostic
           pseudo_labeler = PseudoLabeler(cfg, ema or model) # if cfg.DOMAIN_ADAPT.TEACHER.ENABLED else None
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
-          # TODO
           trainer.distiller = Distiller(teacher=ema.model,
                                         student=model,
-                                        do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED, # TODO init with cfg
+                                        do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
+                                        do_hard_obj=cfg.DOMAIN_ADAPT.DISTILL.HARD_OBJ_ENABLED,
+                                        do_hard_rpn_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_RPN_REG_ENABLED,
+                                        do_hard_roi_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED,
+                                        do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED, 
                                         do_obj_dst=cfg.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED,
                                         do_rpn_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED,
                                         do_roi_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,
-                                        do_hint=cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED)
+                                        do_hint=cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
+                                        cls_temperature=cfg.DOMAIN_ADAPT.DISTILL.CLS_TMP,
+                                        obj_temperature=cfg.DOMAIN_ADAPT.DISTILL.OBJ_TMP,
+                                        cls_loss_type=cfg.DOMAIN_ADAPT.CLS_LOSS_TYPE)
 
           return trainer
      

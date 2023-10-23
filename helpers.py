@@ -38,3 +38,10 @@ class ReplaceProposalsOnce:
             ret = (images, features, self.proposals, gt_instances)
             self.proposals = None
         return ret
+
+def set_attributes(obj, params):
+    """Set attributes of an object from a dictionary."""
+    if params:
+        for k, v in params.items():
+            if k != "self" and not k.startswith("_"):
+                setattr(obj, k, v)

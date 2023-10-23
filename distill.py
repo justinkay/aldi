@@ -11,25 +11,16 @@ from detectron2.modeling.sampling import subsample_labels
 from detectron2.modeling.box_regression import _dense_box_regression_loss
 from fvcore.nn import smooth_l1_loss
 
-from helpers import SaveIO, ManualSeed, ReplaceProposalsOnce
+from helpers import SaveIO, ManualSeed, ReplaceProposalsOnce, set_attributes
 
 
 class Distiller:
 
-    def __init__(self, teacher, student, do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roi_reg_dst=False, do_hint=False):
-        self.teacher = teacher
-        self.student = student
-        self.do_cls_dst = do_cls_dst
-        self.do_obj_dst = do_obj_dst
-        self.do_rpn_reg_dst = do_rpn_reg_dst
-        self.do_roi_reg_dst = do_roi_reg_dst
-        self.do_hint = do_hint
-
+    def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, do_hard_roi_reg=False,
+                 do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roi_reg_dst=False, do_hint=False,
+                 cls_temperature=1.0, obj_temperature=1.0, cls_loss_type="CE"):
+        set_attributes(self, locals())
         self.register_hooks()
-
-        # TODO
-        self.obj_temperature = 1.0
-        self.cls_temperature = 1.0
 
     def register_hooks(self):
         self.teacher_io, self.teacher_backbone_io, self.teacher_rpn_io, self.teacher_rpn_head_io, self.teacher_roih_io, self.teacher_boxhead_io, self.teacher_boxpred_io = SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO()
@@ -54,6 +45,8 @@ class Distiller:
         teacher_model.roi_heads.box_head.register_forward_hook(self.teacher_boxhead_io)
         teacher_model.roi_heads.box_predictor.register_forward_hook(self.teacher_boxpred_io)
 
+        # Make sure seeds are the same for proposal sampling in teacher/student
+        # TODO: Don't think we actually need this for RPN?
         self.seeder = ManualSeed()
         teacher_model.proposal_generator.register_forward_pre_hook(self.seeder)
         student_model.proposal_generator.register_forward_pre_hook(self.seeder)
@@ -89,10 +82,22 @@ class Distiller:
 
     def __call__(self, teacher_batched_inputs, student_batched_inputs):
         losses = {}
-        
-        # TODO these are actually the hard pseudo-label losses
-        standard_losses = self._distill_forward(teacher_batched_inputs, student_batched_inputs)
-        
+
+        # Do a forward pass to get activations, and get hard pseudo-label losses if desired
+        hard_losses = self._distill_forward(teacher_batched_inputs, student_batched_inputs)
+        loss_to_attr = {
+            "loss_cls": self.do_hard_cls,
+            "loss_rpn_cls": self.do_hard_obj,
+            "loss_rpn_loc": self.do_hard_rpn_reg,
+            "loss_box_reg": self.do_hard_roi_reg,
+        }
+        for k, v in hard_losses.items():
+            if loss_to_attr[k]:
+                losses[k] = v
+            else:
+                # Need to add to standard losses so that the optimizer can see it
+                losses[k] = v * 0.0
+
         ### RPN ###
         student_objectness_logits, student_proposal_deltas = self.student_rpn_head_io.output
         teacher_objectness_logits, teacher_proposal_deltas = self.teacher_rpn_head_io.output
@@ -140,15 +145,16 @@ class Distiller:
 
         # ROI heads classification loss
         if self.do_cls_dst:
-            cls_dst_loss = cross_entropy(student_cls_logits, teacher_cls_probs)
+            if self.cls_loss_type == "CE":
+                cls_dst_loss = cross_entropy(student_cls_logits, teacher_cls_probs)
+            elif self.cls_loss_type == "KL":
+                cls_dst_loss = F.kl_div(F.log_softmax(student_cls_logits, dim=1),
+                                    F.log_softmax(teacher_cls_logits / self.cls_temperature, dim=1),
+                                    reduction="batchmean",
+                                    log_target=True)
+            else:
+                raise ValueError("cls_loss_type must be one of {CE, KL}")
             losses["loss_cls_ce"] = cls_dst_loss
-
-            # KL div loss -- an alternative
-            # cls_dst_loss = F.kl_div(F.log_softmax(student_cls_logits, dim=1),
-            #                         F.log_softmax(teacher_cls_logits / self.cls_temperature, dim=1),
-            #                         reduction="batchmean",
-            #                         log_target=True)
-            # losses["loss_cls_kl"] = cls_dst_loss
 
         # ROI box loss
         # TODO
@@ -156,50 +162,4 @@ class Distiller:
         # Feature losses/hints
         # TODO
 
-        # if DEBUG:
-            # self.visualize_batch()
-
-        # hacky
-        # TODO add each one to their respective loss entry in standard_losses
-        for k, v in standard_losses.items():
-            losses["loss_cls_ce"] += v * 0.0
-
         return losses
-
-    def visualize_batch(self):
-        import matplotlib.pyplot as plt
-        import numpy as np
-        import time
-
-        student_cls_logits, _ = self.student_boxpred_io.output
-        teacher_cls_logits, _ = self.teacher_boxpred_io.output
-        teacher_cls_probs = F.softmax(teacher_cls_logits / self.cls_temperature, dim=1)
-
-        # Average logits across the batch for each class
-        student_avg_logits = student_cls_logits.mean(dim=0).detach().cpu().numpy()
-        teacher_avg_logits = teacher_cls_logits.mean(dim=0).detach().cpu().numpy()
-
-        # Compute the differences
-        differences = student_avg_logits - teacher_avg_logits
-
-        # Plotting
-        fig, axes = plt.subplots(2, 1, figsize=(10, 12))
-
-        # Plot average logits per class for both student and teacher
-        axes[0].bar(np.arange(student_avg_logits.shape[0]), student_avg_logits, alpha=0.7, label='Student')
-        axes[0].bar(np.arange(teacher_avg_logits.shape[0]), teacher_avg_logits, alpha=0.5, label='Teacher')
-        axes[0].set_title('Average Logits per Class')
-        axes[0].set_ylabel('Logit Value')
-        axes[0].set_xlabel('Class Index')
-        axes[0].legend()
-
-        # Plot differences
-        axes[1].bar(np.arange(differences.shape[0]), differences, color='r', alpha=0.7)
-        axes[1].set_title('Difference in Average Logits per Class (Student - Teacher)')
-        axes[1].set_ylabel('Difference')
-        axes[1].set_xlabel('Class Index')
-
-        # Save the plot
-        timestamp = int(time.time())  # Unix timestamp
-        plt.tight_layout()
-        plt.savefig(f"debug_{timestamp}.png")
