@@ -211,8 +211,12 @@ class DATrainer(DefaultTrainer):
 
           # add a hook to save the best (teacher, if EMA enabled) checkpoint to model_best.pth
           if comm.is_main_process():
-               for test_set in self.cfg.DATASETS.TEST:
+               if len(self.cfg.DATASETS.TEST) == 1:
                     ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, self.checkpointer,
+                                                    f"bbox/AP50", "max", file_prefix=f"{self.cfg.DATASETS.TEST[0]}_model_best"))
+               else: 
+                    for test_set in self.cfg.DATASETS.TEST:
+                         ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, self.checkpointer,
                                                     f"{test_set}/bbox/AP50", "max", file_prefix=f"{test_set}_model_best"))
 
           return ret

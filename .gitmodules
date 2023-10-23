@@ -1,0 +1,3 @@
+[submodule "libs/detectron2"]
+	path = libs/detectron2
+	url = https://github.com/justinkay/detectron2_v07ish.git
