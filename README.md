@@ -1,6 +1,12 @@
 # doad-strong-baseline
 Strong unified baselines for domain adaptive object detection.
 
+### Dependencies
+Install dependencies using anaconda:
+```
+conda env create -f environment.yml
+conda activate daod-strong-baseline
+```
 
 ### Detectron v0.7 Setup
 For now use the unofficial 0.7 release.
