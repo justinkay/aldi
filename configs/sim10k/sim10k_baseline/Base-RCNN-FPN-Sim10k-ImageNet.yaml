@@ -8,9 +8,8 @@ DATASETS:
   TEST: ("cityscapes_cars_val",)
 OUTPUT_DIR: "output/sim10k/sim10k_baseline_imagenet/"
 
-# to start, try: double compared to Cityscapes train
 SOLVER:
-  STEPS: (800,) #(18000,)
-  MAX_ITER: 1000 #5000 #24000
+  STEPS: (2600,) 
+  MAX_ITER: 3000 # 15 epochs
 TEST:
-  EVAL_PERIOD: 165 # evaluate sooner; with 312, 625 the best model was the first one
+  EVAL_PERIOD: 200
