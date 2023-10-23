@@ -7,4 +7,6 @@ DATASETS:
   BATCH_RATIOS: (1,1,1,1)
 AUG:
   INCLUDE_RANDOM_ERASING: False
-OUTPUT_DIR: "output/cityscapes_umt_nobackwardatend/"
+SOLVER:
+  BACKWARD_AT_END: True  # TODO: without this, predictions become NaN
+OUTPUT_DIR: "output/cityscapes_umt/"
