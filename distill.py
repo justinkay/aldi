@@ -17,7 +17,7 @@ from helpers import SaveIO, ManualSeed, ReplaceProposalsOnce, set_attributes
 class Distiller:
 
     def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, do_hard_roi_reg=False,
-                 do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roi_reg_dst=False, do_hint=False,
+                 do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roih_reg_dst=False, do_hint=False,
                  cls_temperature=1.0, obj_temperature=1.0, cls_loss_type="CE"):
         set_attributes(self, locals())
         self.register_hooks()
@@ -46,7 +46,7 @@ class Distiller:
         teacher_model.roi_heads.box_predictor.register_forward_hook(self.teacher_boxpred_io)
 
         # Make sure seeds are the same for proposal sampling in teacher/student
-        # TODO: Don't think we actually need this for RPN?
+        # TODO: Don't think we actually need this for RPN since we do the sampling ourselves now
         self.seeder = ManualSeed()
         teacher_model.proposal_generator.register_forward_pre_hook(self.seeder)
         student_model.proposal_generator.register_forward_pre_hook(self.seeder)

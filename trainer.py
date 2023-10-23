@@ -47,8 +47,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
      do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
-     do_distill = True # TODO
-     do_pseudolabel = do_unlabeled or do_distill
+     do_distill = do_pseudolabel = do_unlabeled # TODO
 
      total_batch_size = sum([len(s or []) for s in [labeled_weak, labeled_strong, unlabeled_weak]])
      num_grad_accum_steps = total_batch_size // model_batch_size
@@ -112,15 +111,12 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
 
      # Do pseudo-labeling
      # NOTE: This modifies in-place
+     # TODO: Move to distill
      if do_pseudolabel:
           pseudolabeled_data = []
           for batch_i in range(0, len(unlabeled_weak), model_batch_size):
                pseudolabeled_data.extend(pseudo_labeler(unlabeled_weak[batch_i:batch_i+model_batch_size], 
                                                         unlabeled_strong[batch_i:batch_i+model_batch_size]))
-               
-     # Target imagery (Used for pseudo-labeling)
-     if do_unlabeled:
-          do_training_step(pseudolabeled_data, "target_pseudolabeled", labeled=False, do_sada=False)
           if DEBUG: 
                debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
 
@@ -175,7 +171,7 @@ class DATrainer(DefaultTrainer):
                                         do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED, 
                                         do_obj_dst=cfg.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED,
                                         do_rpn_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED,
-                                        do_roi_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,
+                                        do_roih_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,
                                         do_hint=cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
                                         cls_temperature=cfg.DOMAIN_ADAPT.DISTILL.CLS_TMP,
                                         obj_temperature=cfg.DOMAIN_ADAPT.DISTILL.OBJ_TMP,

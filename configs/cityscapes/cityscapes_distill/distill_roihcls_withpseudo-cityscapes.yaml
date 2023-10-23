@@ -1,5 +1,0 @@
-_BASE_: "../cityscapes_startingpoint/DA-RCNN-FPN-Cityscapes_strongaugemastart.yaml"
-DOMAIN_ADAPT:
-  DISTILL:
-    ROIH_CLS_ENABLED: True
-OUTPUT_DIR: "output/cityscapes_distill_roihcls_withpseudo/"
