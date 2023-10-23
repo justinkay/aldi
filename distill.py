@@ -157,25 +157,16 @@ class Distiller:
             losses["loss_cls_ce"] = cls_dst_loss
 
         # ROI box loss
-        print("ROI:")
-        print("student cls logits", student_cls_logits.shape)
-        print("teacher cls logits", teacher_cls_logits.shape)
-        print("student proposal deltas", student_proposal_deltas.shape)
-        print("teacher proposal deltas", teacher_proposal_deltas.shape)
-
-        # fg_mask = ...
-        # loss_roih_reg = smooth_l1_loss(
-        #         cat([torch.flatten(t) for t in student_proposal_deltas])[fg_mask],
-        #         cat([torch.flatten(t) for t in teacher_proposal_deltas])[fg_mask],
-        #         beta=0.0, # default
-        #         reduction="mean"
-        #     )
-        # losses["loss_roih_l1"] = loss_roih_reg
-
-        # pseudo_gt_labels = torch.stack(rpn.label_and_sample_anchors(self.teacher_anchor_io.output, 
-        #                                                                [i['instances'].to(self.teacher.device) for i in teacher_batched_inputs])[0])
-        # valid_mask = pseudo_gt_labels >= 0 # the proposals we'll compute loss for
-        # fg_mask = pseudo_gt_labels == 1 # proposals matched to a pseudo GT box
+        if self.do_roih_reg_dst:
+            bg_idx = teacher_cls_logits.shape[1] - 1
+            fg_mask = torch.argmax(teacher_cls_logits, dim=1) != bg_idx
+            loss_roih_reg = smooth_l1_loss(
+                    cat([torch.flatten(t) for t in student_proposal_deltas[fg_mask]]),
+                    cat([torch.flatten(t) for t in teacher_proposal_deltas[fg_mask]]),
+                    beta=0.0, # default
+                    reduction="mean"
+                )
+            losses["loss_roih_l1"] = loss_roih_reg
 
         # Feature losses/hints
         # TODO
