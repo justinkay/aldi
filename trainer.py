@@ -165,6 +165,7 @@ class DATrainer(DefaultTrainer):
           trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
+          # TODO Add to constructor of trainer
           trainer.distiller = Distiller(teacher=ema.model,
                                         student=model,
                                         do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
