@@ -1,11 +1,11 @@
 from detectron2.data.datasets import register_coco_instances
 
 # Cityscapes 
-register_coco_instances("cityscapes_train", {"image_dir_prefix": "datasets/cityscapes/leftImg8bit/train", "translated_image_dir": "../pytorch-CycleGAN-and-pix2pix/results/cityscapes2foggy_001/test_latest/images/fake_A"},         "datasets/cityscapes/annotations/cityscapes_train_instances.json",                  "datasets/cityscapes/leftImg8bit/train/")
+register_coco_instances("cityscapes_train", {"image_dir_prefix": "datasets/cityscapes/leftImg8bit/train", "translated_image_dir": "datasets/daod-strong-baseline-cyclegan-results/cityscapes2foggy_002/test_50/images/fake_A"},         "datasets/cityscapes/annotations/cityscapes_train_instances.json",                  "datasets/cityscapes/leftImg8bit/train/")
 register_coco_instances("cityscapes_val",   {},         "datasets/cityscapes/annotations/cityscapes_val_instances.json",                    "datasets/cityscapes/leftImg8bit/val/")
 
 # Foggy Cityscapes
-register_coco_instances("cityscapes_foggy_train", {"image_dir_prefix": "datasets/cityscapes/leftImg8bit_foggy/train", "translated_image_dir": "../pytorch-CycleGAN-and-pix2pix/results/cityscapes2foggy_001/test_latest/images/fake_B"},   "datasets/cityscapes/annotations/cityscapes_train_instances_foggyALL.json",   "datasets/cityscapes/leftImg8bit_foggy/train/")
+register_coco_instances("cityscapes_foggy_train", {"image_dir_prefix": "datasets/cityscapes/leftImg8bit_foggy/train", "translated_image_dir": "daod-strong-baseline-cyclegan-results/cityscapes2foggy_002/test_50/images/fake_B"},   "datasets/cityscapes/annotations/cityscapes_train_instances_foggyALL.json",   "datasets/cityscapes/leftImg8bit_foggy/train/")
 register_coco_instances("cityscapes_foggy_val", {},     "datasets/cityscapes/annotations/cityscapes_val_instances_foggyALL.json",     "datasets/cityscapes/leftImg8bit_foggy/val/")
 # for evaluating COCO-pretrained models: category IDs are remapped to match
 register_coco_instances("cityscapes_foggy_val_coco_ids", {},     "datasets/cityscapes/annotations/cityscapes_val_instances_foggyALL_coco.json",     "datasets/cityscapes/leftImg8bit_foggy/val/")
