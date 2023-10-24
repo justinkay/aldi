@@ -107,17 +107,13 @@ class Distiller:
         rpn = (self.teacher.module if type(self.teacher) is DDP else self.teacher).proposal_generator
         pseudo_gt_labels = torch.stack(rpn.label_and_sample_anchors(self.teacher_anchor_io.output, 
                                                                        [i['instances'].to(self.teacher.device) for i in teacher_batched_inputs])[0])
-        valid_mask = pseudo_gt_labels >= 0 # the proposals we'll compute loss for
+        valid_mask = torch.flatten(pseudo_gt_labels >= 0) # the proposals we'll compute loss for
         fg_mask = pseudo_gt_labels == 1 # proposals matched to a pseudo GT box
-
-        # TODO is this right? visualize...
-        valid_mask = torch.flatten(valid_mask)
-        fg_mask = torch.repeat_interleave(fg_mask, repeats=4)
 
         # Postprocessing -- for now just sharpening
         teacher_objectness_probs = torch.sigmoid(cat([torch.flatten(t) for t in teacher_objectness_logits]) / self.obj_temperature)
 
-        # Objectness loss -- compute for the subsampled proposals
+        # Objectness loss -- compute for all subsampled proposals (use valid_mask)
         if self.do_obj_dst:
             objectness_loss = F.binary_cross_entropy_with_logits(
                 cat([torch.flatten(t) for t in student_objectness_logits])[valid_mask],
@@ -126,8 +122,9 @@ class Distiller:
             )
             losses["loss_obj_bce"] = objectness_loss
 
-        # Regression loss -- compute only for positive proposals
+        # Regression loss -- compute only for positive proposals (use fg_mask)
         if self.do_rpn_reg_dst:
+            fg_mask = torch.repeat_interleave(fg_mask, repeats=4)
             loss_rpn_reg = smooth_l1_loss(
                 cat([torch.flatten(t) for t in student_proposal_deltas])[fg_mask],
                 cat([torch.flatten(t) for t in teacher_proposal_deltas])[fg_mask],
@@ -158,15 +155,29 @@ class Distiller:
 
         # ROI box loss
         if self.do_roih_reg_dst:
+            # get the regression targets for all pseudo-foreground proposals
             bg_idx = teacher_cls_logits.shape[1] - 1
-            fg_mask = torch.argmax(teacher_cls_logits, dim=1) != bg_idx
+            fg_cls = torch.argmax(teacher_cls_logits, dim=1)
+            fg_mask = fg_cls != bg_idx
+            
+            fg_teacher_deltas = teacher_proposal_deltas.view(-1, bg_idx, 4)[
+                fg_mask, fg_cls[fg_mask], :
+            ]
+            fg_student_deltas = student_proposal_deltas.view(-1, bg_idx, 4)[
+                fg_mask, fg_cls[fg_mask], :
+            ]
+
             loss_roih_reg = smooth_l1_loss(
-                    cat([torch.flatten(t) for t in student_proposal_deltas[fg_mask]]),
-                    cat([torch.flatten(t) for t in teacher_proposal_deltas[fg_mask]]),
+                    fg_student_deltas,
+                    fg_teacher_deltas,
                     beta=0.0, # default
-                    reduction="mean"
+                    reduction="sum"
                 )
-            losses["loss_roih_l1"] = loss_roih_reg
+            
+            # normalize by the total number of regions so that each proposal is given
+            # equal weight; see detectron2.modeling.roi_heads.fast_rcnn.py:box_reg_loss
+            normalizer = teacher_cls_logits.shape[0]
+            losses["loss_roih_l1"] = loss_roih_reg / normalizer
 
         # Feature losses/hints
         # TODO
