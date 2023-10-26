@@ -1,0 +1,9 @@
+_BASE_: "./OracleT-RCNN-VitDetB-Sim10k.yaml"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+AUG:
+  INCLUDE_RANDOM_ERASING: False
+  LABELED_MIC_AUG: True
+OUTPUT_DIR: "output/sim10k/sim10k_vitdetb_oraclet_strongaug_ema/"
