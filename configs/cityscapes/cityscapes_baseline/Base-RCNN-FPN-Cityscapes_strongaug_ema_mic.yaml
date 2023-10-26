@@ -1,0 +1,12 @@
+_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+AUG:
+  INCLUDE_RANDOM_ERASING: False
+  LABELED_MIC_AUG: True
+SOLVER:
+  STEPS: (3200,)
+  MAX_ITER: 4000
+OUTPUT_DIR: "output/cityscapes_baseline_strongaug_ema_mic/"
