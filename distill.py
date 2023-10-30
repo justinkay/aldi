@@ -190,7 +190,7 @@ class Distiller:
             hint_loss = 0.0
             for student_feat, teacher_feat in zip(self.student_hint_io.output, teacher_features):
                 hint_loss += F.mse_loss(student_feat, teacher_feat, reduction="mean")
-            losses["loss_hint_l2"] = hint_loss
+            losses["loss_hint_l2"] = hint_loss / len(teacher_features)
 
         return losses
 
