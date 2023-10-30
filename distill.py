@@ -237,7 +237,7 @@ class DistillMixin(GeneralizedRCNN):
 
     def forward(self, *args, **kwargs):
         output = super().forward(*args, **kwargs)
-        if self.do_hint:
+        if self.do_hint and self.training:
             self.hint_adapter(self.backbone_io.output)
             # don't compute losses here; but make sure parameters are seen as being used
             # this is needed for any forward passes that don't use the hint adapter
