@@ -7,6 +7,7 @@ from detectron2.modeling.meta_arch import GeneralizedRCNN
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 from detectron2.layers import cat, cross_entropy
 
+from distill import DistillMixin
 from helpers import SaveIO
 from sada import grad_reverse, SADA, FCDiscriminator_img
 
@@ -146,3 +147,21 @@ class DARCNN(GeneralizedRCNN):
             da_losses = {"loss_da_img": self.dis_loss_weight * loss_D_img}
 
         return da_losses
+    
+# TODO
+# Hopefully this is all we need:
+# class ALDI(AlignMixin, DistillMixin, GeneralizedRCNN): pass
+@META_ARCH_REGISTRY.register()
+class ALDI(DistillMixin, GeneralizedRCNN): 
+    @configurable
+    def __init__(self, **kwargs):
+        super(ALDI, self).__init__(**kwargs)
+
+    @classmethod
+    def from_config(cls, cfg):
+        return super(ALDI, cls).from_config(cfg)
+
+    # TODO remove this once API is fixed up
+    def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], 
+                labeled: bool = True, do_sada: bool = False):
+        return super(ALDI, self).forward(batched_inputs)

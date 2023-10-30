@@ -1,10 +1,9 @@
-import copy
-import random
 import torch
 import torch.nn.functional as F
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-from detectron2.structures import Instances
+from detectron2.config import configurable
+from detectron2.modeling.meta_arch.rcnn import GeneralizedRCNN
 from detectron2.layers import cat
 from detectron2.layers.wrappers import cross_entropy
 from detectron2.modeling.sampling import subsample_labels
@@ -59,6 +58,10 @@ class Distiller:
         self.teacher_anchor_io = SaveIO()
         teacher_model.proposal_generator.anchor_generator.register_forward_hook(self.teacher_anchor_io)
 
+        if self.do_hint:
+            self.student_hint_io = SaveIO()
+            student_model.hint_adapter.register_forward_hook(self.student_hint_io)
+
     def _distill_forward(self, teacher_batched_inputs, student_batched_inputs):
         self.seeder.reset_seed()
 
@@ -92,7 +95,7 @@ class Distiller:
             "loss_box_reg": self.do_hard_roi_reg,
         }
         for k, v in hard_losses.items():
-            if loss_to_attr[k]:
+            if loss_to_attr.get(k, False):
                 losses[k] = v
             else:
                 # Need to add to standard losses so that the optimizer can see it
@@ -180,6 +183,63 @@ class Distiller:
             losses["loss_roih_l1"] = loss_roih_reg / normalizer
 
         # Feature losses/hints
-        # TODO
+        # Assumes DistillMixin has been used
+        if self.do_hint:
+            student_model = self.student.module if type(self.student) is DDP else self.student
+            teacher_features = [self.teacher_backbone_io.output[f] for f in student_model.hint_adapter.in_features]
+            hint_loss = 0.0
+            for student_feat, teacher_feat in zip(self.student_hint_io.output, teacher_features):
+                hint_loss += F.mse_loss(student_feat, teacher_feat, reduction="mean")
+            losses["loss_hint_l2"] = hint_loss
 
         return losses
+
+
+class DistillMixin(GeneralizedRCNN):
+    """Any modifications to the torch module itself go here and are mixed in in TODO"""
+
+    class HintAdaptLayer(torch.nn.Module):
+        def __init__(self, hint_channels=256):
+            super().__init__()
+            self.hint_adapter = torch.nn.Conv2d(in_channels=hint_channels, out_channels=hint_channels, kernel_size=1)
+            # initialize to identity matrix for initial training stability
+            with torch.no_grad():
+                self.hint_adapter.weight.zero_()
+                for i in range(hint_channels):
+                    self.hint_adapter.weight[i, i, 0, 0] = 1
+                self.hint_adapter.bias.zero_()
+            self.in_features = ["p2", "p3", "p4", "p5", "p6"] # TODO
+
+        def forward(self, x):
+            """Handles multi-level features."""
+            in_features = [x[f] for f in self.in_features]
+            out_features = []
+            for f in in_features:
+                out_features.append(self.hint_adapter(f))
+            return out_features
+
+    @configurable
+    def __init__(self, *, do_hint=False, hint_channels=256, **kwargs):
+        super(DistillMixin, self).__init__(**kwargs)
+        self.do_hint = do_hint
+        if do_hint:
+            self.backbone_io = SaveIO()
+            self.backbone.register_forward_hook(self.backbone_io)
+            self.hint_adapter = DistillMixin.HintAdaptLayer(hint_channels=hint_channels)
+
+    @classmethod
+    def from_config(cls, cfg):
+        ret = super(DistillMixin, cls).from_config(cfg)
+        ret.update({"do_hint": cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
+                    "hint_channels": cfg. MODEL.RESNETS.RES2_OUT_CHANNELS, # TODO
+                    })
+        return ret
+
+    def forward(self, *args, **kwargs):
+        output = super().forward(*args, **kwargs)
+        if self.do_hint:
+            self.hint_adapter(self.backbone_io.output)
+            # don't compute losses here; but make sure parameters are seen as being used
+            # this is needed for any forward passes that don't use the hint adapter
+            output["_"] = sum([p.sum() for p in self.hint_adapter.parameters()]) * 0
+        return output

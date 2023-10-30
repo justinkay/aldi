@@ -1,7 +1,5 @@
 import os
-import torch
 import copy
-import logging
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
@@ -43,7 +41,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      model_batch_size = trainer.model_batch_size # TODO this could be None
 
      _model = model.module if type(model) == DDP else model
-     do_sada = _model.sada_heads is not None
+     do_sada = hasattr(model, "sada_heads") and _model.sada_heads is not None
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
      do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
