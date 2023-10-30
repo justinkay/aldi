@@ -258,7 +258,7 @@ class DATrainer(DefaultTrainer):
           if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
                DatasetMapper = SaveWeakDatasetMapper if not cfg.MODEL.UMT.ENABLED else UMTDatasetMapper
                labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                    mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True, include_strong_augs="labeled_strong" in batch_contents),
+                    mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True, include_strong_augs="labeled_strong" in batch_contents and not cfg.MODEL.UMT.ENABLED),
                     dataset_type="source"),
                     num_workers=cfg.DATALOADER.NUM_WORKERS, 
                     total_batch_size=labeled_bs)
