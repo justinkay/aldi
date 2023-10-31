@@ -4,3 +4,8 @@ DATASETS:
 EMA:
   ENABLED: True
 OUTPUT_DIR: "output/sim10k/sim10k_vitdetb_oraclet_strongaug_ema/"
+
+SOLVER:
+  STEPS: (18000,)
+  MAX_ITER: 24000
+  CHECKPOINT_PERIOD: 3000
