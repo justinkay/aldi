@@ -61,6 +61,10 @@ class Distiller:
         if self.do_hint:
             self.student_hint_io = SaveIO()
             student_model.hint_adapter.register_forward_hook(self.student_hint_io)
+            self.student_bottom_up_io = SaveIO()
+            student_model.backbone.bottom_up.register_forward_hook(self.student_bottom_up_io)
+            self.teacher_bottom_up_io = SaveIO()
+            teacher_model.backbone.bottom_up.register_forward_hook(self.teacher_bottom_up_io)
 
     def _distill_forward(self, teacher_batched_inputs, student_batched_inputs):
         self.seeder.reset_seed()
@@ -186,7 +190,8 @@ class Distiller:
         # Assumes DistillMixin has been used
         if self.do_hint:
             student_model = self.student.module if type(self.student) is DDP else self.student
-            teacher_features = [self.teacher_backbone_io.output[f] for f in student_model.hint_adapter.in_features]
+            # teacher_features = [self.teacher_backbone_io.output[f] for f in student_model.hint_adapter.in_features]
+            teacher_features = [self.teacher_bottom_up_io.output[f] for f in student_model.hint_adapter.in_features]
             hint_loss = 0.0
             for student_feat, teacher_feat in zip(self.student_hint_io.output, teacher_features):
                 hint_loss += F.mse_loss(student_feat, teacher_feat, reduction="mean")
@@ -208,7 +213,7 @@ class DistillMixin(GeneralizedRCNN):
                 for i in range(hint_channels):
                     self.hint_adapter.weight[i, i, 0, 0] = 1
                 self.hint_adapter.bias.zero_()
-            self.in_features = ["p2",] # "p3", "p4", "p5", "p6"] # TODO
+            self.in_features = ["res2"] # ["p2",] # "p3", "p4", "p5", "p6"] # TODO
 
         def forward(self, x):
             """Handles multi-level features."""
@@ -224,7 +229,7 @@ class DistillMixin(GeneralizedRCNN):
         self.do_hint = do_hint
         if do_hint:
             self.backbone_io = SaveIO()
-            self.backbone.register_forward_hook(self.backbone_io)
+            self.backbone.bottom_up.register_forward_hook(self.backbone_io)
             self.hint_adapter = DistillMixin.HintAdaptLayer(hint_channels=hint_channels)
 
     @classmethod
