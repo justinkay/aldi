@@ -190,7 +190,7 @@ class Distiller:
             hint_loss = 0.0
             for student_feat, teacher_feat in zip(self.student_hint_io.output, teacher_features):
                 hint_loss += F.mse_loss(student_feat, teacher_feat, reduction="mean")
-            losses["loss_hint_l2"] = hint_loss / len(teacher_features)
+            losses["loss_hint_l2"] = 0.5 * hint_loss / len(teacher_features)
 
         return losses
 
@@ -208,7 +208,7 @@ class DistillMixin(GeneralizedRCNN):
                 for i in range(hint_channels):
                     self.hint_adapter.weight[i, i, 0, 0] = 1
                 self.hint_adapter.bias.zero_()
-            self.in_features = ["p2", "p3", "p4", "p5", "p6"] # TODO
+            self.in_features = ["p2",] # "p3", "p4", "p5", "p6"] # TODO
 
         def forward(self, x):
             """Handles multi-level features."""

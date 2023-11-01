@@ -12,4 +12,4 @@ DOMAIN_ADAPT:
     ROIH_REG_ENABLED: True
     RPN_REG_ENABLED: True
     HINT_ENABLED: True
-OUTPUT_DIR: "output/cityscapes_distill_soft-all-hint/"
+OUTPUT_DIR: "output/cityscapes_distill_soft-all-hintp2/"
