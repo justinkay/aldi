@@ -41,11 +41,10 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      model_batch_size = trainer.model_batch_size # TODO this could be None
 
      _model = model.module if type(model) == DDP else model
-     do_sada = hasattr(model, "sada_heads") and _model.sada_heads is not None
+     do_sada = hasattr(_model, "sada_heads") and _model.sada_heads is not None
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
-     do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
-     do_distill = do_pseudolabel = do_unlabeled # TODO
+     do_distill = do_pseudolabel = pseudo_labeler is not None and unlabeled_weak is not None and unlabeled_strong # TODO
 
      total_batch_size = sum([len(s or []) for s in [labeled_weak, labeled_strong, unlabeled_weak]])
      num_grad_accum_steps = total_batch_size // model_batch_size
@@ -160,20 +159,20 @@ class DATrainer(DefaultTrainer):
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
           # TODO Add to constructor of trainer
-          trainer.distiller = Distiller(teacher=ema.model,
-                                        student=model,
-                                        do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
-                                        do_hard_obj=cfg.DOMAIN_ADAPT.DISTILL.HARD_OBJ_ENABLED,
-                                        do_hard_rpn_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_RPN_REG_ENABLED,
-                                        do_hard_roi_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED,
-                                        do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED, 
-                                        do_obj_dst=cfg.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED,
-                                        do_rpn_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED,
-                                        do_roih_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,
-                                        do_hint=cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
-                                        cls_temperature=cfg.DOMAIN_ADAPT.DISTILL.CLS_TMP,
-                                        obj_temperature=cfg.DOMAIN_ADAPT.DISTILL.OBJ_TMP,
-                                        cls_loss_type=cfg.DOMAIN_ADAPT.CLS_LOSS_TYPE)
+          # trainer.distiller = Distiller(teacher=ema.model,
+          #                               student=model,
+          #                               do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
+          #                               do_hard_obj=cfg.DOMAIN_ADAPT.DISTILL.HARD_OBJ_ENABLED,
+          #                               do_hard_rpn_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_RPN_REG_ENABLED,
+          #                               do_hard_roi_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED,
+          #                               do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED, 
+          #                               do_obj_dst=cfg.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED,
+          #                               do_rpn_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED,
+          #                               do_roih_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,
+          #                               do_hint=cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
+          #                               cls_temperature=cfg.DOMAIN_ADAPT.DISTILL.CLS_TMP,
+          #                               obj_temperature=cfg.DOMAIN_ADAPT.DISTILL.OBJ_TMP,
+          #                               cls_loss_type=cfg.DOMAIN_ADAPT.CLS_LOSS_TYPE)
 
           return trainer
      
@@ -241,7 +240,7 @@ class DATrainer(DefaultTrainer):
           total_batch_size = cfg.SOLVER.IMS_PER_BATCH
           batch_sizes = [ int(total_batch_size * r / sum(batch_ratios)) for r in batch_ratios ]
           assert len(batch_contents) == len(batch_sizes), "len(cfg.DATASETS.BATCH_CONTENTS) must equal len(cfg.DATASETS.BATCH_RATIOS)."
-          assert sum(batch_sizes) == total_batch_size, "sum(batch_sizes) must equal total_batch_size"
+          assert sum(batch_sizes) == total_batch_size, f"sum(batch_sizes)={sum(batch_sizes)} must equal total_batch_size={total_batch_size}"
 
           labeled_bs = [batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("labeled")]
           labeled_bs = max(labeled_bs) if len(labeled_bs) else 0

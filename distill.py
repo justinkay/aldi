@@ -201,7 +201,7 @@ class Distiller:
 
 
 class DistillMixin(GeneralizedRCNN):
-    """Any modifications to the torch module itself go here and are mixed in in TODO"""
+    """Any modifications to the torch module itself go here and are mixed in in rcnn.ALDI"""
 
     class HintAdaptLayer(torch.nn.Module):
         def __init__(self, hint_channels=256):
