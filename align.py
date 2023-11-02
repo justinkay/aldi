@@ -29,10 +29,8 @@ class AlignMixin(GeneralizedRCNN):
         self.ins_da_weight = ins_da_weight
 
         self.sada_heads = sada_heads
-        if img_da_enabled:
-            self.img_align = ConvDiscriminator(hidden_dims=[256]) # same as RPN head
-        if ins_da_enabled:
-            self.ins_align = FCDiscriminator(hidden_dims=[1024,1024]) # same as ROI head
+        self.img_align = ConvDiscriminator(256, hidden_dims=[256]) if img_da_enabled else None # TODO dims; same as RPN head
+        self.ins_align = FCDiscriminator(1024, hidden_dims=[1024]) if ins_da_enabled else None # TODO dims
 
         # register hooks so we can grab output of sub-modules
         self.backbone_io, self.rpn_io, self.roih_io, self.boxhead_io, self.boxpred_io = SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO()
@@ -60,7 +58,6 @@ class AlignMixin(GeneralizedRCNN):
 
     def forward(self, *args, do_align=False, labeled=True, **kwargs):
         output = super().forward(*args, **kwargs)
-
         if self.training:
             if do_align:
                 # extract needed info for alignment: domain labels, image features, instance features
@@ -74,65 +71,59 @@ class AlignMixin(GeneralizedRCNN):
 
                 if self.sada_heads is not None:
                     output.update(self.sada_heads(img_features, instance_features, instance_targets, proposals, img_targets))
-                if self.img_da_enabled:
+                if self.img_align:
                     features = self.backbone_io.output
                     features = grad_reverse(features[self.img_da_layer])
                     domain_preds = self.img_align(features)
                     loss = F.binary_cross_entropy_with_logits(domain_preds, torch.FloatTensor(domain_preds.data.size()).fill_(domain_label).to(device))
                     output["loss_da_img"] = self.img_da_weight * loss
-                if self.ins_da_enabled:
+                if self.ins_align:
                     domain_preds = self.ins_align(instance_features)
                     loss = F.binary_cross_entropy_with_logits(domain_preds, torch.FloatTensor(domain_preds.data.size()).fill_(domain_label).to(device))
                     output["loss_da_ins"] = self.ins_da_weight * loss
-                
-            elif len(self.aligners) > 0:
+            elif self.sada_heads or self.img_align or self.ins_align:
                 # need to utilize the modules at some point during the forward pass or PyTorch complains.
                 # this is only an issue when cfg.SOLVER.BACKWARD_AT_END=False, because intermediate backward()
                 # calls may not have used sada_heads
                 # see: https://github.com/pytorch/pytorch/issues/43259#issuecomment-964284292
                 fake_output = 0
-                for aligner in self.aligners:
-                    fake_output += sum([p.sum() for p in aligner.parameters()]) * 0
-
+                for aligner in [self.sada_heads, self.img_align, self.ins_align]:
+                    if aligner is not None:
+                        fake_output += sum([p.sum() for p in aligner.parameters()]) * 0
+                output["_da"] = fake_output
         return output
 
 class ConvDiscriminator(torch.nn.Module):
     """A discriminator that uses conv layers."""
-    def __init__(self, hidden_dims=[], kernel_size=3):
+    def __init__(self, input_dim, hidden_dims=[], kernel_size=3):
         super(ConvDiscriminator, self).__init__()
-        prev_dim = None
+        modules = []
+        prev_dim = input_dim
         for i, dim in enumerate(hidden_dims):
-            if prev_dim is None:
-                self.add_module(f"conv{i}", torch.nn.LazyConv2d(dim, kernel_size))
-            else:
-                self.add_module(f"conv{i}", torch.nn.Conv2d(prev_dim, dim, kernel_size))
-            self.add_module(f"relu{i}", torch.nn.ReLU())
+            modules.append(torch.nn.Conv2d(prev_dim, dim, kernel_size))
+            modules.append(torch.nn.ReLU())
             prev_dim = dim
-        self.add_module(f"pool", torch.nn.AdaptiveAvgPool2d(1))
-        self.add_module(f"flatten", torch.nn.Flatten())
-        self.add_module(f"classifier", torch.nn.LazyLinear(1))
+        modules.append(torch.nn.AdaptiveAvgPool2d(1))
+        modules.append(torch.nn.Flatten())
+        modules.append(torch.nn.Linear(prev_dim, 1))
+        self.model = torch.nn.Sequential(*modules)
 
     def forward(self, x):
-        for layer in self:
-            x = layer(x)
-        return x
+        return self.model(x)
     
-class FCDiscriminator(torch.nn.module):
+class FCDiscriminator(torch.nn.Module):
     """A discriminator that uses fully connected layers."""
-    def __init__(self, hidden_dims=[]):
+    def __init__(self, input_dim, hidden_dims=[]):
         super(FCDiscriminator, self).__init__()
-        self.add_module(f"flatten", torch.nn.Flatten())
-        prev_dim = None
+        modules = []
+        modules.append(torch.nn.Flatten())
+        prev_dim = input_dim
         for i, dim in enumerate(hidden_dims):
-            if prev_dim is None:
-                self.add_module(f"fc{i}", torch.nn.LazyLinear(dim))
-            else:
-                self.add_module(f"fc{i}", torch.nn.Linear(prev_dim, dim))
-            self.add_module(f"relu{i}", torch.nn.ReLU())
+            modules.append(torch.nn.Linear(prev_dim, dim))
+            modules.append(torch.nn.ReLU())
             prev_dim = dim
-        self.add_module(f"classifier", torch.nn.LazyLinear(1))
+        modules.append(torch.nn.Linear(prev_dim, 1))
+        self.model = torch.nn.Sequential(*modules)
 
     def forward(self, x):
-        for layer in self:
-            x = layer(x)
-        return x
+        return self.model(x)

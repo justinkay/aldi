@@ -41,8 +41,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      model_batch_size = trainer.model_batch_size # TODO this could be None
 
      _model = model.module if type(model) == DDP else model
-     # do_align = hasattr(_model, "sada_heads") and _model.sada_heads is not None
-     do_align = hasattr(_model, "aligners") and len(_model.aligners) > 0
+     do_align = any( [ getattr(_model, a, None) is not None for a in ["sada_heads", "img_align", "ins_align"] ] )
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
      do_distill = do_pseudolabel = pseudo_labeler is not None and unlabeled_weak is not None and unlabeled_strong # TODO
