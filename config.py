@@ -7,8 +7,6 @@ from detectron2.config import CfgNode as CN
 def add_da_config(cfg):
     _C = cfg
 
-    _C.DOMAIN_ADAPT = CN()
-
     # Datasets and sampling
     _C.DATASETS.UNLABELED = tuple()
     _C.DATASETS.BATCH_CONTENTS = ("labeled_weak", ) # one or more of: { "labeled_weak", "labeled_strong", "unlabeled_weak", "unlabeled_strong" }
@@ -28,12 +26,22 @@ def add_da_config(cfg):
     _C.EMA.ENABLED = False
     _C.EMA.ALPHA = 0.9996 # From Adaptive Teacher settings
 
-    # Teacher model provides pseudo labels
-    _C.DOMAIN_ADAPT.TEACHER = CN()
-    _C.DOMAIN_ADAPT.TEACHER.ENABLED = False
-    _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # one of: { "thresholding", "probabilistic" }
-    _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
+    # Begin domain adaptation settings
+    _C.DOMAIN_ADAPT = CN()
 
+    # Source-target alignment
+    _C.DOMAIN_ADAPT.ALIGN = CN()
+    _C.DOMAIN_ADAPT.ALIGN.SADA_ENABLED = False
+    _C.DOMAIN_ADAPT.ALIGN.SADA_IMG_GRL_WEIGHT = 0.01
+    _C.DOMAIN_ADAPT.ALIGN.SADA_INS_GRL_WEIGHT = 0.1
+    _C.DOMAIN_ADAPT.ALIGN.SADA_COS_WEIGHT = 0.1
+    _C.DOMAIN_ADAPT.ALIGN.IMG_DA_ENABLED = False
+    _C.DOMAIN_ADAPT.ALIGN.IMG_DA_LAYER = "p2"
+    _C.DOMAIN_ADAPT.ALIGN.IMG_DA_WEIGHT = 0.05
+    _C.DOMAIN_ADAPT.ALIGN.INS_DA_ENABLED = False
+    _C.DOMAIN_ADAPT.ALIGN.INS_DA_WEIGHT = 0.05
+
+    # Self-distillation
     _C.DOMAIN_ADAPT.DISTILL = CN()
     # 'Pseudo label' approaches
     _C.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED = False
@@ -50,23 +58,31 @@ def add_da_config(cfg):
     _C.DOMAIN_ADAPT.DISTILL.OBJ_TMP = 1.0
     _C.DOMAIN_ADAPT.CLS_LOSS_TYPE = "CE" # one of: { "CE", "KL" }
 
+    # Teacher model provides pseudo labels
+    # TODO: Could be merged into DISTILL settings somehow
+    _C.DOMAIN_ADAPT.TEACHER = CN()
+    _C.DOMAIN_ADAPT.TEACHER.ENABLED = False
+    _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # one of: { "thresholding", "probabilistic" }
+    _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
+
     # Custom loss functions/modifications
+    # TODO Get rid of these; loc_loss_enabled can be captured in distillation settings
     _C.DOMAIN_ADAPT.LOSSES = CN()
     _C.DOMAIN_ADAPT.LOSSES.LOC_LOSS_ENABLED = True
     _C.DOMAIN_ADAPT.LOSSES.QUALITY_LOSS_WEIGHT_ENABLED = False
 
     # SADA settings
-    _C.MODEL.SADA = CN()
-    _C.MODEL.SADA.ENABLED = False
-    _C.MODEL.SADA.DA_IMG_GRL_WEIGHT = 0.01
-    _C.MODEL.SADA.DA_INS_GRL_WEIGHT = 0.1
-    _C.MODEL.SADA.COS_WEIGHT = 0.1
+    # _C.MODEL.SADA = CN()
+    # _C.MODEL.SADA.ENABLED = False
+    # _C.MODEL.SADA.DA_IMG_GRL_WEIGHT = 0.01
+    # _C.MODEL.SADA.DA_INS_GRL_WEIGHT = 0.1
+    # _C.MODEL.SADA.COS_WEIGHT = 0.1
 
     # Adaptive Teacher style adverarial feature alignment
-    _C.MODEL.DA = CN()
-    _C.MODEL.DA.ENABLED = False
-    _C.MODEL.DA.DIS_TYPE = "p2"
-    _C.MODEL.DA.DIS_LOSS_WEIGHT = 0.05
+    # _C.MODEL.DA = CN()
+    # _C.MODEL.DA.ENABLED = False
+    # _C.MODEL.DA.DIS_TYPE = "p2"
+    # _C.MODEL.DA.DIS_LOSS_WEIGHT = 0.05
 
     # Probabilistic Teacher (Gaussian RCNN) settings
     _C.GRCNN = CN()

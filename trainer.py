@@ -41,7 +41,8 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      model_batch_size = trainer.model_batch_size # TODO this could be None
 
      _model = model.module if type(model) == DDP else model
-     do_sada = hasattr(_model, "sada_heads") and _model.sada_heads is not None
+     # do_align = hasattr(_model, "sada_heads") and _model.sada_heads is not None
+     do_align = hasattr(_model, "aligners") and len(_model.aligners) > 0
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
      do_distill = do_pseudolabel = pseudo_labeler is not None and unlabeled_weak is not None and unlabeled_strong # TODO
@@ -95,16 +96,16 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
                add_to_loss_dict(distill_loss, name, key_conditional)
 
      # Weakly-augmented source imagery (Used for normal training and/or domain alignment)
-     if do_weak or do_sada: 
-          do_training_step(labeled_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k), do_sada=do_sada)
+     if do_weak or do_align: 
+          do_training_step(labeled_weak, "source_weak", lambda k: do_weak or (do_align and "_da_" in k), do_align=do_align)
      
      # Weakly-augmented target imagery (Only used for domain alignment)
-     if do_sada: 
-          do_training_step(unlabeled_weak, "target_weak", lambda k: "_da_" in k, labeled=False, do_sada=True)
+     if do_align: 
+          do_training_step(unlabeled_weak, "target_weak", lambda k: "_da_" in k, labeled=False, do_align=True)
 
      # Strongly-augmented source imagery (Used for normal training)
      if do_strong: 
-          do_training_step(labeled_strong, "source_strong", do_sada=False)
+          do_training_step(labeled_strong, "source_strong", do_align=False)
 
      # Do pseudo-labeling
      # NOTE: This modifies in-place

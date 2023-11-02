@@ -74,7 +74,7 @@ class DARCNN(GeneralizedRCNN):
 
         return ret
 
-    def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], labeled: bool = True, do_sada: bool = False):
+    def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], labeled: bool = True, do_align: bool = False):
         # hack in PT related stuff as needed
         # our Trainer handles the "unsup_data_weak" case as a separate inference step
         self.roi_heads.branch = "supervised" if labeled else "unsupervised"
@@ -87,7 +87,7 @@ class DARCNN(GeneralizedRCNN):
 
         if self.training:
             # handle any domain alignment modules
-            if do_sada:
+            if do_align:
                 assert self.sada_heads is not None, "SADA is enabled but no SADA module is defined"
                 method = "sada" if type(self.sada_heads) == SADA else "da"
                 da_losses = self.get_sada_losses(labeled, method)
@@ -162,5 +162,5 @@ class ALDI(AlignMixin, DistillMixin, GeneralizedRCNN):
 
     # TODO remove this once API is fixed up?
     def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], 
-                labeled: bool = True, do_sada: bool = False):
-        return super(ALDI, self).forward(batched_inputs, do_sada=do_sada, labeled=labeled)
+                labeled: bool = True, do_align: bool = False):
+        return super(ALDI, self).forward(batched_inputs, do_align=do_align, labeled=labeled)
