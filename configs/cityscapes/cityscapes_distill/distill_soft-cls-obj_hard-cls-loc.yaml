@@ -1,15 +1,12 @@
 _BASE_: "../cityscapes_startingpoint/DA-RCNN-FPN-Cityscapes_strongaugemastart.yaml"
-MODEL:
-  META_ARCHITECTURE: "ALDI"
 DOMAIN_ADAPT:
   DISTILL:
-    HARD_ROIH_CLS_ENABLED: False
+    HARD_ROIH_CLS_ENABLED: True
     HARD_ROIH_REG_ENABLED: False
-    HARD_OBJ_ENABLED: False
+    HARD_OBJ_ENABLED: True
     HARD_RPN_REG_ENABLED: False
     ROIH_CLS_ENABLED: True
-    OBJ_ENABLED: True
+    OBJ_ENABLED: False
     ROIH_REG_ENABLED: True
     RPN_REG_ENABLED: True
-    HINT_ENABLED: True
-OUTPUT_DIR: "output/cityscapes_distill_soft-all-hint_res2/"
+OUTPUT_DIR: "output/cityscapes_distill_soft-cls-obj_hard-cls-loc/"
