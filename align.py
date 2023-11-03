@@ -78,7 +78,8 @@ class AlignMixin(GeneralizedRCNN):
                     loss = F.binary_cross_entropy_with_logits(domain_preds, torch.FloatTensor(domain_preds.data.size()).fill_(domain_label).to(device))
                     output["loss_da_img"] = self.img_da_weight * loss
                 if self.ins_align:
-                    domain_preds = self.ins_align(instance_features)
+                    features = grad_reverse(instance_features)
+                    domain_preds = self.ins_align(features)
                     loss = F.binary_cross_entropy_with_logits(domain_preds, torch.FloatTensor(domain_preds.data.size()).fill_(domain_label).to(device))
                     output["loss_da_ins"] = self.ins_da_weight * loss
             elif self.sada_heads or self.img_align or self.ins_align:
