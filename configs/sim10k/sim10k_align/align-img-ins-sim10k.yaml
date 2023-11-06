@@ -1,0 +1,12 @@
+_BASE_: "../sim10k_baseline/Base-RCNN-FPN-Sim10k.yaml"
+MODEL:
+  META_ARCHITECTURE: "ALDI"
+DOMAIN_ADAPT:
+  ALIGN:
+    IMG_DA_ENABLED: True
+    INS_DA_ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_cars_train",)
+  BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
+  BATCH_RATIOS: (1,1)
+OUTPUT_DIR: "output/sim10k_align_img_ins/"
