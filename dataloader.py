@@ -3,6 +3,7 @@ import copy
 import os
 import torch
 import numpy as np
+import cv2
 
 from detectron2.structures import Instances, Boxes
 from detectron2.data import detection_utils as utils, MetadataCatalog
@@ -38,7 +39,10 @@ class UMTDatasetMapper(StoreImageDatasetMapper):
     def _after_call(self, dataset_dict, _, transforms):
         # load source-like or target-like samples for UMT
         dataset_dict = copy.deepcopy(dataset_dict)
-        image_translated = utils.read_image(os.path.join(self.meta.translated_image_dir, os.path.relpath(dataset_dict["file_name"], self.meta.image_dir_prefix)), format=self.image_format)
+        image_translated = utils.read_image(os.path.join(self.meta.translated_image_dir, os.path.relpath(os.path.splitext(dataset_dict["file_name"])[0] + ".png", self.meta.image_dir_prefix)), format=self.image_format)
+        original_shape = (dataset_dict["height"], dataset_dict["width"])
+        if image_translated.shape[:2] != original_shape:
+            image_translated = cv2.resize(image_translated, dsize=(original_shape[1], original_shape[0]), interpolation=cv2.INTER_CUBIC)
         image_translated = transforms.apply_image(image_translated)
         dataset_dict[TRANSLATED_IMG_KEY] = torch.as_tensor(np.ascontiguousarray(image_translated.transpose(2, 0, 1)))
 
