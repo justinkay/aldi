@@ -1,6 +1,4 @@
 _BASE_: "../cityscapes_baseline/Base-RCNN-FPN-Cityscapes.yaml"
-MODEL:
-  META_ARCHITECTURE: "ALDI"
 DOMAIN_ADAPT:
   ALIGN:
     INS_DA_ENABLED: True

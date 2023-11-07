@@ -1,6 +1,4 @@
 _BASE_: "../cityscapes_startingpoint/DA-RCNN-FPN-Cityscapes_strongaugemastart.yaml"
-MODEL:
-  META_ARCHITECTURE: "ALDI"
 DOMAIN_ADAPT:
   DISTILL:
     HARD_ROIH_CLS_ENABLED: False

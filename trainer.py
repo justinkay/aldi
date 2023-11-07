@@ -237,5 +237,5 @@ class DATrainer(DefaultTrainer):
           """Update the EMA model every step."""
           super(DATrainer, self).before_step()
           if self.cfg.EMA.ENABLED:
-               self._trainer.ema.update_weights(self._trainer.model, self.iter)
+               self.ema.update_weights(self._trainer.model, self.iter)
                
