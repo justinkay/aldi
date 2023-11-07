@@ -1,0 +1,12 @@
+_BASE_: "../MeanTeacher-CFC.yaml"
+MODEL:
+  UMT:
+    ENABLED: True
+DATASETS:
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_weak", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1,1)
+AUG:
+  INCLUDE_RANDOM_ERASING: False
+SOLVER:
+  BACKWARD_AT_END: True  # TODO: without this, predictions become NaN
+OUTPUT_DIR: "output/cfc_umt/"
