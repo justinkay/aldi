@@ -1,5 +1,6 @@
 _BASE_: "./Base-RCNN-FPN.yaml"
 MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
   ANCHOR_GENERATOR:
     NAME: "DifferentiableAnchorGenerator"
   PROPOSAL_GENERATOR:

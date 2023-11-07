@@ -1,4 +1,6 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
+MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
 DATASETS:
   BATCH_CONTENTS: ("labeled_weak", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
@@ -7,6 +9,5 @@ AUG:
   UNLABELED_MIC_AUG: True
 DOMAIN_ADAPT:
   LOSSES:
-    LOC_LOSS_ENABLED: False
     QUALITY_LOSS_WEIGHT_ENABLED: True
 OUTPUT_DIR: "output/cityscapes_mic_no_sada/"

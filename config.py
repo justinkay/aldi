@@ -68,7 +68,7 @@ def add_da_config(cfg):
     # Custom loss functions/modifications
     # TODO Get rid of these; loc_loss_enabled can be captured in distillation settings
     _C.DOMAIN_ADAPT.LOSSES = CN()
-    _C.DOMAIN_ADAPT.LOSSES.LOC_LOSS_ENABLED = True
+    # _C.DOMAIN_ADAPT.LOSSES.LOC_LOSS_ENABLED = True
     _C.DOMAIN_ADAPT.LOSSES.QUALITY_LOSS_WEIGHT_ENABLED = False
 
     # SADA settings

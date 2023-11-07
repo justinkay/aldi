@@ -15,15 +15,14 @@ DATASETS:
   BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
   BATCH_RATIOS: (1,1,1)
 DOMAIN_ADAPT:
-  LOSSES:
-    LOC_LOSS_ENABLED: False
   TEACHER:
     ENABLED: True
   DISTILL:
+    # By default, disable localization losses (done by AT, UBT, MIC, ...)
     HARD_ROIH_CLS_ENABLED: True
-    HARD_ROIH_REG_ENABLED: True
+    HARD_ROIH_REG_ENABLED: False
     HARD_OBJ_ENABLED: True
-    HARD_RPN_REG_ENABLED: True
+    HARD_RPN_REG_ENABLED: False
 SOLVER:
   STEPS: (59999,)
   MAX_ITER: 60000
