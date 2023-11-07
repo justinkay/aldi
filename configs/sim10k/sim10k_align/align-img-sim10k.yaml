@@ -4,6 +4,7 @@ MODEL:
 DOMAIN_ADAPT:
   ALIGN:
     IMG_DA_ENABLED: True
+    IMG_DA_WEIGHT: 0.0025 # default of 0.01 diverges
 DATASETS:
   UNLABELED: ("cityscapes_cars_train",)
   BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
