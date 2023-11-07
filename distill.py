@@ -11,15 +11,34 @@ from detectron2.modeling.box_regression import _dense_box_regression_loss
 from fvcore.nn import smooth_l1_loss
 
 from helpers import SaveIO, ManualSeed, ReplaceProposalsOnce, set_attributes
-
+from pseudolabeler import PseudoLabeler
 
 class Distiller:
 
     def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, do_hard_roi_reg=False,
                  do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roih_reg_dst=False, do_hint=False,
-                 cls_temperature=1.0, obj_temperature=1.0, cls_loss_type="CE"):
+                 cls_temperature=1.0, obj_temperature=1.0, cls_loss_type="CE", pseudo_label_threshold=0.8, pseudo_label_method="thresholding"):
         set_attributes(self, locals())
         self.register_hooks()
+        self.pseudo_labeler = PseudoLabeler(teacher, pseudo_label_threshold, pseudo_label_method)
+
+    @classmethod
+    def from_config(cls, teacher, student, cfg):
+        return Distiller(teacher, student,
+                        do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
+                        do_hard_obj=cfg.DOMAIN_ADAPT.DISTILL.HARD_OBJ_ENABLED,
+                        do_hard_rpn_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_RPN_REG_ENABLED,
+                        do_hard_roi_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED,
+                        do_cls_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_CLS_ENABLED, 
+                        do_obj_dst=cfg.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED,
+                        do_rpn_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED,
+                        do_roih_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,
+                        do_hint=cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
+                        cls_temperature=cfg.DOMAIN_ADAPT.DISTILL.CLS_TMP,
+                        obj_temperature=cfg.DOMAIN_ADAPT.DISTILL.OBJ_TMP,
+                        cls_loss_type=cfg.DOMAIN_ADAPT.CLS_LOSS_TYPE,
+                        pseudo_label_threshold=cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD,
+                        pseudo_label_method=cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD)
 
     def register_hooks(self):
         self.student_rpn_io, self.student_rpn_head_io, self.student_boxpred_io = SaveIO(), SaveIO(), SaveIO()
@@ -54,7 +73,16 @@ class Distiller:
             self.teacher_bottom_up_io = SaveIO()
             teacher_model.backbone.bottom_up.register_forward_hook(self.teacher_bottom_up_io)
 
+    def distill_enabled(self):
+        return any([self.do_hard_cls, self.do_hard_obj, self.do_hard_rpn_reg, self.do_hard_roi_reg,
+                    self.do_cls_dst, self.do_obj_dst, self.do_rpn_reg_dst, self.do_roih_reg_dst, self.do_hint])
+
     def _distill_forward(self, teacher_batched_inputs, student_batched_inputs):
+        # first, get hard pseudo labels -- this is done in place
+        # even if not included in overall loss, we need them for RPN proposal sampling
+        # TODO there may be a more efficient way to do the latter if you don't want hard losses
+        self.pseudo_labeler(teacher_batched_inputs, student_batched_inputs)
+        
         self.seeder.reset_seed()
 
         # teacher might be in eval mode -- this is important for inputs/outputs aligning
@@ -93,13 +121,13 @@ class Distiller:
                 # Need to add to standard losses so that the optimizer can see it
                 losses[k] = v * 0.0
 
-        losses.update(self.get_rpn_losses())
+        losses.update(self.get_rpn_losses(teacher_batched_inputs))
         losses.update(self.get_roih_losses())
         losses.update(self.get_hint_losses())
 
         return losses
     
-    def get_rpn_losses(self):
+    def get_rpn_losses(self, teacher_batched_inputs):
         losses = {}
         student_objectness_logits, student_proposal_deltas = self.student_rpn_head_io.output
         teacher_objectness_logits, teacher_proposal_deltas = self.teacher_rpn_head_io.output
@@ -213,7 +241,7 @@ class DistillMixin(GeneralizedRCNN):
                 for i in range(hint_channels):
                     self.hint_adapter.weight[i, i, 0, 0] = 1
                 self.hint_adapter.bias.zero_()
-            self.in_features = ["res2"] # ["p2",] # "p3", "p4", "p5", "p6"] # TODO
+            self.in_features = ["res2"] # ["p2",] # "p3", "p4", "p5", "p6"] # TODO: from config
 
         def forward(self, x):
             """Handles multi-level features."""

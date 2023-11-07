@@ -6,17 +6,15 @@ from gaussian_rcnn.instances import FreeInstances as Instances # TODO: only when
 
 
 class PseudoLabeler:
-    def __init__(self, cfg, model):
+    def __init__(self, model, threshold, method):
         self.model = model
-        self.threshold = cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD
-        self.method = cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD
+        self.threshold = threshold
+        self.method = method
 
     def __call__(self, unlabeled_weak, unlabeled_strong):
-        return do_pseudo_label(self.model, unlabeled_weak, unlabeled_strong, self.threshold, self.method)
+        return pseudo_label_inplace(self.model, unlabeled_weak, unlabeled_strong, self.threshold, self.method)
 
-def do_pseudo_label(model, unlabeled_weak, unlabeled_strong, threshold, method):
-    data_to_pseudolabel = unlabeled_strong if unlabeled_strong is not None else unlabeled_weak
-    
+def pseudo_label_inplace(model, unlabeled_weak, unlabeled_strong, threshold, method):
     with torch.no_grad():
         # get predictions from teacher model on weakly-augmented data
         # do_postprocess=False to disable transforming outputs back into original image space
@@ -29,12 +27,9 @@ def do_pseudo_label(model, unlabeled_weak, unlabeled_strong, threshold, method):
         teacher_preds, _ = process_pseudo_label(teacher_preds, threshold, "roih", method)
         
         # add pseudo labels back as "ground truth"
-        data_to_pseudolabel = add_label(data_to_pseudolabel, teacher_preds)
-
-        # TODO HACK to make RPN sampling compatible with distillation
         add_label(unlabeled_weak, teacher_preds)
-    
-    return data_to_pseudolabel
+        if unlabeled_strong is not None:
+            add_label(unlabeled_strong, teacher_preds)
 
 # Modified from Adaptive Teacher ATeacherTrainer:
 # - Add scores_logists and boxes_sigma from PT if available
