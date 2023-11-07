@@ -22,41 +22,29 @@ class Distiller:
         self.register_hooks()
 
     def register_hooks(self):
-        self.teacher_io, self.teacher_backbone_io, self.teacher_rpn_io, self.teacher_rpn_head_io, self.teacher_roih_io, self.teacher_boxhead_io, self.teacher_boxpred_io = SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO()
-        self.student_io, self.student_backbone_io, self.student_rpn_io, self.student_rpn_head_io, self.student_roih_io, self.student_boxhead_io, self.student_boxpred_io = SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO()
+        self.student_rpn_io, self.student_rpn_head_io, self.student_boxpred_io = SaveIO(), SaveIO(), SaveIO()
+        self.teacher_backbone_io, self.teacher_rpn_head_io, self.teacher_boxpred_io, self.teacher_anchor_io = SaveIO(), SaveIO(), SaveIO(), SaveIO()
         
         student_model = self.student.module if type(self.student) is DDP else self.student
         teacher_model = self.teacher.module if type(self.teacher) is DDP else self.teacher
 
-        student_model.register_forward_hook(self.student_io)
-        student_model.backbone.register_forward_hook(self.student_backbone_io)
         student_model.proposal_generator.register_forward_hook(self.student_rpn_io)
         student_model.proposal_generator.rpn_head.register_forward_hook(self.student_rpn_head_io)
-        student_model.roi_heads.register_forward_hook(self.student_roih_io)
-        student_model.roi_heads.box_head.register_forward_hook(self.student_boxhead_io)
         student_model.roi_heads.box_predictor.register_forward_hook(self.student_boxpred_io)
 
-        teacher_model.register_forward_hook(self.teacher_io)
         teacher_model.backbone.register_forward_hook(self.teacher_backbone_io)
-        teacher_model.proposal_generator.register_forward_hook(self.teacher_rpn_io)
         teacher_model.proposal_generator.rpn_head.register_forward_hook(self.teacher_rpn_head_io)
-        teacher_model.roi_heads.register_forward_hook(self.teacher_roih_io)
-        teacher_model.roi_heads.box_head.register_forward_hook(self.teacher_boxhead_io)
         teacher_model.roi_heads.box_predictor.register_forward_hook(self.teacher_boxpred_io)
+        teacher_model.proposal_generator.anchor_generator.register_forward_hook(self.teacher_anchor_io)
 
         # Make sure seeds are the same for proposal sampling in teacher/student
-        # TODO: Don't think we actually need this for RPN since we do the sampling ourselves now
         self.seeder = ManualSeed()
-        teacher_model.proposal_generator.register_forward_pre_hook(self.seeder)
-        student_model.proposal_generator.register_forward_pre_hook(self.seeder)
         teacher_model.roi_heads.register_forward_pre_hook(self.seeder)
         student_model.roi_heads.register_forward_pre_hook(self.seeder)
 
+        # Teacher and student second stage need to have the same input proposals in order to distill predictions on those proposals
         self.teacher_proposal_replacer = ReplaceProposalsOnce()
         teacher_model.roi_heads.register_forward_pre_hook(self.teacher_proposal_replacer)
-
-        self.teacher_anchor_io = SaveIO()
-        teacher_model.proposal_generator.anchor_generator.register_forward_hook(self.teacher_anchor_io)
 
         if self.do_hint:
             self.student_hint_io = SaveIO()
@@ -105,7 +93,14 @@ class Distiller:
                 # Need to add to standard losses so that the optimizer can see it
                 losses[k] = v * 0.0
 
-        ### RPN ###
+        losses.update(self.get_rpn_losses())
+        losses.update(self.get_roih_losses())
+        losses.update(self.get_hint_losses())
+
+        return losses
+    
+    def get_rpn_losses(self):
+        losses = {}
         student_objectness_logits, student_proposal_deltas = self.student_rpn_head_io.output
         teacher_objectness_logits, teacher_proposal_deltas = self.teacher_rpn_head_io.output
 
@@ -140,7 +135,10 @@ class Distiller:
             )
             losses["loss_rpn_l1"] = loss_rpn_reg
 
-        ### ROI Heads ###
+        return losses
+    
+    def get_roih_losses(self):
+        losses = {}
         student_cls_logits, student_proposal_deltas = self.student_boxpred_io.output
         teacher_cls_logits, teacher_proposal_deltas = self.teacher_boxpred_io.output
 
@@ -186,7 +184,10 @@ class Distiller:
             normalizer = teacher_cls_logits.shape[0]
             losses["loss_roih_l1"] = loss_roih_reg / normalizer
 
-        # Feature losses/hints
+        return losses
+    
+    def get_hint_losses(self):
+        losses = {}
         # Assumes DistillMixin has been used
         if self.do_hint:
             student_model = self.student.module if type(self.student) is DDP else self.student
@@ -196,7 +197,6 @@ class Distiller:
             for student_feat, teacher_feat in zip(self.student_hint_io.output, teacher_features):
                 hint_loss += F.mse_loss(student_feat, teacher_feat, reduction="mean")
             losses["loss_hint_l2"] = 0.5 * hint_loss / len(teacher_features)
-
         return losses
 
 
