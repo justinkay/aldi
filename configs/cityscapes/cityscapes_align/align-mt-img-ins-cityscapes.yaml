@@ -3,4 +3,6 @@ DOMAIN_ADAPT:
   ALIGN:
     IMG_DA_ENABLED: True
     INS_DA_ENABLED: True
-OUTPUT_DIR: "output/cityscapes_align_img_ins/"
+    IMG_DA_WEIGHT: 0.01
+    INS_DA_WEIGHT: 0.005
+OUTPUT_DIR: "output/cityscapes_mt_align_img_ins/"

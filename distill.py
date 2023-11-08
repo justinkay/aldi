@@ -232,7 +232,7 @@ class DistillMixin(GeneralizedRCNN):
     """Any modifications to the torch module itself go here and are mixed in in rcnn.ALDI"""
 
     class HintAdaptLayer(torch.nn.Module):
-        def __init__(self, hint_channels=256):
+        def __init__(self, hint_channels=512, hint_layer="res3"):
             super().__init__()
             self.hint_adapter = torch.nn.Conv2d(in_channels=hint_channels, out_channels=hint_channels, kernel_size=1)
             # initialize to identity matrix for initial training stability
@@ -241,7 +241,7 @@ class DistillMixin(GeneralizedRCNN):
                 for i in range(hint_channels):
                     self.hint_adapter.weight[i, i, 0, 0] = 1
                 self.hint_adapter.bias.zero_()
-            self.in_features = ["res2"] # ["p2",] # "p3", "p4", "p5", "p6"] # TODO: from config
+            self.in_features = [hint_layer]
 
         def forward(self, x):
             """Handles multi-level features."""
@@ -252,19 +252,20 @@ class DistillMixin(GeneralizedRCNN):
             return out_features
 
     @configurable
-    def __init__(self, *, do_hint=False, hint_channels=256, **kwargs):
+    def __init__(self, *, do_hint=False, hint_channels=512, hint_layer="res3", **kwargs):
         super(DistillMixin, self).__init__(**kwargs)
         self.do_hint = do_hint
         if do_hint:
             self.backbone_io = SaveIO()
             self.backbone.bottom_up.register_forward_hook(self.backbone_io)
-            self.hint_adapter = DistillMixin.HintAdaptLayer(hint_channels=hint_channels)
+            self.hint_adapter = DistillMixin.HintAdaptLayer(hint_channels=hint_channels, hint_layer=hint_layer)
 
     @classmethod
     def from_config(cls, cfg):
         ret = super(DistillMixin, cls).from_config(cfg)
         ret.update({"do_hint": cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
-                    "hint_channels": cfg. MODEL.RESNETS.RES2_OUT_CHANNELS, # TODO
+                    "hint_channels": cfg.DOMAIN_ADAPT.DISTILL.HINT_CHANNELS
+                    "hint_layer": cfg.DOMAIN_ADAPT.DISTILL.HINT_LAYER
                     })
         return ret
 
