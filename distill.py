@@ -264,7 +264,7 @@ class DistillMixin(GeneralizedRCNN):
     def from_config(cls, cfg):
         ret = super(DistillMixin, cls).from_config(cfg)
         ret.update({"do_hint": cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
-                    "hint_channels": cfg.DOMAIN_ADAPT.DISTILL.HINT_CHANNELS
+                    "hint_channels": cfg.DOMAIN_ADAPT.DISTILL.HINT_CHANNELS,
                     "hint_layer": cfg.DOMAIN_ADAPT.DISTILL.HINT_LAYER
                     })
         return ret
