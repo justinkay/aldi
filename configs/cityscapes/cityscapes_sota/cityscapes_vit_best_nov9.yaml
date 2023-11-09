@@ -1,0 +1,20 @@
+_BASE_: "../MeanTeacher-VitDetB-Cityscapes.yaml"
+DOMAIN_ADAPT:
+  DISTILL:
+    HARD_ROIH_CLS_ENABLED: False
+    HARD_ROIH_REG_ENABLED: False
+    HARD_OBJ_ENABLED: False
+    HARD_RPN_REG_ENABLED: False
+    ROIH_CLS_ENABLED: True
+    OBJ_ENABLED: True
+    ROIH_REG_ENABLED: True
+    RPN_REG_ENABLED: True
+    HINT_ENABLED: False # disabling this for ViT since it is untested
+AUG:
+  INCLUDE_RANDOM_ERASING: False
+  LABELED_MIC_AUG: True
+  UNLABELED_MIC_AUG: True
+DATASETS:
+  BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1)
+OUTPUT_DIR: "output/cityscapes_vit_best_nov9_noalign_nohint/"
