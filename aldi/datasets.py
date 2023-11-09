@@ -19,7 +19,7 @@ register_coco_instances("cityscapes_cars_train", {"image_dir_prefix": "datasets/
 register_coco_instances("cityscapes_cars_val",   {},         "datasets/cityscapes/annotations/cityscapes_val_instances_cars.json",                    "datasets/cityscapes/leftImg8bit/val/")
 
 # CFC
-register_coco_instances("cfc_train", {"image_dir_prefix": "datasets/cfc_daod/images/cfc_train", "translated_image_dir": f"datasets/daod-strong-baseline-cyclegan-results/cfc_daod/test_1/images/fake_A"},         "datasets/cfc_daod/coco_labels/cfc_train.json",                  "datasets/cfc_daod/images/cfc_train/")
-register_coco_instances("cfc_val",   {},         "datasets/cfc_daod/coco_labels/cfc_val.json",                    "datasets/cfc/images/cfc_val/")
-register_coco_instances("cfc_channel_train", {"image_dir_prefix": "datasets/cfc_daod/images/cfc_channel_train", "translated_image_dir": f"datasets/daod-strong-baseline-cyclegan-results/cfc/test_1/images/fake_B"},         "datasets/cfc_daod/coco_labels/cfc_channel_train.json",                  "datasets/cfc_daod/images/cfc_channel_train/")
-register_coco_instances("cfc_channel_test",   {},         "datasets/cfc_daod/coco_labels/cfc_channel_test.json",                    "datasets/cfc_daod/images/cfc_channel_test/")
+register_coco_instances("cfc_train", {"image_dir_prefix": "datasets/cfc/images/cfc_train", "translated_image_dir": f"datasets/daod-strong-baseline-cyclegan-results/cfc_002/test_1/images/fake_A"},         "datasets/cfc/coco_labels/cfc_train.json",                  "datasets/cfc/images/cfc_train/")
+register_coco_instances("cfc_val",   {},         "datasets/cfc/coco_labels/cfc_val.json",                    "datasets/cfc/images/cfc_val/")
+register_coco_instances("cfc_channel_train", {"image_dir_prefix": "datasets/cfc/images/cfc_channel_train", "translated_image_dir": f"datasets/daod-strong-baseline-cyclegan-results/cfc_002/test_1/images/fake_B"},         "datasets/cfc/coco_labels/cfc_channel_train.json",                  "datasets/cfc/images/cfc_channel_train/")
+register_coco_instances("cfc_channel_test",   {},         "datasets/cfc/coco_labels/cfc_channel_test.json",                    "datasets/cfc/images/cfc_channel_test/")
