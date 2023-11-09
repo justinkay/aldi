@@ -6,4 +6,6 @@ DATASETS:
   UNLABELED: ("cityscapes_foggy_train",)
   BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
   BATCH_RATIOS: (1,1)
+TEST:
+  EVAL_PERIOD: 25 # 1/4 epoch
 OUTPUT_DIR: "output/cityscapes_sada/"

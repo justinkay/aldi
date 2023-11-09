@@ -24,7 +24,7 @@ def add_da_config(cfg):
     # EMA of student weights
     _C.EMA = CN()
     _C.EMA.ENABLED = False
-    _C.EMA.ALPHA = 0.9996 # From Adaptive Teacher settings
+    _C.EMA.ALPHA = 0.9996
 
     # Begin domain adaptation settings
     _C.DOMAIN_ADAPT = CN()
@@ -60,6 +60,12 @@ def add_da_config(cfg):
     _C.DOMAIN_ADAPT.DISTILL.OBJ_TMP = 1.0
     _C.DOMAIN_ADAPT.CLS_LOSS_TYPE = "CE" # one of: { "CE", "KL" }
 
+    # Adaptive Teacher style adverarial feature alignment
+    # _C.MODEL.DA = CN()
+    # _C.MODEL.DA.ENABLED = False
+    # _C.MODEL.DA.DIS_TYPE = "p2"
+    # _C.MODEL.DA.DIS_LOSS_WEIGHT = 0.05
+
     # Teacher model provides pseudo labels
     # TODO: Could be merged into DISTILL settings somehow
     _C.DOMAIN_ADAPT.TEACHER = CN()
@@ -70,21 +76,7 @@ def add_da_config(cfg):
     # Custom loss functions/modifications
     # TODO Get rid of these; loc_loss_enabled can be captured in distillation settings
     _C.DOMAIN_ADAPT.LOSSES = CN()
-    # _C.DOMAIN_ADAPT.LOSSES.LOC_LOSS_ENABLED = True
     _C.DOMAIN_ADAPT.LOSSES.QUALITY_LOSS_WEIGHT_ENABLED = False
-
-    # SADA settings
-    # _C.MODEL.SADA = CN()
-    # _C.MODEL.SADA.ENABLED = False
-    # _C.MODEL.SADA.DA_IMG_GRL_WEIGHT = 0.01
-    # _C.MODEL.SADA.DA_INS_GRL_WEIGHT = 0.1
-    # _C.MODEL.SADA.COS_WEIGHT = 0.1
-
-    # Adaptive Teacher style adverarial feature alignment
-    # _C.MODEL.DA = CN()
-    # _C.MODEL.DA.ENABLED = False
-    # _C.MODEL.DA.DIS_TYPE = "p2"
-    # _C.MODEL.DA.DIS_LOSS_WEIGHT = 0.05
 
     # Probabilistic Teacher (Gaussian RCNN) settings
     _C.GRCNN = CN()
