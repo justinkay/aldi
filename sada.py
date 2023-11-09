@@ -20,12 +20,12 @@ class SADA(torch.nn.Module):
         self.USE_FPN = True # cfg.MODEL.RPN.USE_FPN
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=7)
 
-        self.consit_weight = self.cfg.MODEL.SADA.COS_WEIGHT
+        self.consit_weight = self.cfg.DOMAIN_ADAPT.ALIGN.SADA_COS_WEIGHT
 
-        self.grl_img = GradientScalarLayer(-1.0 * self.cfg.MODEL.SADA.DA_IMG_GRL_WEIGHT)
-        self.grl_ins = GradientScalarLayer(-1.0 * self.cfg.MODEL.SADA.DA_INS_GRL_WEIGHT)
-        self.grl_img_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.SADA.DA_IMG_GRL_WEIGHT)
-        self.grl_ins_consist = GradientScalarLayer(self.consit_weight * self.cfg.MODEL.SADA.DA_INS_GRL_WEIGHT)
+        self.grl_img = GradientScalarLayer(-1.0 * self.cfg.DOMAIN_ADAPT.ALIGN.SADA_IMG_GRL_WEIGHT)
+        self.grl_ins = GradientScalarLayer(-1.0 * self.cfg.DOMAIN_ADAPT.ALIGN.SADA_INS_GRL_WEIGHT)
+        self.grl_img_consist = GradientScalarLayer(self.consit_weight * self.cfg.DOMAIN_ADAPT.ALIGN.SADA_IMG_GRL_WEIGHT)
+        self.grl_ins_consist = GradientScalarLayer(self.consit_weight * self.cfg.DOMAIN_ADAPT.ALIGN.SADA_INS_GRL_WEIGHT)
 
         # in_features       = cfg.MODEL.ROI_HEADS.IN_FEATURES
         # pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
