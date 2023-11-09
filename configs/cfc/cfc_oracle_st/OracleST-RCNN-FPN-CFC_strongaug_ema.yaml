@@ -3,7 +3,24 @@ DATASETS:
   BATCH_CONTENTS: ("labeled_strong", )
 EMA:
   ENABLED: True
-SOLVER:
-  STEPS: (18000,)
-  MAX_ITER: 20000
 OUTPUT_DIR: "output/cfc/cfc_oracle_st_strongaug_ema/"
+
+# match settings of other baselines/oracles
+# TODO move this into the main baseline file...
+# SOLVER:
+#   BASE_LR: 0.02
+#   STEPS: (9999,)
+#   MAX_ITER: 10000
+#   IMS_PER_BATCH: 16
+#   IMS_PER_GPU: 8
+#   BACKWARD_AT_END: True
+#   AMP:
+#     ENABLED: True
+#   WARMUP_ITERS: 312
+#   WARMUP_FACTOR: 0.0032
+#   # just save a few checkpoints throughout because we will also use BestCheckpointer
+#   # every TEST.EVAL_PERIOD
+#   CHECKPOINT_PERIOD: 3000
+# VIS_PERIOD: 312
+# TEST:
+#   EVAL_PERIOD: 312

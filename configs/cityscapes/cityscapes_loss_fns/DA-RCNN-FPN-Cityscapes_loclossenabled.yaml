@@ -1,5 +1,8 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
 DOMAIN_ADAPT:
-  LOSSES:
-    LOC_LOSS_ENABLED: True
+  DISTILL:
+    HARD_ROIH_CLS_ENABLED: True
+    HARD_ROIH_REG_ENABLED: True
+    HARD_OBJ_ENABLED: True
+    HARD_RPN_REG_ENABLED: True
 OUTPUT_DIR: "output/cityscapes_meanteacher_loclossenabled/"

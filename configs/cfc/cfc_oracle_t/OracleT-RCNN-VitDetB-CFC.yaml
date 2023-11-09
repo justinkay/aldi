@@ -1,0 +1,16 @@
+_BASE_: "../../Base-RCNN-VitDetB.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("cfc_channel_train",)
+  TEST: ("cfc_val", "cfc_channel_test",)
+OUTPUT_DIR: "output/cfc/cfc_vitdetb_oracle_t/"
+
+# rough numbers -- don't correspond to any specific number of epochs, just checking how we do
+SOLVER:
+  STEPS: (10000,)
+  MAX_ITER: 12000
+  CHECKPOINT_PERIOD: 3000
+TEST:
+  EVAL_PERIOD: 1250

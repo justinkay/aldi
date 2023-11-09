@@ -17,6 +17,11 @@ pip install -e .
 ```
 Once this is an official release, replace with `pip install`.
 
+### ViT Backbone Setup
+```
+pip install timm==0.9.7
+```
+
 ### Downloading data
 
 TODO

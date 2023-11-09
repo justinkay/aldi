@@ -1,6 +1,6 @@
 _BASE_: "detectron2/Base-RCNN-FPN.yaml"
 MODEL:
-  META_ARCHITECTURE: "DARCNN"
+  META_ARCHITECTURE: "ALDI"
   WEIGHTS: "models/model_final_f10217.pkl"
   MASK_ON: False
 INPUT:

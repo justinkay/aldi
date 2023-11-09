@@ -1,0 +1,9 @@
+_BASE_: "./Base-RCNN-VitDetB-Cityscapes.yaml"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+SOLVER:
+  STEPS: (6400,)
+  MAX_ITER: 8000
+OUTPUT_DIR: "output/cityscapes_vitdetb_baseline_strongaug_ema/"

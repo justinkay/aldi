@@ -7,7 +7,8 @@
 
 _BASE_: "./cityscapes_baseline/Base-RCNN-FPN-Cityscapes.yaml"
 MODEL:
-  WEIGHTS: "models/cityscapes_baseline_foggy_val_model_best_519.pth" 
+  # WEIGHTS: "models/cityscapes_baseline_strongaug_ema_foggy_val_model_best_591.pth"
+  WEIGHTS: "models/cityscapes_baseline_strongaug_ema_foggy_val_model_best_591_ema2model.pth"
 EMA:
   ENABLED: True
 DATASETS:
@@ -15,10 +16,14 @@ DATASETS:
   BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
   BATCH_RATIOS: (1,1,1)
 DOMAIN_ADAPT:
-  LOSSES:
-    LOC_LOSS_ENABLED: False
   TEACHER:
     ENABLED: True
+  DISTILL:
+    # By default, disable localization losses (done by AT, UBT, MIC, ...)
+    HARD_ROIH_CLS_ENABLED: True
+    HARD_ROIH_REG_ENABLED: False
+    HARD_OBJ_ENABLED: True
+    HARD_RPN_REG_ENABLED: False
 SOLVER:
   STEPS: (59999,)
   MAX_ITER: 60000

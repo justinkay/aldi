@@ -125,7 +125,6 @@ class SimpleTrainer(_SimpleTrainer):
     def _do_backward(self, losses):
         losses.backward()
 
-
 class AMPTrainer(_AMPTrainer):
     """
     Same as detectron2.engine.train_loop.AMPTrainer, but:

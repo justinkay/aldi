@@ -1,0 +1,12 @@
+_BASE_: "../cfc_baseline/Base-RCNN-FPN-CFC.yaml"
+MODEL:
+  META_ARCHITECTURE: "ALDI"
+DOMAIN_ADAPT:
+  ALIGN:
+    IMG_DA_ENABLED: True
+DATASETS:
+  UNLABELED: ("cfc_channel_train",)
+  TEST: ("cfc_channel_test",) # skip val inference to speed up experiments
+  BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
+  BATCH_RATIOS: (1,1)
+OUTPUT_DIR: "output/CFC_align_img/"

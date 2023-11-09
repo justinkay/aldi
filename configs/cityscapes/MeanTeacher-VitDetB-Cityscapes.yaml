@@ -1,0 +1,23 @@
+_BASE_: "./cityscapes_baseline/Base-RCNN-VitDetB-Cityscapes.yaml"
+MODEL:
+  WEIGHTS: "models/cityscapes_vitdetb_baseline_strongaug_ema_foggy_val_model_best_4799_ema2model.pth"
+EMA:
+  ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_foggy_train",)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
+DOMAIN_ADAPT:
+  TEACHER:
+    ENABLED: True
+  DISTILL:
+    # By default, disable localization losses (done by AT, UBT, MIC, ...)
+    HARD_ROIH_CLS_ENABLED: True
+    HARD_ROIH_REG_ENABLED: False
+    HARD_OBJ_ENABLED: True
+    HARD_RPN_REG_ENABLED: False
+SOLVER:
+  STEPS: (59999,)
+  MAX_ITER: 60000
+  BACKWARD_AT_END: False
+OUTPUT_DIR: "output/cityscapes_vitdetb_meanteacher/"

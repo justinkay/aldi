@@ -55,49 +55,51 @@ def main(args):
     trainer.resume_or_load(resume=args.resume)
     trainer.train()
 
-    labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong = debug_dict['last_labeled_weak'], debug_dict['last_labeled_strong'], debug_dict['last_unlabeled_weak'], debug_dict['last_unlabeled_strong']
-    pseudolabeled = trainer._trainer._last_pseudolabeled
+    if not args.no_save:
 
-    # for i, (lw, ls, uw, us, sp) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, student_preds)):
-    for i, (lw, ls, uw, pl) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, pseudolabeled)):
-        fig, ax = plt.subplots(4,1, figsize=(20,20))
-        labeled_im = lw['image'].permute(1,2,0).cpu().numpy()
-        unlabeled_im = ls['image'].permute(1,2,0).cpu().numpy()
-        unlabeled_before_im = uw['image'].permute(1,2,0).cpu().numpy()
-        unlabeled_after_im = pl['image'].permute(1,2,0).cpu().numpy()
+        labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong = debug_dict['last_labeled_weak'], debug_dict['last_labeled_strong'], debug_dict['last_unlabeled_weak'], debug_dict['last_unlabeled_strong']
+        pseudolabeled = debug_dict['last_pseudolabeled']
 
-        # plot images
-        ax[0].imshow(labeled_im[:,:,::-1])
-        ax[1].imshow(unlabeled_im[:,:,::-1])
-        ax[2].imshow(unlabeled_before_im[:,:,::-1])
-        ax[3].imshow(unlabeled_after_im[:,:,::-1])
+        for i, (lw, ls, uw, pl) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, pseudolabeled)):
+            fig, ax = plt.subplots(4,1, figsize=(20,20))
+            labeled_im = lw['image'].permute(1,2,0).cpu().numpy()
+            unlabeled_im = ls['image'].permute(1,2,0).cpu().numpy()
+            unlabeled_before_im = uw['image'].permute(1,2,0).cpu().numpy()
+            unlabeled_after_im = pl['image'].permute(1,2,0).cpu().numpy()
 
-        # plot instances as rectangles
-        for inst in lw['instances'].gt_boxes.tensor:
-            x1,y1,x2,y2 = inst.cpu().numpy()
-            x1,y1,x2,y2 = int(x1),int(y1),int(x2),int(y2)
-            ax[0].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
-        for inst in ls['instances'].gt_boxes.tensor:
-            x1,y1,x2,y2 = inst.cpu().numpy()
-            ax[1].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
-        for inst in uw['instances'].gt_boxes.tensor:
-            x1,y1,x2,y2 = inst.cpu().numpy()
-            ax[2].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
-        for inst in pl['instances'].gt_boxes.tensor:
-            x1,y1,x2,y2 = inst.cpu().numpy()
-            ax[3].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=3))
+            # plot images
+            ax[0].imshow(labeled_im[:,:,::-1])
+            ax[1].imshow(unlabeled_im[:,:,::-1])
+            ax[2].imshow(unlabeled_before_im[:,:,::-1])
+            ax[3].imshow(unlabeled_after_im[:,:,::-1])
 
-        ax[0].set_title('Labeled Weak')
-        ax[1].set_title('Labeled Strong')
-        ax[2].set_title('Unlabeled Weak')
-        ax[3].set_title('Unlabeled Strong (w/ Pseudo boxes)')
+            # plot instances as rectangles
+            for inst in lw['instances'].gt_boxes.tensor:
+                x1,y1,x2,y2 = inst.cpu().numpy()
+                x1,y1,x2,y2 = int(x1),int(y1),int(x2),int(y2)
+                ax[0].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
+            for inst in ls['instances'].gt_boxes.tensor:
+                x1,y1,x2,y2 = inst.cpu().numpy()
+                ax[1].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
+            for inst in uw['instances'].gt_boxes.tensor:
+                x1,y1,x2,y2 = inst.cpu().numpy()
+                ax[2].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=2))
+            for inst in pl['instances'].gt_boxes.tensor:
+                x1,y1,x2,y2 = inst.cpu().numpy()
+                ax[3].add_patch(plt.Rectangle((x1,y1), x2-x1, y2-y1, fill=False, edgecolor='r', linewidth=3))
 
-        plt.savefig(f'debug_{lw["image_id"]}_{i}.png')
-        plt.close()
+            ax[0].set_title('Labeled Weak')
+            ax[1].set_title('Labeled Strong')
+            ax[2].set_title('Unlabeled Weak')
+            ax[3].set_title('Unlabeled Strong (w/ Pseudo boxes)')
 
+            plt.savefig(f'debug_{lw["image_id"]}_{i}.png')
+            plt.close()
 
 if __name__ == "__main__":
-    args = default_argument_parser().parse_args()
+    parser = default_argument_parser()
+    parser.add_argument("--no-save", action="store_true", help="don't save debug images")
+    args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
         main,

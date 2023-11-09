@@ -1,0 +1,4 @@
+_BASE_: "./OracleT-RCNN-VitDetB-Cityscapes.yaml"
+EMA:
+  ENABLED: True
+OUTPUT_DIR: "output/cityscapes_vitdetb_oracle-t_ema/"

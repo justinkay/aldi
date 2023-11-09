@@ -1,7 +1,5 @@
 import os
-import torch
 import copy
-import logging
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
@@ -14,10 +12,10 @@ from detectron2.utils import comm
 
 from aug import WEAK_IMG_KEY, get_augs
 from backbone import get_adamw_optim, get_swinb_optim
+from distill import Distiller
 from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from ema import EMA
-from pseudolabeler import PseudoLabeler
 
 
 DEBUG = False
@@ -37,15 +35,15 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           model_batch_size (int): batch size to feed to the model *per GPU*
      """
      model = trainer.model
-     pseudo_labeler = trainer.pseudo_labeler
      backward_at_end = trainer.backward_at_end
      model_batch_size = trainer.model_batch_size # TODO this could be None
 
      _model = model.module if type(model) == DDP else model
-     do_sada = _model.sada_heads is not None
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
-     do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
+     do_align = any( [ getattr(_model, a, None) is not None for a in ["sada_heads", "img_align", "ins_align"] ] )
+     do_distill = trainer.distiller.distill_enabled()
+
      total_batch_size = sum([len(s or []) for s in [labeled_weak, labeled_strong, unlabeled_weak]])
      num_grad_accum_steps = total_batch_size // model_batch_size
 
@@ -86,27 +84,31 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
                maybe_do_backward(loss, key_conditional)
                add_to_loss_dict(loss, name, key_conditional)
 
+     def do_distill_step(teacher_data, student_data, name="", key_conditional=lambda k: True, **kwargs):
+          assert len(teacher_data) == len(student_data), "Teacher and student data must be the same length."
+          for batch_i in range(0, len(teacher_data), model_batch_size):
+               distill_loss = trainer.distiller(teacher_data[batch_i:batch_i+model_batch_size], 
+                                                student_data[batch_i:batch_i+model_batch_size])
+               maybe_do_backward(distill_loss, key_conditional)
+               add_to_loss_dict(distill_loss, name, key_conditional)
+
      # Weakly-augmented source imagery (Used for normal training and/or domain alignment)
-     if do_weak or do_sada: 
-          do_training_step(labeled_weak, "source_weak", lambda k: do_weak or (do_sada and "_da_" in k), do_sada=do_sada)
+     if do_weak: 
+          do_training_step(labeled_weak, "source_weak", lambda k: do_weak or (do_align and "_da_" in k), do_align=do_align)
      
+     # Strongly-augmented source imagery (Used for normal training and/or domain alignment)
+     if do_strong:
+          do_training_step(labeled_strong, "source_strong", lambda k: do_strong or (do_align and "_da_" in k), do_align=do_align)
+
      # Weakly-augmented target imagery (Only used for domain alignment)
-     if do_sada: 
-          do_training_step(unlabeled_weak, "target_weak", lambda k: "_da_" in k, labeled=False, do_sada=True)
+     if do_align: 
+          do_training_step(unlabeled_weak, "target_weak", lambda k: "_da_" in k, labeled=False, do_align=True)
 
-     # Strongly-augmented source imagery (Used for normal training)
-     if do_strong: 
-          do_training_step(labeled_strong, "source_strong", do_sada=False)
-
-     # Target imagery (Used for pseudo-labeling)
-     if do_unlabeled:
-          pseudolabeled_data = []
-          for batch_i in range(0, len(unlabeled_weak), model_batch_size):
-               pseudolabeled_data.extend(pseudo_labeler(unlabeled_weak[batch_i:batch_i+model_batch_size], 
-                                             unlabeled_strong[batch_i:batch_i+model_batch_size]))
-          do_training_step(pseudolabeled_data, "target_pseudolabeled", labeled=False, do_sada=False)
-          if DEBUG: 
-               debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
+     # Distillation losses
+     if do_distill:
+          do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
+          # if DEBUG: 
+          #   debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
 
      return loss_dict
 
@@ -114,9 +116,9 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
 # Extend both Detectron2's AMPTrainer and SimpleTrainer classes with DA capabilities
 # Used by DATrainer below in the same way DefaultTrainer uses the original AMP and Simple Trainers
 class _DATrainer:
-     def __init__(self, model, data_loader, optimizer, pseudo_labeler, backward_at_end=True, model_batch_size=None):
+     def __init__(self, model, data_loader, optimizer, distiller, backward_at_end=True, model_batch_size=None):
           super().__init__(model, data_loader, optimizer, zero_grad_before_forward=not backward_at_end)
-          self.pseudo_labeler = pseudo_labeler
+          self.distiller = distiller
           self.backward_at_end = backward_at_end
           self.model_batch_size = model_batch_size
 
@@ -132,12 +134,12 @@ class DAAMPTrainer(_DATrainer, AMPTrainer): pass
 class DASimpleTrainer(_DATrainer, SimpleTrainer): pass
 
 class DATrainer(DefaultTrainer):
+     """Modified DefaultTrainer to support Mean Teacher style training."""
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
-          ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
-          # build pseudo-labeler if applicable (pseudo-labels creaed by: EMA, student, or None based on cfg)
-          pseudo_labeler = PseudoLabeler(cfg, ema or model) # if cfg.DOMAIN_ADAPT.TEACHER.ENABLED else None
-          trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, pseudo_labeler,
+          self.ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
+          distiller = Distiller.from_config(teacher=self.ema.model if cfg.EMA.ENABLED else model, student=model, cfg=cfg)
+          trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, distiller,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
           return trainer
@@ -145,7 +147,7 @@ class DATrainer(DefaultTrainer):
      def _create_checkpointer(self, model, cfg):
           checkpointer = super(DATrainer, self)._create_checkpointer(model, cfg)
           if cfg.EMA.ENABLED:
-               checkpointer.add_checkpointable("ema", self._trainer.pseudo_labeler.model)
+               checkpointer.add_checkpointable("ema", self.ema)
           return checkpointer
 
      @classmethod
@@ -161,7 +163,7 @@ class DATrainer(DefaultTrainer):
           # add hooks to evaluate/save teacher model if applicable
           if self.cfg.EMA.ENABLED:
                def test_and_save_results_ema():
-                    self._last_eval_results = self.test(self.cfg, self._trainer.pseudo_labeler.model.model)
+                    self._last_eval_results = self.test(self.cfg, self.ema.model)
                     return self._last_eval_results
                eval_hook = hooks.EvalHook(self.cfg.TEST.EVAL_PERIOD, test_and_save_results_ema)
                if comm.is_main_process():
@@ -191,7 +193,7 @@ class DATrainer(DefaultTrainer):
           elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW":
                # TOOD: this could be cleaner and maybe removed
                if cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone":
-                    return get_adamw_optim(model)
+                    return get_adamw_optim(model, include_vit_lr_decay=True)
                elif cfg.MODEL.BACKBONE.NAME == "build_swinb_fpn_backbone":
                     return get_swinb_optim(model)
                else:
@@ -206,7 +208,7 @@ class DATrainer(DefaultTrainer):
           total_batch_size = cfg.SOLVER.IMS_PER_BATCH
           batch_sizes = [ int(total_batch_size * r / sum(batch_ratios)) for r in batch_ratios ]
           assert len(batch_contents) == len(batch_sizes), "len(cfg.DATASETS.BATCH_CONTENTS) must equal len(cfg.DATASETS.BATCH_RATIOS)."
-          assert sum(batch_sizes) == total_batch_size, "sum(batch_sizes) must equal total_batch_size"
+          assert sum(batch_sizes) == total_batch_size, f"sum(batch_sizes)={sum(batch_sizes)} must equal total_batch_size={total_batch_size}"
 
           labeled_bs = [batch_sizes[i] for i in range(len(batch_contents)) if batch_contents[i].startswith("labeled")]
           labeled_bs = max(labeled_bs) if len(labeled_bs) else 0
@@ -235,5 +237,5 @@ class DATrainer(DefaultTrainer):
           """Update the EMA model every step."""
           super(DATrainer, self).before_step()
           if self.cfg.EMA.ENABLED:
-               self._trainer.pseudo_labeler.model.update_weights(self._trainer.model, self.iter)
+               self.ema.update_weights(self._trainer.model, self.iter)
                

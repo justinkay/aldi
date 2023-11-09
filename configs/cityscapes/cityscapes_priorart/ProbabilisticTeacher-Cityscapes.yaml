@@ -1,5 +1,6 @@
 _BASE_: "../cityscapes_baseline/Probabilistic-RCNN-FPN-Cityscapes.yaml"
 MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
   WEIGHTS: "models/cityscapes_probabilistic_baseline_foggy_val_model_best_512.pth"
 EMA:
   ENABLED: True

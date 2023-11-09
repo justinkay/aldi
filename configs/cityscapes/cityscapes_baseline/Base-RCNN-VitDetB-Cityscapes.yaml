@@ -1,6 +1,5 @@
 _BASE_: "../../Base-RCNN-VitDetB.yaml"
 MODEL:
-  FSDP_ENABLED: False # it's big -- but this doesn't work yet
   ROI_HEADS:
     NUM_CLASSES: 8
 DATASETS:
