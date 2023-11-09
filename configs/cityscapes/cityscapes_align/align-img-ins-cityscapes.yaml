@@ -3,8 +3,8 @@ DOMAIN_ADAPT:
   ALIGN:
     IMG_DA_ENABLED: True
     INS_DA_ENABLED: True
-    IMG_DA_WEIGHT: 0.0025
-    INS_DA_WEIGHT: 0.00125
+    IMG_DA_WEIGHT: 0.01
+    INS_DA_WEIGHT: 0.005
 DATASETS:
   UNLABELED: ("cityscapes_foggy_train",)
   BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
