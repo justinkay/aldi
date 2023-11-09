@@ -241,7 +241,7 @@ class DistillMixin(GeneralizedRCNN):
                 for i in range(hint_channels):
                     self.hint_adapter.weight[i, i, 0, 0] = 1
                 self.hint_adapter.bias.zero_()
-            self.in_features = [hint_layer]
+            self.in_features = [hint_layer,]
 
         def forward(self, x):
             """Handles multi-level features."""
@@ -256,8 +256,8 @@ class DistillMixin(GeneralizedRCNN):
         super(DistillMixin, self).__init__(**kwargs)
         self.do_hint = do_hint
         if do_hint:
-            self.backbone_io = SaveIO()
-            self.backbone.bottom_up.register_forward_hook(self.backbone_io)
+            self.bottom_up_io = SaveIO()
+            self.backbone.bottom_up.register_forward_hook(self.bottom_up_io)
             self.hint_adapter = DistillMixin.HintAdaptLayer(hint_channels=hint_channels, hint_layer=hint_layer)
 
     @classmethod
@@ -272,7 +272,7 @@ class DistillMixin(GeneralizedRCNN):
     def forward(self, *args, **kwargs):
         output = super().forward(*args, **kwargs)
         if self.do_hint and self.training:
-            self.hint_adapter(self.backbone_io.output)
+            self.hint_adapter(self.bottom_up_io.output)
             # don't compute losses here; but make sure parameters are seen as being used
             # this is needed for any forward passes that don't use the hint adapter
             output["_"] = sum([p.sum() for p in self.hint_adapter.parameters()]) * 0

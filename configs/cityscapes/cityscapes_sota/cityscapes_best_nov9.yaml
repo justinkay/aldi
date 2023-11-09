@@ -1,4 +1,4 @@
-_BASE_: "../cityscapes_startingpoint/DA-RCNN-FPN-Cityscapes_strongaugemastart_ema2model.yaml"
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
 DOMAIN_ADAPT:
   DISTILL:
     HARD_ROIH_CLS_ENABLED: False
@@ -17,4 +17,4 @@ AUG:
 DATASETS:
   BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
-OUTPUT_DIR: "output/cityscapes_best_nov9/"
+OUTPUT_DIR: "output/cityscapes_best_nov9_noalign_withhint/"
