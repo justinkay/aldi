@@ -33,6 +33,7 @@ class DARCNN(GeneralizedRCNN):
         sada_heads: SADA = None,
         dis_type: str = None,
         dis_loss_weight: float = 0.0,
+        cmt_loss_weight: float = 0.0,
         **kwargs
     ):
         super(DARCNN, self).__init__(**kwargs)
@@ -51,6 +52,8 @@ class DARCNN(GeneralizedRCNN):
         if self.dis_type:
             assert sada_heads is None, "Can't have both SADA heads and DA heads"
             self.sada_heads = FCDiscriminator_img(self.backbone._out_feature_channels[self.dis_type])
+        
+        self.cmt_loss_weight = cmt_loss_weight
 
         # register hooks so we can grab output of sub-modules
         self.backbone_io, self.rpn_io, self.roih_io, self.boxhead_io, self.boxpred_io = SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO()
@@ -77,6 +80,9 @@ class DARCNN(GeneralizedRCNN):
             ret.update({"dis_type": cfg.MODEL.DA.DIS_TYPE,
                         "dis_loss_weight": cfg.MODEL.DA.DIS_LOSS_WEIGHT,
                         })
+            
+        if cfg.MODEL.CMT.ENABLED:
+            ret.update({"cmt_loss_weight": cfg.MODEL.CMT.CONTRASTIVE_LOSS_WEIGHT})
 
         return ret
 

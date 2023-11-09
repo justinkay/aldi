@@ -1,0 +1,5 @@
+_BASE_: "../MeanTeacher-Sim10k.yaml"
+MODEL:
+  DA:
+    ENABLED: True
+OUTPUT_DIR: "output/sim10k_adaptiveteacher_nobackwardatend/"

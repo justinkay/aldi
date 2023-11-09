@@ -61,6 +61,11 @@ def add_da_config(cfg):
     _C.GRCNN.EFL_LAMBDA = [0.5, 0.5]
     _C.GRCNN.MODEL_TYPE = "GAUSSIAN"
 
+    # Contrastive Mean Teacher (CMT) settings
+    _C.MODEL.CMT = CN()
+    _C.MODEL.CMT.ENABLED = False
+    _C.MODEL.CMT.CONTRASTIVE_LOSS_WEIGHT = 0.05
+
     # We interpret SOLVER.IMS_PER_BATCH as the total batch size on all GPUs, for 
     # experimental consistency. Gradient accumulation is used according to 
     # num_gradient_accum_steps = IMS_PER_BATCH / (NUM_GPUS * IMS_PER_GPU)

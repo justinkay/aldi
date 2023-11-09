@@ -18,6 +18,7 @@ from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from ema import EMA
 from pseudolabeler import PseudoLabeler
+from cmt import get_cmt_losses
 
 
 DEBUG = False
@@ -46,8 +47,19 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
      do_unlabeled = unlabeled_weak is not None and pseudo_labeler is not None
+     do_cmt = _model.cmt_loss_weight != 0
      total_batch_size = sum([len(s or []) for s in [labeled_weak, labeled_strong, unlabeled_weak]])
      num_grad_accum_steps = total_batch_size // model_batch_size
+     features_student = {}
+     features_teacher = {}
+
+     def merge_backbone_features(acc, val):
+          assert not acc or acc.keys() == val.keys()
+          for k in val.keys():
+               acc[k] = torch.cat((acc[k], val[k])) if k in acc else val[k]
+          return acc
+
+     assert not (do_cmt and not backward_at_end)
 
      if DEBUG:
           debug_dict['last_labeled_weak'] = copy.deepcopy(labeled_weak)
@@ -76,13 +88,15 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
                losses = { k: v * 0 if not key_conditional(k) else v for k, v in losses.items() }
                trainer.do_backward(sum(losses.values()) / num_grad_accum_steps, override=True)
 
-     def do_training_step(data, name="", key_conditional=lambda k: True, **kwargs):
+     def do_training_step(data, name="", key_conditional=lambda k: True, do_cmt= False, **kwargs):
           """Helper method to do a forward pass:
                - Handle gradient accumulation and possible backward passes
                - Handle Detectron2's loss dictionary
           """
           for batch_i in range(0, len(data), model_batch_size):
                loss = model(data[batch_i:batch_i+model_batch_size], **kwargs)
+               if do_cmt and name == "target_pseudolabeled":
+                    merge_backbone_features(features_student, _model.backbone_io.output)
                maybe_do_backward(loss, key_conditional)
                add_to_loss_dict(loss, name, key_conditional)
 
@@ -104,9 +118,14 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
           for batch_i in range(0, len(unlabeled_weak), model_batch_size):
                pseudolabeled_data.extend(pseudo_labeler(unlabeled_weak[batch_i:batch_i+model_batch_size], 
                                              unlabeled_strong[batch_i:batch_i+model_batch_size]))
-          do_training_step(pseudolabeled_data, "target_pseudolabeled", labeled=False, do_sada=False)
+               if do_cmt:
+                    merge_backbone_features(features_teacher, pseudo_labeler.model.model.backbone_io.output)
+          do_training_step(pseudolabeled_data, "target_pseudolabeled", labeled=False, do_sada=False, do_cmt=do_cmt)
           if DEBUG: 
                debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
+
+     if do_cmt:
+          loss_dict.update(get_cmt_losses(unlabeled_strong, unlabeled_weak, pseudolabeled_data, features_student, features_teacher, _model.cmt_loss_weight))
 
      return loss_dict
 

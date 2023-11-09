@@ -1,0 +1,5 @@
+_BASE_: "../MeanTeacher-CFC.yaml"
+MODEL:
+  DA:
+    ENABLED: True
+OUTPUT_DIR: "output/cfc_adaptiveteacher_nobackwardatend/"
