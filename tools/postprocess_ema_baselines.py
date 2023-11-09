@@ -5,7 +5,7 @@ model_path = '../models/*.pth'
 
 for mp in glob.glob(model_path):
     print(mp)
-    m = torch.load(mp)
+    m = torch.load(mp,map_location=torch.device('cpu'))
     print(m.keys())
     if "ema" in m.keys():
         for k, v in m["ema"].items():
