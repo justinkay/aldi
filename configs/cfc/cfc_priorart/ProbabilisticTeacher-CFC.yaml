@@ -1,0 +1,26 @@
+_BASE_: "../cfc_baseline/Probabilistic-RCNN-FPN-cfc.yaml"
+MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
+  WEIGHTS: "models/cfc_probabilistic_baseline_cfc_channel_test_model_best_678.pth"
+EMA:
+  ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_foggy_train",)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
+GRCNN:
+  LEARN_ANCHORS_LABELED: False
+  LEARN_ANCHORS_UNLABELED: True
+  EFL: True
+SOLVER:
+  STEPS: (59999,)
+  MAX_ITER: 60000
+  BACKWARD_AT_END: False
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_VALUE: 10.0 # this mimics PT trainer
+DOMAIN_ADAPT:
+  TEACHER:
+    PSEUDO_LABEL_METHOD: "probabilistic"
+
+OUTPUT_DIR: "output/cfc_probabilisticteacher/"
