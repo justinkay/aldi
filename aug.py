@@ -27,7 +27,8 @@ def get_augs(cfg, labeled, include_strong_augs=True):
 
     # add strong augmentation
     if include_strong_augs:
-        augs += build_strong_augmentation(include_erasing=cfg.AUG.INCLUDE_RANDOM_ERASING)
+        include_random_erasing = (labeled and cfg.AUG.LABELED_INCLUDE_RANDOM_ERASING) or (not labeled and cfg.AUG.UNLABELED_INCLUDE_RANDOM_ERASING)
+        augs += build_strong_augmentation(include_erasing=include_random_erasing)
 
         # add MIC
         if (labeled and cfg.AUG.LABELED_MIC_AUG) or (not labeled and cfg.AUG.UNLABELED_MIC_AUG):

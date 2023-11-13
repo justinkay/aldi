@@ -15,7 +15,8 @@ def add_da_config(cfg):
     # Strong augmentations
     _C.AUG = CN()
     _C.AUG.WEAK_INCLUDES_MULTISCALE = True
-    _C.AUG.INCLUDE_RANDOM_ERASING = True
+    _C.AUG.LABELED_INCLUDE_RANDOM_ERASING = True
+    _C.AUG.UNLABELED_INCLUDE_RANDOM_ERASING = True
     _C.AUG.LABELED_MIC_AUG = False
     _C.AUG.UNLABELED_MIC_AUG = False
     _C.AUG.MIC_RATIO = 0.5

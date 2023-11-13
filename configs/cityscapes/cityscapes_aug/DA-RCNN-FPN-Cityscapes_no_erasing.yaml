@@ -1,4 +1,5 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
 AUG:
-  INCLUDE_RANDOM_ERASING: False
+  LABELED_INCLUDE_RANDOM_ERASING: False
+  UNLABELED_INCLUDE_RANDOM_ERASING: False
 OUTPUT_DIR: "output/cityscapes_meanteacher_no_erasing/"

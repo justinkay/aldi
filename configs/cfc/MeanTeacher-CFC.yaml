@@ -7,7 +7,7 @@
 
 _BASE_: "./cfc_baseline/Base-RCNN-FPN-CFC.yaml"
 MODEL:
-  WEIGHTS: "models/cfc_channel_test_model_best_strongaug_ema_667.pth"
+  WEIGHTS: "models/cfc_channel_test_model_best_strongaug_ema_667_ema2model.pth"
 EMA:
   ENABLED: True
 DATASETS:

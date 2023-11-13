@@ -4,7 +4,7 @@ DATASETS:
 EMA:
   ENABLED: True
 AUG:
-  INCLUDE_RANDOM_ERASING: False
+  LABELED_INCLUDE_RANDOM_ERASING: False
   LABELED_MIC_AUG: True
 OUTPUT_DIR: "output/sim10k/sim10k_baseline_strongaug_ema_mic_imagenet/"
 
