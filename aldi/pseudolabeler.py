@@ -1,8 +1,7 @@
 import torch
 
 from detectron2.structures.boxes import Boxes
-# from detectron2.structures.instances import Instances
-from gaussian_rcnn.instances import FreeInstances as Instances # TODO: only when necessary
+from detectron2.structures.instances import Instances
 
 
 class PseudoLabeler:
@@ -42,12 +41,6 @@ def process_pseudo_label(proposals, cur_threshold, proposal_type, pseudo_label_m
             proposal_bbox_inst = process_bbox(
                 proposal_bbox_inst,
                 thres=cur_threshold, 
-                proposal_type=proposal_type
-            )
-        elif pseudo_label_method == "probabilistic":
-            proposal_bbox_inst = process_bbox(
-                proposal_bbox_inst,
-                thres=-1.0, 
                 proposal_type=proposal_type
             )
         else:
@@ -93,12 +86,6 @@ def process_bbox(proposal_bbox_inst, thres=0.7, proposal_type="roih"):
         new_proposal_inst.gt_boxes = new_boxes.to("cpu")
         new_proposal_inst.gt_classes = proposal_bbox_inst.pred_classes[valid_map].to("cpu")
         new_proposal_inst.scores = proposal_bbox_inst.scores[valid_map].to("cpu")
-
-        # add probabilistic outputs for gaussian RCNN
-        if proposal_bbox_inst.has('scores_logists'):
-            new_proposal_inst.scores_logists = proposal_bbox_inst.scores_logists.to("cpu")
-        if proposal_bbox_inst.has('boxes_sigma'):
-            new_proposal_inst.boxes_sigma = proposal_bbox_inst.boxes_sigma.to("cpu")
     else:
         raise ValueError("Unknown proposal type in threshold_bbox")
 

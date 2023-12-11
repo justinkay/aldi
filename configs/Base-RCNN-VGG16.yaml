@@ -1,9 +1,0 @@
-_BASE_: "./Base-RCNN-FPN.yaml"
-MODEL:
-  BACKBONE:
-    NAME: "build_vgg_backbone"
-  WEIGHTS: ""
-  RPN:
-    IN_FEATURES: ["vgg4"]
-  ROI_HEADS:
-    IN_FEATURES: ["vgg4"]

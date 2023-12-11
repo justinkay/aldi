@@ -45,3 +45,17 @@ def set_attributes(obj, params):
         for k, v in params.items():
             if k != "self" and not k.startswith("_"):
                 setattr(obj, k, v)
+
+class _GradientScalarLayer(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input, weight):
+        ctx.weight = weight
+        return input.view_as(input)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        grad_input = grad_output.clone()
+        return ctx.weight*grad_input, None
+
+def grad_reverse(x):
+    return _GradientScalarLayer.apply(x, -1.0)
