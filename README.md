@@ -9,7 +9,7 @@ i. Install the appropriate versions of PyTorch and torchvision for your machine.
 
 #### 2. Installing ALDI and its dependencies
 
-We recommend developing in a new Conda environment (e.g. using [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/):
+We recommend developing in a new Conda environment (e.g. using [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/)):
 
 ```
 conda create -n aldi python=3.9
