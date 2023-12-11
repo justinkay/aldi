@@ -1,5 +1,15 @@
-_BASE_: "../MeanTeacher-Sim10k.yaml"
+_BASE_: "./Base-RCNN-FPN-Sim10k.yaml"
+MODEL:
+  WEIGHTS: "models/sim10k_baseline_strongaug_ema_cityscapes_cars_val_model_best_768_ema2model.pth"
+EMA:
+  ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_cars_train",)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
 DOMAIN_ADAPT:
+  TEACHER:
+    ENABLED: True
   DISTILL:
     HARD_ROIH_CLS_ENABLED: False
     HARD_ROIH_REG_ENABLED: False
@@ -18,4 +28,8 @@ AUG:
 DATASETS:
   BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
-OUTPUT_DIR: "output/sim10k_best_nov12/"
+SOLVER:
+  STEPS: (59999,)
+  MAX_ITER: 60000
+  BACKWARD_AT_END: False
+OUTPUT_DIR: "output/sim10k/sim10k_aldi_best/"

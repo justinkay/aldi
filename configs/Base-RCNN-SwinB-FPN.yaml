@@ -1,5 +1,0 @@
-_BASE_: "./Base-RCNN-FPN.yaml"
-MODEL:
-  BACKBONE:
-    NAME: "build_swinb_fpn_backbone"
-  WEIGHTS: "detectron2://ViTDet/COCO/cascade_mask_rcnn_swin_b_in21k/f342979038/model_final_246a82.pkl"
