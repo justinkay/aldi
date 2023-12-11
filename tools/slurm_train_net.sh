@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=daod-strong-baseline       # short name for the job
+#SBATCH --job-name=aldi                       # short name for the job
 #SBATCH --partition=xeon-g6-volta             # partition to run on
 #SBATCH --exclusive                           # use entire node
 #SBATCH --ntasks=4                            # total task count
@@ -22,7 +22,7 @@ echo "LEADER_ADDR="$LEADER_ADDR
 export CUDA_VISIBLE_DEVICES="0,1"
 
 # configuration values
-CFG="${1:-configs/cityscapes/cityscapes_baseline/Base-RCNN-FPN-Cityscapes.yaml}"
+CFG="${1:-configs/cityscapes/Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml}"
 
 # setup SuperCloud module system
 module purge

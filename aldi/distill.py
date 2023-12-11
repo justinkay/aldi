@@ -10,8 +10,8 @@ from detectron2.modeling.sampling import subsample_labels
 from detectron2.modeling.box_regression import _dense_box_regression_loss
 from fvcore.nn import smooth_l1_loss
 
-from helpers import SaveIO, ManualSeed, ReplaceProposalsOnce, set_attributes
-from pseudolabeler import PseudoLabeler
+from aldi.helpers import SaveIO, ManualSeed, ReplaceProposalsOnce, set_attributes
+from aldi.pseudolabeler import PseudoLabeler
 
 class Distiller:
 

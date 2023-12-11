@@ -12,12 +12,11 @@ from detectron2.data import MetadataCatalog
 from detectron2.engine import default_argument_parser, default_setup, launch
 from detectron2.evaluation import verify_results
 
-from config import add_da_config
-from trainer import DATrainer
-import datasets # register datasets with Detectron2
-import rcnn # register DA R-CNN model with Detectron2
-import gaussian_rcnn # register Gaussian R-CNN model with Detectron2
-import backbone # register Swin-B FPN backbone with Detectron2
+from aldi.config import add_da_config
+from aldi.trainer import DATrainer
+import aldi.datasets # register datasets with Detectron2
+import aldi.rcnn # register ALDI R-CNN model with Detectron2
+import aldi.backbone # register ViT FPN backbone with Detectron2
 
 def setup(args):
     """

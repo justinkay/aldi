@@ -1,12 +1,8 @@
 from functools import partial 
-
-import torch.nn as nn
 from torch.utils.checkpoint import checkpoint
 
 from detectron2 import model_zoo
 from detectron2.config import instantiate
-from detectron2.modeling import SwinTransformer
-from detectron2.modeling.backbone.fpn import FPN, LastLevelMaxPool
 from detectron2.modeling.backbone.vit import get_vit_lr_decay_rate
 from detectron2.modeling.backbone.build import BACKBONE_REGISTRY
 from detectron2.modeling.backbone.utils import get_abs_pos
