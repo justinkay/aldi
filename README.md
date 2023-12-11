@@ -3,11 +3,7 @@ Align and distill (ALDI): A unified framework for domain adaptive object detecti
 
 ## Installation
 
-#### 1. Prerequisites (start here!)
-
-i. Install the appropriate versions of PyTorch and torchvision for your machine. Follow the instructions [here](https://pytorch.org/get-started/locally/). *You must do this before installing ALDI!*
-
-#### 2. Installing ALDI and its dependencies
+#### 1. Environment setup (recommended)
 
 We recommend developing in a new Conda environment (e.g. using [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/)):
 
@@ -16,14 +12,18 @@ conda create -n aldi python=3.9
 conda activate aldi
 ```
 
+#### 2. Prerequisites (required)
+
+i. Install the appropriate versions of PyTorch and torchvision for your machine. Follow the instructions [here](https://pytorch.org/get-started/locally/). *You must do this before installing ALDI!*
+
+#### 3. Installing ALDI and its dependencies
+
 i. Clone this repository with submodules:
 
 ```
-git clone --recurse-submodules git@github.com:justinkay/aldi.git
+git clone git@github.com:justinkay/aldi.git
 cd aldi
 ```
-
-(If you forgot to `--recurse-submodules`, don't worry, you can do this later)
 
 ii. Install Detectron2:
 
