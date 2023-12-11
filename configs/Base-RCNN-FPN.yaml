@@ -20,9 +20,7 @@ SOLVER:
     ENABLED: True
   WARMUP_ITERS: 100
   WARMUP_FACTOR: 0.01
-  # just save a few checkpoints throughout because we will also use BestCheckpointer
-  # every TEST.EVAL_PERIOD
   CHECKPOINT_PERIOD: 500
 VIS_PERIOD: 100
 TEST:
-  EVAL_PERIOD: 100 # ~one epoch for Cityscapes
+  EVAL_PERIOD: 100

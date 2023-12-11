@@ -1,7 +1,0 @@
-_BASE_: "../MeanTeacher-Cityscapes.yaml"
-MODEL:
-  WEIGHTS: "models/cityscapes_baseline_imagenet_foggy_val_model_best.pth"
-SOLVER:
-  STEPS: (99999,)
-  MAX_ITER: 100000
-OUTPUT_DIR: "output/cityscapes_meanteacher_imagenetstart/"

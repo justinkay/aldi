@@ -1,8 +1,0 @@
-_BASE_: "../MeanTeacher-Cityscapes.yaml"
-DOMAIN_ADAPT:
-  ALIGN:
-    IMG_DA_ENABLED: True
-    INS_DA_ENABLED: True
-    IMG_DA_WEIGHT: 0.001
-    INS_DA_WEIGHT: 0.0005
-OUTPUT_DIR: "output/cityscapes_mt_align_img_ins/"

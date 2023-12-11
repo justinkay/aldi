@@ -1,5 +1,11 @@
-_BASE_: "../MeanTeacher-VitDetB-Cityscapes.yaml"
+_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
+MODEL:
+  WEIGHTS: "models/cityscapes_baseline_strongaug_ema_foggy_val_model_best_591_ema2model.pth"
+EMA:
+  ENABLED: True
 DOMAIN_ADAPT:
+  TEACHER:
+    ENABLED: True
   DISTILL:
     HARD_ROIH_CLS_ENABLED: False
     HARD_ROIH_REG_ENABLED: False
@@ -16,6 +22,11 @@ AUG:
   LABELED_MIC_AUG: False
   UNLABELED_MIC_AUG: True
 DATASETS:
+  UNLABELED: ("cityscapes_foggy_train",)
   BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
-OUTPUT_DIR: "output/cityscapes_vit_best_nov12/"
+SOLVER:
+  STEPS: (59999,)
+  MAX_ITER: 60000
+  BACKWARD_AT_END: False
+OUTPUT_DIR: "output/cityscapes/cityscapes_aldi_best/"

@@ -1,6 +1,0 @@
-_BASE_: "./OracleT-RCNN-VitDetB-Cityscapes.yaml"
-DATASETS:
-  BATCH_CONTENTS: ("labeled_strong", )
-EMA:
-  ENABLED: True
-OUTPUT_DIR: "output/cityscapes_vitdetb_oracle-t_strongaug_ema/"

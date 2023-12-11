@@ -1,7 +1,0 @@
-_BASE_: "../cityscapes_startingpoint/DA-RCNN-FPN-Cityscapes_strongaugemastart.yaml"
-DATASETS:
-  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
-  BATCH_RATIOS: (0.5,0.5,2)
-SOLVER:
-  IMS_PER_GPU: 1 # required to get this ratio on 8 GPUs
-OUTPUT_DIR: "output/cityscapes_bothsource_twothirdstarget/"

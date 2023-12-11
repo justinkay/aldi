@@ -1,4 +1,0 @@
-_BASE_: "../MeanTeacher-Cityscapes.yaml"
-EMA:
-  ENABLED: False
-OUTPUT_DIR: "output/cityscapes_noteacher/"

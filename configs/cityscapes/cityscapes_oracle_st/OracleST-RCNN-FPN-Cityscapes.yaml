@@ -1,5 +1,0 @@
-_BASE_: "../cityscapes_baseline/Base-RCNN-FPN-Cityscapes.yaml"
-DATASETS:
-  TRAIN: ("cityscapes_train","cityscapes_foggy_train",)
-  TEST: ("cityscapes_val","cityscapes_foggy_val",)
-OUTPUT_DIR: "output/cityscapes_oracle-st/"

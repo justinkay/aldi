@@ -1,4 +1,0 @@
-_BASE_: "../MeanTeacher-Cityscapes.yaml"
-DATASETS:
-  BATCH_CONTENTS: ("labeled_weak", "unlabeled_weak")
-OUTPUT_DIR: "output/cityscapes_meanteacher_weakaug/"

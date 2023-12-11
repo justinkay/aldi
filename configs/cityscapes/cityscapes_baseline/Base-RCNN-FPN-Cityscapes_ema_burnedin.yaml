@@ -1,4 +1,0 @@
-_BASE_: "./Base-RCNN-FPN-Cityscapes_ema.yaml"
-MODEL:
-  WEIGHTS: "models/cityscapes_baseline_foggy_val_model_best_519.pth" 
-OUTPUT_DIR: "output/cityscapes_baseline_ema_burnedin/"

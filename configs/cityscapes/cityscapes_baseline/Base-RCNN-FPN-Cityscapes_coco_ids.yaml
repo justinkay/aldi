@@ -1,8 +1,0 @@
-_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
-MODEL:
-  ROI_HEADS:
-    NUM_CLASSES: 80 # match COCO
-DATASETS:
-  TRAIN: ("cityscapes_train",)
-  TEST: ("cityscapes_foggy_val_coco_ids",)
-OUTPUT_DIR: "output/cityscapes_baseline_coco_ids/"

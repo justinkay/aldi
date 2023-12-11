@@ -1,5 +1,0 @@
-_BASE_: "../MeanTeacher-SwinB-Cityscapes.yaml"
-MODEL:
-  DA:
-    ENABLED: True
-OUTPUT_DIR: "output/cityscapes_swinb_adaptiveteacher_nobiastable/"

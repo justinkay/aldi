@@ -1,4 +1,0 @@
-_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
-EMA:
-  ENABLED: True
-OUTPUT_DIR: "output/cityscapes_baseline_ema/"

@@ -1,4 +1,0 @@
-_BASE_: "../MeanTeacher-Cityscapes.yaml"
-MODEL:
-  WEIGHTS: "models/cityscapes_baseline_strongaug_foggy_val_model_best_568.pth"
-OUTPUT_DIR: "output/cityscapes_meanteacher_strongaugstart/"

@@ -1,0 +1,8 @@
+_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
+DATASETS:
+  TRAIN: ("cityscapes_foggy_train",)
+  TEST: ("cityscapes_val","cityscapes_foggy_val",)
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-t_strongaug_ema/"

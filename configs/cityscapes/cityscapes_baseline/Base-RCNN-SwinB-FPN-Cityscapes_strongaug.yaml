@@ -1,4 +1,0 @@
-_BASE_: "./Base-RCNN-SwinB-FPN-Cityscapes.yaml"
-DATASETS:
-  BATCH_CONTENTS: ("labeled_strong", )
-OUTPUT_DIR: "output/cityscapes_baseline_swinb_strongaug/"

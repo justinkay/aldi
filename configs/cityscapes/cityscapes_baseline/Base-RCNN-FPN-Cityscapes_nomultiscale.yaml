@@ -1,4 +1,0 @@
-_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
-INPUT:
-  MIN_SIZE_TRAIN: (1024,)
-OUTPUT_DIR: "output/cityscapes_baseline_no_multiscale/"
