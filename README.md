@@ -1,25 +1,45 @@
-# doad-strong-baseline
-Strong unified baselines for domain adaptive object detection.
+# ALDI
+Align and distill (ALDI): A unified framework for domain adaptive object detection.
 
-### Dependencies
-Install dependencies using anaconda:
+## Installation
+
+#### 1. Prerequisites (start here!)
+
+i. Install the appropriate versions of PyTorch and torchvision for your machine. Follow the instructions [here](https://pytorch.org/get-started/locally/). *You must do this before installing ALDI!*
+
+#### 2. Installing ALDI and its dependencies
+
+We recommend developing in a new Conda environment (e.g. using [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/):
+
 ```
-conda env create -f environment.yml
-conda activate daod-strong-baseline
+conda create -n aldi python=3.9
+conda activate aldi
 ```
 
-### Detectron v0.7 Setup
-For now use the unofficial 0.7 release.
+i. Clone this repository with submodules:
+
+```
+git clone --recurse-submodules git@github.com:justinkay/aldi.git
+cd aldi
+```
+
+(If you forgot to `--recurse-submodules`, don't worry, you can do this later)
+
+ii. Install Detectron2:
+
 ```
 git submodule update --init --recursive
 cd libs/detectron2
 pip install -e .
 ```
-Once this is an official release, replace with `pip install`.
 
-### ViT Backbone Setup
+iii. Install ALDI:
+
 ```
-pip install timm==0.9.7
+# if working directory is libs/detectron2
+cd ../..
+
+pip install -e .
 ```
 
 ### Downloading data
