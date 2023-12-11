@@ -25,6 +25,7 @@ from detectron2.utils.logger import setup_logger
 from detectron2.utils import comm
 from detectron2.utils.events import get_event_storage
 
+
 class DefaultTrainer(_DefaultTrainer):
     """
     Same as detectron2.engine.defaults.DefaultTrainer, but adds:

@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from detectron2.config import configurable
 from detectron2.modeling import GeneralizedRCNN
 
-from helpers import SaveIO, grad_reverse
+from aldi.helpers import SaveIO, grad_reverse
 
 
 class AlignMixin(GeneralizedRCNN):

@@ -4,8 +4,8 @@ import numpy as np
 
 from detectron2.structures import Instances, Boxes
 
-from aug import WEAK_IMG_KEY
-from dropin import DatasetMapper
+from aldi.aug import WEAK_IMG_KEY
+from aldi.dropin import DatasetMapper
 
 class SaveWeakDatasetMapper(DatasetMapper):
     """

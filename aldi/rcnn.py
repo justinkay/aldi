@@ -6,8 +6,8 @@ from detectron2.modeling.meta_arch import GeneralizedRCNN
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 from detectron2.layers import cat, cross_entropy
 
-from align import AlignMixin
-from distill import DistillMixin
+from aldi.align import AlignMixin
+from aldi.distill import DistillMixin
 
 
 @META_ARCH_REGISTRY.register()

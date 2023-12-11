@@ -10,12 +10,12 @@ from detectron2.solver import build_optimizer
 from detectron2.utils.events import get_event_storage
 from detectron2.utils import comm
 
-from aug import WEAK_IMG_KEY, get_augs
-from backbone import get_adamw_optim, get_swinb_optim
-from distill import Distiller
-from dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-from dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
-from ema import EMA
+from aldi.aug import WEAK_IMG_KEY, get_augs
+from aldi.backbone import get_adamw_optim
+from aldi.distill import Distiller
+from aldi.dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
+from aldi.dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
+from aldi.ema import EMA
 
 
 DEBUG = False
