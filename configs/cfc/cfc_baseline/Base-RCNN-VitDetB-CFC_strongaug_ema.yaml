@@ -1,9 +1,0 @@
-_BASE_: "./Base-RCNN-VitDetB-CFC.yaml"
-DATASETS:
-  BATCH_CONTENTS: ("labeled_strong", )
-EMA:
-  ENABLED: True
-SOLVER:
-  STEPS: (18000,)
-  MAX_ITER: 20000
-OUTPUT_DIR: "output/cfc/cfc_vitdetb_baseline_strongaug_ema/"

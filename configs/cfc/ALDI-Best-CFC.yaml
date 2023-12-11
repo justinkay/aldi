@@ -1,10 +1,10 @@
-_BASE_: "./Base-RCNN-FPN-Sim10k_strongaug_ema"
+_BASE_: "./Base-RCNN-FPN-CFC_strongaug_ema.yaml"
 MODEL:
-  WEIGHTS: "models/sim10k_baseline_strongaug_ema_cityscapes_cars_val_model_best_768_ema2model.pth"
+  WEIGHTS: "models/cfc_channel_test_model_best_strongaug_ema_667_ema2model.pth"
 EMA:
   ENABLED: True
 DATASETS:
-  UNLABELED: ("cityscapes_cars_train",)
+  UNLABELED: ("cfc_channel_train",)
   BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
 DOMAIN_ADAPT:
@@ -29,4 +29,4 @@ SOLVER:
   STEPS: (59999,)
   MAX_ITER: 60000
   BACKWARD_AT_END: False
-OUTPUT_DIR: "output/sim10k/sim10k_aldi_best/"
+OUTPUT_DIR: "output/cfc/cfc_aldi_best/"
