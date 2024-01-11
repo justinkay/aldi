@@ -1,5 +1,6 @@
 _BASE_: "../MeanTeacher-Cityscapes.yaml"
 MODEL:
+  WEIGHTS: "models/model_final_f10217.pkl" # UMT does no burn in
   UMT:
     ENABLED: True
 DATASETS:
@@ -7,6 +8,11 @@ DATASETS:
   BATCH_RATIOS: (1,1,1,1)
 AUG:
   INCLUDE_RANDOM_ERASING: False
-SOLVER:
-  BACKWARD_AT_END: True  # TODO: without this, predictions become NaN
+# SOLVER:
+#   BACKWARD_AT_END: True  # TODO: without this, predictions become NaN
+DOMAIN_ADAPT:
+  DISTILL:
+    # UMT does not disable loc losses
+    HARD_ROIH_REG_ENABLED: False
+    HARD_RPN_REG_ENABLED: False
 OUTPUT_DIR: "output/cityscapes_umt/"

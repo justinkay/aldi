@@ -1,14 +1,14 @@
 # this file mimics the settings of using "Mean Teacher" off the shelf with
-# the Adaptive Teacher / Unbiased Teacher repo.
+# the Adaptive Teacher / Unbiased Teacher repo, with our upgrades.
 # that is:
 # - batches are 1/3 weak source, 1/3 strong source, 1/3 target
 # - bbox localization losses are disabled
 # - random erasing is used as part of the strong augs
+# - best burn-in checkpoint is used (baseline model trained w/o ema and strong augs)
 
-_BASE_: "./cityscapes_baseline/Base-RCNN-FPN-Cityscapes.yaml"
+_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
 MODEL:
-  # WEIGHTS: "models/cityscapes_baseline_strongaug_ema_foggy_val_model_best_591.pth"
-  WEIGHTS: "models/cityscapes_baseline_strongaug_ema_foggy_val_model_best_591_ema2model.pth"
+  WEIGHTS: "models/cityscapes_baseline_strongaug_ema_foggy_val_model_best_519.pth"
 EMA:
   ENABLED: True
 DATASETS:
