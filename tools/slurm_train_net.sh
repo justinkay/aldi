@@ -31,7 +31,7 @@ module load anaconda
 # run training script inside anaconda environment
 srun -N$SLURM_JOB_NUM_NODES bash -c "\
     CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES \
-    conda run --no-capture-output -n daod-strong-baseline \
+    conda run --no-capture-output -n aldi \
         python train_net.py \
             --machine-rank \$SLURM_PROCID \
             --num-machines $SLURM_JOB_NUM_NODES \
