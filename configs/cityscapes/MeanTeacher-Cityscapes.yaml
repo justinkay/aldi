@@ -6,7 +6,7 @@
 # - random erasing is used as part of the strong augs
 # - best burn-in checkpoint is used (baseline model trained w/o ema and strong augs)
 
-_BASE_: "./Base-RCNN-FPN-Cityscapes.yaml"
+_BASE_: "./Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml"
 MODEL:
   WEIGHTS: "models/cityscapes_baseline_strongaug_ema_foggy_val_model_best_519.pth"
 EMA:
