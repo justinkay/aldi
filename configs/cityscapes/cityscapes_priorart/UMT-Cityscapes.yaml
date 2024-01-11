@@ -4,10 +4,11 @@ MODEL:
   UMT:
     ENABLED: True
 DATASETS:
-  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_weak", "unlabeled_strong")
-  BATCH_RATIOS: (1,1,1,1)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,2)
 AUG:
-  INCLUDE_RANDOM_ERASING: False
+  LABELED_INCLUDE_RANDOM_ERASING: False
+  UNLABELED_INCLUDE_RANDOM_ERASING: False
 # SOLVER:
 #   BACKWARD_AT_END: True  # TODO: without this, predictions become NaN
 DOMAIN_ADAPT:
