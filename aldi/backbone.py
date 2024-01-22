@@ -44,9 +44,7 @@ def get_adamw_optim(model, params={}, include_vit_lr_decay=False):
     # Thus, disabling the following line by default, since we pretrain with COCO.
     if include_vit_lr_decay:
         optimizer.params.lr_factor_func = partial(get_vit_lr_decay_rate, num_layers=12, lr_decay_rate=0.7)
-    optimizer.params.overrides = { "pos_embed": {"weight_decay": 0.0}, # VitDet
-                                   "relative_position_bias_table": {"weight_decay": 0.0}, # Swin Transformer
-                                }
+    optimizer.params.overrides = { "pos_embed": {"weight_decay": 0.0}, }
     for p in params:
         setattr(optimizer, p, params[p])
     optimizer.params.model = model

@@ -61,7 +61,6 @@ def add_da_config(cfg):
     # TODO: Could be merged into DISTILL settings somehow
     _C.DOMAIN_ADAPT.TEACHER = CN()
     _C.DOMAIN_ADAPT.TEACHER.ENABLED = False
-    _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # one of: { "thresholding", "probabilistic" }
     _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
 
     # Vision Transformer settings
