@@ -35,8 +35,7 @@ def build_vitdet_b_backbone(cfg, input_shape):
     return backbone
 
 def get_adamw_optim(model, params={}, include_vit_lr_decay=False):
-    """See detectron2/projects/ViTDet/configs/COCO/mask_rcnn_vitdet_b_100ep.py
-    and detectron2/projects/ViTDet/configs/COCO/cascade_mask_rcnn_swin_b_in21k_50ep.py"""
+    """See detectron2/projects/ViTDet/configs/COCO/mask_rcnn_vitdet_b_100ep.py"""
     optimizer = model_zoo.get_config("common/optim.py").AdamW
     # From VitDet paper: We also use a layer-wise lr decay [10][2] of 0.7/0.8/0.9 for ViT-B/L/H with 
     # MAE pre-training, which has a small gain of up to 0.3 AP; **we have not seen this gain for 
