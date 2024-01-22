@@ -1,0 +1,23 @@
+_BASE_: "./Base-RCNN-FPN-Sim10k_strongaug_ema.yaml"
+MODEL:
+  WEIGHTS: "models/sim10k_baseline_cityscapes_cars_val_model_best_687.pth" 
+EMA:
+  ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_cars_train",)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
+DOMAIN_ADAPT:
+  TEACHER:
+    ENABLED: True
+  DISTILL:
+    # By default, disable localization losses (done by AT, UBT, MIC, ...)
+    HARD_ROIH_CLS_ENABLED: True
+    HARD_ROIH_REG_ENABLED: False
+    HARD_OBJ_ENABLED: True
+    HARD_RPN_REG_ENABLED: False
+SOLVER:
+  STEPS: (59999,)
+  MAX_ITER: 60000
+  BACKWARD_AT_END: False
+OUTPUT_DIR: "output/sim10k_meanteacher/"

@@ -1,4 +1,4 @@
-_BASE_: "../MeanTeacher-CFC.yaml"
+_BASE_: "../MeanTeacher-Sim10k.yaml"
 MODEL:
   WEIGHTS: "models/model_final_f10217.pkl" # UMT does no burn in
   UMT:
@@ -14,4 +14,4 @@ DOMAIN_ADAPT:
     # UMT does not disable loc losses
     HARD_ROIH_REG_ENABLED: False
     HARD_RPN_REG_ENABLED: False
-OUTPUT_DIR: "output/cityscapes_umt/"
+OUTPUT_DIR: "output/sim10k_umt/"
