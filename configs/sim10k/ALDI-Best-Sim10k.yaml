@@ -26,7 +26,7 @@ AUG:
   LABELED_MIC_AUG: False
   UNLABELED_MIC_AUG: True
 SOLVER:
-  STEPS: (59999,)
-  MAX_ITER: 60000
+  STEPS: (14999,)
+  MAX_ITER: 15000
   BACKWARD_AT_END: False
 OUTPUT_DIR: "output/sim10k/sim10k_aldi_best/"
