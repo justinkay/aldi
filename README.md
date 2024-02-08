@@ -6,12 +6,13 @@ This is the official codebase for [Align and Distill: A Unified Framework for Do
 
 Align and Distill ($ALDI$) is a state-of-the-art framework for domain adaptive object detection (DAOD), built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library. $ALDI$ is:
 
-- **Accurate:** $ALDI$'s default settings achieve <ins>state-of-the-art results</ins> on DAOD benchmarks including Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
+**Accurate:** $ALDI$'s default settings achieve <ins>state-of-the-art results</ins> on DAOD benchmarks including Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
 
-- **Fast to train:** Thanks to efficient dataloading and optimized burn-in settings, $ALDI$ <ins>trains upwards of 20x faster</ins> than other DAOD methods.
+**Fast to train:** Thanks to efficient dataloading and optimized burn-in settings, $ALDI$ <ins>trains upwards of 20x faster</ins> than other DAOD methods.
  
-- **Easy to use:** Training DAOD models on your own data requires just a couple steps; see [setting up your own data](docs/CUSTOM_DATA.md) and [training ALDI](docs/TRAINING.md).
-- **Extensible:** The framework is lightweight, reusing default components from Detectron2 wherever possible. See [code documentation](docs/CODEBASE.md) for an overview of the code structure and design decisions.
+**Easy to use:** Training DAOD models on your own data requires just a couple steps; see [setting up your own data](docs/CUSTOM_DATA.md) and [training ALDI](docs/TRAINING.md).
+
+**Extensible:** The framework is lightweight, reusing default components from Detectron2 wherever possible. See [code documentation](docs/CODEBASE.md) for an overview of the code structure and design decisions.
 
 ## Installation
 
