@@ -4,11 +4,11 @@ This is the official codebase for [Align and Distill: A Unified Framework for Do
 
 ![](docs/aldi_banner_3.png)
 
-Align and Distill ($ALDI$) is a state-of-the-art framework for domain adaptive object detection (DAOD), built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library. $ALDI$ is:
+Align and Distill (ALDI) is a state-of-the-art framework for domain adaptive object detection (DAOD), built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library. ALDI is:
 
-**Accurate:** $ALDI$'s default settings achieve <ins>state-of-the-art results</ins> on DAOD benchmarks including Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
+**Accurate:** ALDI's default settings achieve <ins>state-of-the-art results</ins> on DAOD benchmarks including Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
 
-**Fast to train:** Thanks to efficient dataloading and optimized burn-in settings, $ALDI$ <ins>trains upwards of 20x faster</ins> than other DAOD methods.
+**Fast to train:** Thanks to efficient dataloading and optimized burn-in settings, ALDI <ins>trains upwards of 20x faster</ins> than other DAOD methods.
  
 **Easy to use:** Training DAOD models on your own data requires just a couple steps; see [setting up your own data](docs/CUSTOM_DATA.md) and [training ALDI](docs/TRAINING.md).
 
@@ -20,7 +20,7 @@ See [installation instructions](docs/INSTALL.md).
 
 ## Model zoo
 
-We provide burn-in checkpoints and final models for $ALDI_{best}$ for DAOD benchmarks (Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel) in [the model zoo](docs/MODELS.md).
+We provide burn-in checkpoints and final models for DAOD benchmarks (Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel) in [the model zoo](docs/MODELS.md).
 
 For compatibility with existing config files, download models to the `models/` directory in this repo.
 
@@ -32,7 +32,7 @@ Follow [these instructions](docs/DATASETS.md) to set up data and reproduce bench
 
 ## <a id="own-data"></a>Using your own data 
 
-To use $ALDI$ on your own data, see [instructions for custom datasets](docs/CUSTOM_DATA.md).
+To use ALDI on your own data, see [instructions for custom datasets](docs/CUSTOM_DATA.md).
 
 ## Training ALDI
 
@@ -40,7 +40,7 @@ See [training instructions](docs/TRAINING.md).
 
 ## Extras
 
-The [main](/justinkay/aldi/tree/main) branch contains all you need to run $ALDI$, and is a good starting point for most.
+The [main](/justinkay/aldi/tree/main) branch contains all you need to run ALDI, and is a good starting point for most.
 
 Additional code and configuration files to reproduce all experiments in [our paper]() can be found on the [extras](/justinkay/aldi/tree/extras) branch.
 
