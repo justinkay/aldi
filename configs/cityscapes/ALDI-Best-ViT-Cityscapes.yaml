@@ -1,6 +1,6 @@
 _BASE_: "./Base-RCNN-VitDetB-Cityscapes_strongaug_ema.yaml"
 MODEL:
-  WEIGHTS: "models/cityscapes_vitdetb_baseline_strongaug_ema_foggy_val_model_best_4799_ema2model.pth"
+  WEIGHTS: "models/cityscapes_vitdetb_baseline_strongaug_ema_foggy_val_model_best_4799.pth"
 EMA:
   ENABLED: True
 DOMAIN_ADAPT:

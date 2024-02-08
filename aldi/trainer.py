@@ -2,6 +2,7 @@ import os
 import copy
 from torch.nn.parallel import DistributedDataParallel as DDP
 
+from detectron2.checkpoint.detection_checkpoint import DetectionCheckpointer
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.engine import hooks, BestCheckpointer
 from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
@@ -12,6 +13,7 @@ from detectron2.utils import comm
 
 from aldi.aug import WEAK_IMG_KEY, get_augs
 from aldi.backbone import get_adamw_optim
+from aldi.checkpoint import DetectionCheckpointerWithEMA
 from aldi.distill import Distiller
 from aldi.dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from aldi.dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
@@ -107,8 +109,8 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      # Distillation losses
      if do_distill:
           do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
-          # if DEBUG: 
-          #   debug_dict['last_pseudolabeled'] = copy.deepcopy(pseudolabeled_data)
+          if DEBUG: 
+            debug_dict['last_pseudolabeled'] = copy.deepcopy(unlabeled_strong)
 
      return loss_dict
 
@@ -145,7 +147,8 @@ class DATrainer(DefaultTrainer):
           return trainer
      
      def _create_checkpointer(self, model, cfg):
-          checkpointer = super(DATrainer, self)._create_checkpointer(model, cfg)
+          checkpointer = super(DATrainer, self)._create_checkpointer(model, cfg, 
+                         ckpt_cls=DetectionCheckpointerWithEMA if cfg. EMA.LOAD_FROM_EMA_ON_START else DetectionCheckpointer)
           if cfg.EMA.ENABLED:
                checkpointer.add_checkpointable("ema", self.ema)
           return checkpointer

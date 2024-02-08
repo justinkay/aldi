@@ -74,8 +74,8 @@ class DefaultTrainer(_DefaultTrainer):
                 model, data_loader, optimizer
             )
     
-    def _create_checkpointer(self, model, cfg):
-        return DetectionCheckpointer(
+    def _create_checkpointer(self, model, cfg, ckpt_cls=DetectionCheckpointer):
+        return ckpt_cls(
                 model,
                 cfg.OUTPUT_DIR,
                 trainer=weakref.proxy(self),
