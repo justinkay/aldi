@@ -108,7 +108,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
 
      # Distillation losses
      if do_distill:
-          do_distill_step(unlabeled_weak, unlabeled_strong, "distill")
+          do_distill_step(unlabeled_weak, unlabeled_strong, "distill", lambda k: k != "_")
           if DEBUG: 
             debug_dict['last_pseudolabeled'] = copy.deepcopy(unlabeled_strong)
 
