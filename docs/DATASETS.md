@@ -15,6 +15,10 @@ aldi/
             coco_car_annotations.json
         cfc/
             images/
+                cfc_train/
+                cfc_val/
+                cfc_channel_train/
+                cfc_channel_test/
             coco_labels/
                 cfc_train.json
                 ...
