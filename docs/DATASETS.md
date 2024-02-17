@@ -44,7 +44,7 @@ aldi/
 
 ## Sim10k &rarr; Cityscapes
 
-**Sim10k images:** Download the Sim10k images [here](https://deepblue.lib.umich.edu/data/downloads/ks65hc58r), and place them in `aldi/datasets/sim10k/` as shown above.
+**Sim10k images:** Download the Sim10k images [here](https://deepblue.lib.umich.edu/data/downloads/ks65hc58r), and place them in `aldi/datasets/sim10k/images/` as shown above.
 
 **Cityscapes images:** Follow instructions for setting up Cityscapes above. Note you will only need the `leftImg8bit` images, not the foggy ones
 
@@ -58,4 +58,23 @@ aldi/
 
 ## CFC Kenai &rarr; Channel
 
-Coming soon.
+**Images:**
+
+[CFC Kenai (source) train images](https://data.caltech.edu/records/bseww-80110/files/cfc_train.zip?download=1)
+
+[CFC Kenai (source) val images](https://data.caltech.edu/records/bseww-80110/files/cfc_val.zip?download=1)
+
+[CFC Channel (target) train images](https://data.caltech.edu/records/bseww-80110/files/cfc_channel_train.zip?download=1)
+
+[CFC Channel (target) test images](https://data.caltech.edu/records/bseww-80110/files/cfc_channel_test.zip?download=1)
+
+**Labels:**
+
+[CFC Kenai (source) train labels](https://data.caltech.edu/records/bseww-80110/files/cfc_train.json?download=1)
+
+[CFC Kenai (source) val labels](https://data.caltech.edu/records/bseww-80110/files/cfc_val.json?download=1)
+
+[CFC Channel (target) train labels](https://data.caltech.edu/records/bseww-80110/files/cfc_channel_train.json?download=1)
+
+[CFC Channel (target) test labels](https://data.caltech.edu/records/bseww-80110/files/cfc_channel_test.json?download=1)
+
