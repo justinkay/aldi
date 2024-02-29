@@ -30,12 +30,14 @@ class AlignMixin(GeneralizedRCNN):
         self.ins_align = FCDiscriminator(1024, hidden_dims=[1024]) if ins_da_enabled else None # TODO dims
 
         # register hooks so we can grab output of sub-modules
-        self.backbone_io, self.rpn_io, self.roih_io, self.boxhead_io, self.boxpred_io = SaveIO(), SaveIO(), SaveIO(), SaveIO(), SaveIO()
+        self.backbone_io, self.rpn_io, self.roih_io, self.boxhead_io = SaveIO(), SaveIO(), SaveIO(), SaveIO()
         self.backbone.register_forward_hook(self.backbone_io)
         self.proposal_generator.register_forward_hook(self.rpn_io)
         self.roi_heads.register_forward_hook(self.roih_io)
-        self.roi_heads.box_head.register_forward_hook(self.boxhead_io)
-        self.roi_heads.box_predictor.register_forward_hook(self.boxpred_io)
+
+        if ins_da_enabled:
+            assert hasattr(self.roi_heads, 'box_head'), "Instance alignment only implemented for ROI Heads with box_head."
+            self.roi_heads.box_head.register_forward_hook(self.boxhead_io)
 
     @classmethod
     def from_config(cls, cfg):
@@ -58,7 +60,6 @@ class AlignMixin(GeneralizedRCNN):
                 domain_label = 1 if labeled else 0
                 img_features = list(self.backbone_io.output.values())
                 device = img_features[0].device
-                instance_features = self.boxhead_io.output
                 if self.img_align:
                     features = self.backbone_io.output
                     features = grad_reverse(features[self.img_da_layer])
@@ -66,6 +67,7 @@ class AlignMixin(GeneralizedRCNN):
                     loss = F.binary_cross_entropy_with_logits(domain_preds, torch.FloatTensor(domain_preds.data.size()).fill_(domain_label).to(device))
                     output["loss_da_img"] = self.img_da_weight * loss
                 if self.ins_align:
+                    instance_features = self.boxhead_io.output
                     features = grad_reverse(instance_features)
                     domain_preds = self.ins_align(features)
                     loss = F.binary_cross_entropy_with_logits(domain_preds, torch.FloatTensor(domain_preds.data.size()).fill_(domain_label).to(device))

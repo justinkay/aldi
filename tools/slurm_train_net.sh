@@ -26,7 +26,7 @@ CFG="${1:-configs/cityscapes/Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml}"
 
 # setup SuperCloud module system
 module purge
-module load anaconda
+module load anaconda/2023a
 
 # run training script inside anaconda environment
 srun -N$SLURM_JOB_NUM_NODES bash -c "\
