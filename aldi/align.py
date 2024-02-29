@@ -23,6 +23,7 @@ class AlignMixin(GeneralizedRCNN):
         ins_da_weight: float = 0.0,
         ins_da_input_dim: int = 1024,
         ins_da_hidden_dims: list = [1024,],
+        img_da_impl: str = 'ours',
         **kwargs
     ):
         super(AlignMixin, self).__init__(**kwargs)
@@ -30,8 +31,13 @@ class AlignMixin(GeneralizedRCNN):
         self.img_da_weight = img_da_weight
         self.ins_da_weight = ins_da_weight
 
-        self.img_align = ConvDiscriminator(img_da_input_dim, hidden_dims=img_da_hidden_dims) if img_da_enabled else None
-        self.ins_align = FCDiscriminator(ins_da_input_dim, hidden_dims=ins_da_hidden_dims) if ins_da_enabled else None 
+        self.img_align = None
+        if img_da_enabled:
+            if img_da_impl == 'at':
+                self.img_align = ATDiscriminator(512) # TODO dims; only works for VGG; maybe: self.backbone._out_feature_channels['img_da_layer']
+            else:
+                self.img_align = ConvDiscriminator(img_da_input_dim, hidden_dims=img_da_hidden_dims) if img_da_enabled else None
+        self.ins_align = FCDiscriminator(ins_da_input_dim, hidden_dims=ins_da_hidden_dims) if ins_da_enabled else None
 
         # register hooks so we can grab output of sub-modules
         self.backbone_io, self.rpn_io, self.roih_io, self.boxhead_io = SaveIO(), SaveIO(), SaveIO(), SaveIO()
@@ -52,6 +58,7 @@ class AlignMixin(GeneralizedRCNN):
                     "img_da_weight": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_WEIGHT,
                     "img_da_input_dim": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_INPUT_DIM,
                     "img_da_hidden_dims": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_HIDDEN_DIMS,
+                    "img_da_impl": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_IMPL,
                     "ins_da_enabled": cfg.DOMAIN_ADAPT.ALIGN.INS_DA_ENABLED,
                     "ins_da_weight": cfg.DOMAIN_ADAPT.ALIGN.INS_DA_WEIGHT,
                     "ins_da_input_dim": cfg.DOMAIN_ADAPT.ALIGN.INS_DA_INPUT_DIM,
@@ -126,3 +133,25 @@ class FCDiscriminator(torch.nn.Module):
 
     def forward(self, x):
         return self.model(x)
+
+# Discriminator copied from AT codebase: https://github.com/facebookresearch/adaptive_teacher/blob/main/adapteacher/modeling/meta_arch/rcnn.py
+class ATDiscriminator(torch.nn.Module):
+    def __init__(self, num_classes, ndf1=256, ndf2=128):
+        super(ATDiscriminator, self).__init__()
+
+        self.conv1 = torch.nn.Conv2d(num_classes, ndf1, kernel_size=3, padding=1)
+        self.conv2 = torch.nn.Conv2d(ndf1, ndf2, kernel_size=3, padding=1)
+        self.conv3 = torch.nn.Conv2d(ndf2, ndf2, kernel_size=3, padding=1)
+        self.classifier = torch.nn.Conv2d(ndf2, 1, kernel_size=3, padding=1)
+
+        self.leaky_relu = torch.nn.LeakyReLU(negative_slope=0.2, inplace=True)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.leaky_relu(x)
+        x = self.conv2(x)
+        x = self.leaky_relu(x)
+        x = self.conv3(x)
+        x = self.leaky_relu(x)
+        x = self.classifier(x)
+        return x

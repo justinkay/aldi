@@ -41,6 +41,7 @@ def add_aldi_config(cfg):
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_WEIGHT = 0.01
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_INPUT_DIM = 256 # = output channels of backbone
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_HIDDEN_DIMS = [256,]
+    _C.DOMAIN_ADAPT.ALIGN.IMG_DA_IMPL = "ours" # {ours, at}
     _C.DOMAIN_ADAPT.ALIGN.INS_DA_ENABLED = False
     _C.DOMAIN_ADAPT.ALIGN.INS_DA_WEIGHT = 0.01
     _C.DOMAIN_ADAPT.ALIGN.INS_DA_INPUT_DIM = 1024 # = output channels of box head
