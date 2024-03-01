@@ -14,7 +14,7 @@ To use your dataset with $ALDI$,
 
 1. Make your data (images and annotations) accessible from the `datasets` directory in this repository. You can either place your data here, or add symlinks to it.
 
-2. Register each of your dataset(s) by adding a new line to [dataset.py](). Paths should be relative to the base directory of this repo. Note that the images directories can be the same if you'd like, since images will be chosen according to their paths in the COCO JSON files.
+2. Register each of your dataset(s) by adding a new line to [datasets.py](../aldi/datasets.py). Paths should be relative to the base directory of this repo. Note that the images directories can be the same if you'd like, since images will be chosen according to their paths in the COCO JSON files.
 
 ```
 register_coco_instances("your_training_dataset_name", {}, "path/to/your_training_coco_labels.json", "path/to/your/train/images/")
