@@ -16,8 +16,7 @@ class DetectionCheckpointerWithEMA(DetectionCheckpointer):
         super().__init__(model, save_dir=save_dir, save_to_disk=save_to_disk, **checkpointables)
 
     def resume_or_load(self, path: str, *, resume: bool = True) -> Dict[str, Any]:
-        keys = torch.load(path, map_location=torch.device("cpu")).keys()
-        if resume or "ema" not in keys:
+        if resume or (not path.endswith(".pth")) or "ema" not in torch.load(path, map_location=torch.device("cpu")).keys():
             return super().resume_or_load(path, resume=resume)
         else:
             self.load(path, checkpointables=["ema"])
