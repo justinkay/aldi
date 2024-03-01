@@ -90,3 +90,20 @@ def add_aldi_config(cfg):
 
     # Enable use of different optimizers (necessary to match VitDet settings)
     _C.SOLVER.OPTIMIZER = "SGD"
+
+    # to reproduce MIC
+    _C.DOMAIN_ADAPT.ALIGN.SADA_ENABLED = False
+    _C.DOMAIN_ADAPT.ALIGN.SADA_IMG_GRL_WEIGHT = 0.01
+    _C.DOMAIN_ADAPT.ALIGN.SADA_INS_GRL_WEIGHT = 0.1
+    _C.DOMAIN_ADAPT.ALIGN.SADA_COS_WEIGHT = 0.1
+    _C.DOMAIN_ADAPT.LOSSES = CN()
+    _C.DOMAIN_ADAPT.LOSSES.QUALITY_LOSS_WEIGHT_ENABLED = False
+
+    # to reproduce PT (incomplete)
+    _C.GRCNN = CN()
+    _C.GRCNN.LEARN_ANCHORS_LABELED = False
+    _C.GRCNN.LEARN_ANCHORS_UNLABELED = False
+    _C.GRCNN.TAU = [0.5, 0.5]
+    _C.GRCNN.EFL = False
+    _C.GRCNN.EFL_LAMBDA = [0.5, 0.5]
+    _C.GRCNN.MODEL_TYPE = "GAUSSIAN"

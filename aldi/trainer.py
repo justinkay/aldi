@@ -81,7 +81,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
      _model = model.module if type(model) == DDP else model
      do_weak = labeled_weak is not None
      do_strong = labeled_strong is not None
-     do_align = any( [ getattr(_model, a, None) is not None for a in ["img_align", "ins_align"] ] )
+     do_align = any( [ getattr(_model, a, None) is not None for a in ["img_align", "ins_align", "sada_heads"] ] )
      do_distill = trainer.distiller.distill_enabled()
 
      total_batch_size = sum([len(s or []) for s in [labeled_weak, labeled_strong, unlabeled_weak]])

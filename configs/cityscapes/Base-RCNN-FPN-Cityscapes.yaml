@@ -1,0 +1,9 @@
+_BASE_: "../Base-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 8
+DATASETS:
+  TRAIN: ("cityscapes_train",)
+  TEST: ("cityscapes_val", "cityscapes_foggy_val",)
+  BATCH_CONTENTS: ("labeled_weak", )
+OUTPUT_DIR: "output/cityscapes/cityscapes_baseline/"

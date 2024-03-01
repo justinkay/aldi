@@ -5,7 +5,7 @@ from detectron2.config import configurable
 from detectron2.modeling import GeneralizedRCNN
 
 from aldi.helpers import SaveIO, grad_reverse
-
+from aldi.sada import SADA
 
 class AlignMixin(GeneralizedRCNN):
     """Any modifications to the torch module itself go here and are mixed in in trainer.ALDI"""
@@ -14,6 +14,7 @@ class AlignMixin(GeneralizedRCNN):
     def __init__(
         self,
         *,
+        sada_heads: SADA = None,
         img_da_enabled: bool = False,
         img_da_layer: str = None,
         img_da_weight: float = 0.0,
@@ -31,6 +32,7 @@ class AlignMixin(GeneralizedRCNN):
         self.img_da_weight = img_da_weight
         self.ins_da_weight = ins_da_weight
 
+        self.sada_heads = sada_heads
         self.img_align = None
         if img_da_enabled:
             if img_da_impl == 'at':
@@ -52,6 +54,9 @@ class AlignMixin(GeneralizedRCNN):
     @classmethod
     def from_config(cls, cfg):
         ret = super(AlignMixin, cls).from_config(cfg)
+
+        if cfg.DOMAIN_ADAPT.ALIGN.SADA_ENABLED:
+            ret.update({"sada_heads": SADA(cfg)})
 
         ret.update({"img_da_enabled": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_ENABLED,
                     "img_da_layer": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_LAYER,
@@ -75,6 +80,11 @@ class AlignMixin(GeneralizedRCNN):
                 domain_label = 1 if labeled else 0
                 img_features = list(self.backbone_io.output.values())
                 device = img_features[0].device
+                if self.sada_heads is not None:
+                    img_targets = torch.ones(len(img_features), dtype=torch.long, device=device) * domain_label
+                    proposals = [x.proposal_boxes for x in self.roih_io.output[0]] # roih_out = proposals, losses
+                    instance_targets = torch.ones(sum([len(b) for b in proposals]), dtype=torch.long, device=device) * domain_label
+                    output.update(self.sada_heads(img_features, instance_features, instance_targets, proposals, img_targets))
                 if self.img_align:
                     features = self.backbone_io.output
                     features = grad_reverse(features[self.img_da_layer])
@@ -87,13 +97,13 @@ class AlignMixin(GeneralizedRCNN):
                     domain_preds = self.ins_align(features)
                     loss = F.binary_cross_entropy_with_logits(domain_preds, torch.FloatTensor(domain_preds.data.size()).fill_(domain_label).to(device))
                     output["loss_da_ins"] = self.ins_da_weight * loss
-            elif self.img_align or self.ins_align:
+            elif self.img_align or self.ins_align or self.sada_heads:
                 # need to utilize the modules at some point during the forward pass or PyTorch complains.
                 # this is only an issue when cfg.SOLVER.BACKWARD_AT_END=False, because intermediate backward()
                 # calls may not have used alignment heads
                 # see: https://github.com/pytorch/pytorch/issues/43259#issuecomment-964284292
                 fake_output = 0
-                for aligner in [self.img_align, self.ins_align]:
+                for aligner in [self.img_align, self.ins_align, self.sada_heads]:
                     if aligner is not None:
                         fake_output += sum([p.sum() for p in aligner.parameters()]) * 0
                 output["_da"] = fake_output
