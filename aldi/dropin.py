@@ -89,7 +89,7 @@ class SimpleTrainer(_SimpleTrainer):
     Same as detectron2.engine.train_loop.SimpleTrainer, but:
     - adds a run_model method that provides a way to change the model's forward pass without 
     having to copy-paste the entire run_step method.
-    - adds a _do_backward method that provides a way to modify the backward pass
+    - adds a do_backward method that provides a way to modify the backward pass
     """
     def run_step(self):
         assert self.model.training, "[SimpleTrainer] model was changed to eval mode!"
@@ -113,7 +113,7 @@ class SimpleTrainer(_SimpleTrainer):
             self.optimizer.zero_grad()
 
         ## Change is here ##
-        self._do_backward(losses)
+        self.do_backward(losses)
         ##   End change   ##
 
         self.after_backward()
@@ -123,7 +123,7 @@ class SimpleTrainer(_SimpleTrainer):
     def run_model(self, data):
         return self.model(data)
     
-    def _do_backward(self, losses):
+    def do_backward(self, losses):
         losses.backward()
 
 class AMPTrainer(_AMPTrainer):
