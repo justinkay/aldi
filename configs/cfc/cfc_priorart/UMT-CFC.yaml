@@ -14,4 +14,4 @@ DOMAIN_ADAPT:
     # UMT does not disable loc losses
     HARD_ROIH_REG_ENABLED: False
     HARD_RPN_REG_ENABLED: False
-OUTPUT_DIR: "output/cityscapes_umt/"
+OUTPUT_DIR: "output/cfc_umt/"
