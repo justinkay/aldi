@@ -17,7 +17,7 @@ check_dependencies()
 setup(
     name='aldi',
     version='0.1.1',
-    author='justinkay',
+    author='anonymous',
     url="https://github.com/justinkay/aldi",
     description="Align and distill (ALDI): A unified framework for domain adaptive object detection",
     packages=find_packages(include=['aldi', 'aldi.*']),
