@@ -2,7 +2,7 @@
 
 This is the official codebase for [Align and Distill: Unifying and Improving Domain Adaptive Object Detection]().
 
-![](docs/aldi_fig1.png)
+![](docs/aldi_fig1_v2.png)
 
 Align and Distill (ALDI) is a state-of-the-art framework for domain adaptive object detection (DAOD), built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library. ALDI is:
 
