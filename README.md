@@ -1,4 +1,4 @@
-# Align and Distill (ALDI): A Unified Framework for Domain Adaptive Object Detection
+# Align and Distill (ALDI): Unifying and Extending Domain Adaptive Object Detection
 
 This is the official codebase for [Align and Distill: Unifying and Improving Domain Adaptive Object Detection]().
 
