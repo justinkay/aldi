@@ -40,7 +40,7 @@ We also use these checkpoints to initialize domain adaptive training, i.e. they 
 
 ### Final models
 
-Here we provide the models trained using $ALDI_{best}$.
+Here we provide the models trained using ALDI++.
 
 #### Cityscapes &rarr; Foggy Cityscapes
 
