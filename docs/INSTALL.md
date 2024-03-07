@@ -17,8 +17,10 @@ conda activate aldi
 
 1. Clone this repository with submodules:
 
+** Not possible to clone anonymized version **
+
 ```
-git clone git@github.com:justinkay/aldi.git
+git clone git@github.com:.../aldi.git
 cd aldi
 ```
 
