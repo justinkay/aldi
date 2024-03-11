@@ -30,3 +30,11 @@ DATASETS:
   UNLABELED: ("your_unlabeled_dataset_name",) # needs to be a tuple, and can contain multiple datasets if you want
   TEST: ("your_test_dataset_name",)  # needs to be a tuple, and can contain multiple datasets if you want
 ```
+
+4. You will also need to update the `MODEL.ROI_HEADS.NUM_CLASSES` value in your config files to match the number of classes in your COCO files, e.g.:
+
+```
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 9 # change to match your number of classes
+```
