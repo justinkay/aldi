@@ -10,7 +10,7 @@ You will need a separate COCO file for each dataset. Typically this will include
 - Unlabeled: Target-domain images for DAOD. These can be optionally labeled if you also want to use them to train a supervised "oracle" for comparison. If unlabeled, the `"annotations"` entry of your COCO file should be an empty list.
 - Test: A labeled validation set. In most DAOD papers this comes from your target domain, even though this breaks the constraints of UDA.
 
-To use your dataset with $ALDI$, 
+To use your dataset with ALDI, 
 
 1. Make your data (images and annotations) accessible from the `datasets` directory in this repository. You can either place your data here, or add symlinks to it.
 
