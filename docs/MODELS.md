@@ -1,6 +1,6 @@
 # ALDI model zoo
 
-This file contains models trained for the experiments in [Align and Distill: A Unified Framework for Domain Adaptive Object Detection](). All models were trained on 8 NVIDIA Tesla V100s with PyTorch 1.13.1 and CUDA 11.6. 
+This file contains models trained for the experiments in [Align and Distill: Unifying and Improving Domain Adaptive Object Detection](). All models were trained on 8 NVIDIA Tesla V100s with PyTorch 1.13.1 and CUDA 11.6. 
 
 For compatibility with the config files we provide, download any models here to the `models` directory in this repo.
 
@@ -40,7 +40,7 @@ We also use these checkpoints to initialize domain adaptive training, i.e. they 
 
 ### Final models
 
-Here we provide the models trained using $ALDI_{best}$.
+Here we provide the models trained using ALDI++.
 
 #### Cityscapes &rarr; Foggy Cityscapes
 
