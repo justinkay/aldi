@@ -48,7 +48,7 @@ A `BestCheckpointer` will be used by default to save the best model checkpoint b
 
 ## 2. Domain adaptive training
 
-Now you're ready to use $ALDI$ for domain adaptation. Again this involves creating a configuration file and running `tools/train_net.py`.
+Now you're ready to use ALDI for domain adaptation. Again this involves creating a configuration file and running `tools/train_net.py`.
 
 ### Configuration file setup 
 
