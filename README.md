@@ -1,6 +1,6 @@
-# Align and Distill (ALDI): A Unified Framework for Domain Adaptive Object Detection
+# Align and Distill (ALDI): Unifying and Improving Domain Adaptive Object Detection
 
-This is the official codebase for [Align and Distill: A Unified Framework for Domain Adaptive Object Detection]().
+This is the official codebase for [Align and Distill: Unifying and Improving Domain Adaptive Object Detection]().
 
 ![](docs/aldi_banner_3.png)
 
@@ -46,22 +46,18 @@ Additional code and configuration files to reproduce all experiments in [our pap
 
 ## Reference
 
-#### [Align and Distill: A Unified Framework for Domain Adaptive Object Detection]()
+#### [Align and Distill: Unifying and Improving Domain Adaptive Object Detection]()
 
 [Justin Kay](https://justinkay.github.io), [Timm Haucke](https://timm.haucke.xyz/), [Suzanne Stathatos](https://suzanne-stathatos.github.io/), [Siqi Deng](https://www.amazon.science/author/siqi-deng), [Erik Young](https://home.tu.org/users/erikyoung), [Pietro Perona](https://scholar.google.com/citations?user=j29kMCwAAAAJ), [Sara Beery](https://beerys.github.io/), and [Grant Van Horn](https://gvanhorn38.github.io/).
 
-Domain adaptive object detection (DAOD) seeks to address performance degradation caused by distribution shift between training and test data.
-Prior work claims that DAOD methods can more than double the performance of baseline models. We identify two key shortcomings in these works that call the validity of these claims into question: (1) Baselines and oracles are under-powered and often out of date, with limited study of DAOD for modern architectures, 
-and (2) Methods are built on top of inconsistent object detection frameworks, making it difficult to directly compare their performance. We propose *Align and Distill (ALDI)*: a unified framework for DAOD allowing for fair evaluation within a single state-of-the-art object detection codebase. Additionally, common DAOD benchmarks focus almost entirely on urban street settings.
-We contribute a novel DAOD benchmark dataset sourced from a real-world domain adaptation challenge in environmental monitoring, increasing the diversity of DAOD application domains.
-Our framework and dataset enable us to systematically investigate the contribution of different DAOD components and propose novel training techniques leading to state-of-the-art performance across diverse applications. 
+Object detectors often perform poorly on data that differs from their training set. Domain adaptive object detection (DAOD) methods have recently demonstrated strong results on addressing this challenge. Unfortunately, we identify systemic benchmarking pitfalls that call past results into question and hamper further progress: (a) Overestimation of performance due to underpowered baselines, (b) Inconsistent implementation practices preventing transparent comparisons of methods, and (c) Lack of generality due to outdated backbones and lack of diversity in benchmarks. We address these problems by introducing: (1) A unified benchmarking and implementation framework, Align and Distill (ALDI), enabling comparison of DAOD methods and supporting future development, (2) A fair and modern training and evaluation protocol for DAOD that addresses benchmarking pitfalls, (3) A new DAOD benchmark dataset, CFC-DAOD, enabling evaluation on diverse real-world data, and (4) A new method, ALDI++, that achieves state-of-the-art results by a large margin. ALDI++ outperforms the previous state-of-the-art by +3.5 AP50 on Cityscapes → Foggy Cityscapes, +5.7 AP50 on Sim10k → Cityscapes (where ours is the only method to outperform a fair baseline), and +2.0 AP50 on CFC Kenai → Channel. Our framework, dataset, and state-of-the-art method offer a critical reset for DAOD and provide a strong foundation for future research. 
 
 If you find our work useful in your research please consider citing our paper:
 
 ```
 @inproceedings{TODO,
     author    = {Kay, Justin and Haucke, Timm and Stathatos, Suzanne and Deng, Siqi and Young, Erik and Perona, Pietro and Beery, Sara and Van Horn, Grant},
-    title     = {Align and Distill: A Unified Framework for Domain Adaptive Object Detection},
+    title     = {Align and Distill: Unifying and Improving Domain Adaptive Object Detection},
     booktitle = {TODO},
     year      = {2024}
 }
