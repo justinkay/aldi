@@ -17,6 +17,7 @@ from aldi.trainer import DATrainer
 import aldi.datasets # register datasets with Detectron2
 import aldi.rcnn # register ALDI R-CNN model with Detectron2
 import aldi.backbone # register ViT FPN backbone with Detectron2
+import aldi.file_io # register PathManager for automatic model download with Detectron2
 
 def setup(args):
     """
