@@ -24,7 +24,7 @@ We provide burn-in checkpoints and final models for DAOD benchmarks (Cityscapes 
 
 For compatibility with existing config files, download models to the `models/` directory in this repo.
 
-You can also download all models using `models/download_models.sh`
+You can download the required model weights for any config file we provide using `python tools/download_model_for_config.py --config-file path/to/config.yaml`
 
 ## Benchmark dataset setup
 
