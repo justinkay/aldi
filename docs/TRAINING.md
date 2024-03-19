@@ -13,7 +13,7 @@ This assumes you have:
 The first step is to train a standard object detector on your source dataset (AKA "source-only training"). This has two purposes:
 
 - **Baseline.** For evaluation, this model tells you the best you can do *before domain adaptation*, using only source-domain data.
-- **Burn-in.** Source-only training is also an effective method for network initialization, AKA "burn-in", before performing domain adaptation. See [our paper]() for more details.
+- **Burn-in.** Source-only training is also an effective method for network initialization, AKA "burn-in", before performing domain adaptation. See [our paper](https://arxiv.org/abs/2403.12029) for more details.
 
 ### Set up configuration file for baseline training / burn-in
 
