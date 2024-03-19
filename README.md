@@ -1,6 +1,6 @@
 # Align and Distill (ALDI): Unifying and Improving Domain Adaptive Object Detection
 
-This is the official codebase for [Align and Distill: Unifying and Improving Domain Adaptive Object Detection]().
+This is the official codebase for [Align and Distill: Unifying and Improving Domain Adaptive Object Detection](https://arxiv.org/abs/2403.12029).
 
 ![](docs/aldi_banner_4.png)
 
@@ -42,7 +42,7 @@ See [training instructions](docs/TRAINING.md).
 
 The [main](/justinkay/aldi/tree/main) branch contains all you need to run ALDI, and is a good starting point for most.
 
-Additional code and configuration files to reproduce all experiments in [our paper]() can be found on the [extras](/justinkay/aldi/tree/extras) branch.
+Additional code and configuration files to reproduce all experiments in [our paper](https://arxiv.org/abs/2403.12029) can be found on the [extras](/justinkay/aldi/tree/extras) branch.
 
 ## Reference
 
@@ -55,10 +55,12 @@ Object detectors often perform poorly on data that differs from their training s
 If you find our work useful in your research please consider citing our paper:
 
 ```
-@inproceedings{TODO,
-    author    = {Kay, Justin and Haucke, Timm and Stathatos, Suzanne and Deng, Siqi and Young, Erik and Perona, Pietro and Beery, Sara and Van Horn, Grant},
-    title     = {Align and Distill: Unifying and Improving Domain Adaptive Object Detection},
-    booktitle = {TODO},
-    year      = {2024}
+@misc{kay2024align,
+      title={Align and Distill: Unifying and Improving Domain Adaptive Object Detection}, 
+      author={Justin Kay and Timm Haucke and Suzanne Stathatos and Siqi Deng and Erik Young and Pietro Perona and Sara Beery and Grant Van Horn},
+      year={2024},
+      eprint={2403.12029},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
 }
 ```
