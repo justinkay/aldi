@@ -16,7 +16,7 @@ from aldi.pseudolabeler import PseudoLabeler
 class Distiller:
 
     def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, do_hard_roi_reg=False,
-                 do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roih_reg_dst=False, do_hint=False,
+                 do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roih_reg_dst=False,
                  cls_temperature=1.0, obj_temperature=1.0, cls_loss_type="CE", pseudo_label_threshold=0.8):
         set_attributes(self, locals())
         self.register_hooks()
@@ -33,7 +33,6 @@ class Distiller:
                         do_obj_dst=cfg.DOMAIN_ADAPT.DISTILL.OBJ_ENABLED,
                         do_rpn_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.RPN_REG_ENABLED,
                         do_roih_reg_dst=cfg.DOMAIN_ADAPT.DISTILL.ROIH_REG_ENABLED,
-                        do_hint=cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
                         cls_temperature=cfg.DOMAIN_ADAPT.DISTILL.CLS_TMP,
                         obj_temperature=cfg.DOMAIN_ADAPT.DISTILL.OBJ_TMP,
                         cls_loss_type=cfg.DOMAIN_ADAPT.CLS_LOSS_TYPE,
@@ -64,17 +63,9 @@ class Distiller:
         self.teacher_proposal_replacer = ReplaceProposalsOnce()
         teacher_model.roi_heads.register_forward_pre_hook(self.teacher_proposal_replacer)
 
-        if self.do_hint:
-            self.student_hint_io = SaveIO()
-            student_model.hint_adapter.register_forward_hook(self.student_hint_io)
-            self.student_bottom_up_io = SaveIO()
-            student_model.backbone.bottom_up.register_forward_hook(self.student_bottom_up_io)
-            self.teacher_bottom_up_io = SaveIO()
-            teacher_model.backbone.bottom_up.register_forward_hook(self.teacher_bottom_up_io)
-
     def distill_enabled(self):
         return any([self.do_hard_cls, self.do_hard_obj, self.do_hard_rpn_reg, self.do_hard_roi_reg,
-                    self.do_cls_dst, self.do_obj_dst, self.do_rpn_reg_dst, self.do_roih_reg_dst, self.do_hint])
+                    self.do_cls_dst, self.do_obj_dst, self.do_rpn_reg_dst, self.do_roih_reg_dst])
 
     def _distill_forward(self, teacher_batched_inputs, student_batched_inputs):
         # first, get hard pseudo labels -- this is done in place
@@ -122,7 +113,6 @@ class Distiller:
 
         losses.update(self.get_rpn_losses(teacher_batched_inputs))
         losses.update(self.get_roih_losses())
-        losses.update(self.get_hint_losses())
 
         return losses
     
@@ -212,67 +202,9 @@ class Distiller:
             losses["loss_roih_l1"] = loss_roih_reg / normalizer
 
         return losses
-    
-    def get_hint_losses(self):
-        losses = {}
-        # Assumes DistillMixin has been used
-        if self.do_hint:
-            student_model = self.student.module if type(self.student) is DDP else self.student
-            # teacher_features = [self.teacher_backbone_io.output[f] for f in student_model.hint_adapter.in_features]
-            teacher_features = [self.teacher_bottom_up_io.output[f] for f in student_model.hint_adapter.in_features]
-            hint_loss = 0.0
-            for student_feat, teacher_feat in zip(self.student_hint_io.output, teacher_features):
-                hint_loss += F.mse_loss(student_feat, teacher_feat, reduction="mean")
-            losses["loss_hint_l2"] = 0.5 * hint_loss / len(teacher_features)
-        return losses
 
 
-class DistillMixin(GeneralizedRCNN):
-    """Any modifications to the torch module itself go here and are mixed in in rcnn.ALDI"""
-
-    class HintAdaptLayer(torch.nn.Module):
-        def __init__(self, hint_channels=512, hint_layer="res3"):
-            super().__init__()
-            self.hint_adapter = torch.nn.Conv2d(in_channels=hint_channels, out_channels=hint_channels, kernel_size=1)
-            # initialize to identity matrix for initial training stability
-            with torch.no_grad():
-                self.hint_adapter.weight.zero_()
-                for i in range(hint_channels):
-                    self.hint_adapter.weight[i, i, 0, 0] = 1
-                self.hint_adapter.bias.zero_()
-            self.in_features = [hint_layer,]
-
-        def forward(self, x):
-            """Handles multi-level features."""
-            in_features = [x[f] for f in self.in_features]
-            out_features = []
-            for f in in_features:
-                out_features.append(self.hint_adapter(f))
-            return out_features
-
-    @configurable
-    def __init__(self, *, do_hint=False, hint_channels=512, hint_layer="res3", **kwargs):
-        super(DistillMixin, self).__init__(**kwargs)
-        self.do_hint = do_hint
-        if do_hint:
-            self.bottom_up_io = SaveIO()
-            self.backbone.bottom_up.register_forward_hook(self.bottom_up_io)
-            self.hint_adapter = DistillMixin.HintAdaptLayer(hint_channels=hint_channels, hint_layer=hint_layer)
-
-    @classmethod
-    def from_config(cls, cfg):
-        ret = super(DistillMixin, cls).from_config(cfg)
-        ret.update({"do_hint": cfg.DOMAIN_ADAPT.DISTILL.HINT_ENABLED,
-                    "hint_channels": cfg.DOMAIN_ADAPT.DISTILL.HINT_CHANNELS,
-                    "hint_layer": cfg.DOMAIN_ADAPT.DISTILL.HINT_LAYER
-                    })
-        return ret
-
-    def forward(self, *args, **kwargs):
-        output = super().forward(*args, **kwargs)
-        if self.do_hint and self.training:
-            self.hint_adapter(self.bottom_up_io.output)
-            # don't compute losses here; but make sure parameters are seen as being used
-            # this is needed for any forward passes that don't use the hint adapter
-            output["_"] = sum([p.sum() for p in self.hint_adapter.parameters()]) * 0
-        return output
+# Any modifications to the torch module itself go here and are mixed in in rcnn.ALDI
+# See align.py for an example
+# For now, no modifications are needed
+class DistillMixin(GeneralizedRCNN): pass
