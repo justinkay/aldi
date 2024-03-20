@@ -2,8 +2,8 @@
 
 To run on your own data, you will need:
 
-1. A directory containing your images
-2. [COCO](https://docs.aws.amazon.com/rekognition/latest/customlabels-dg/md-coco-overview.html)-formatted annotations for your images
+1. A directory containing your images.
+2. [COCO](https://docs.aws.amazon.com/rekognition/latest/customlabels-dg/md-coco-overview.html)-formatted annotations for your images. Note that COCO bounding box format is `[x_min, y_min, bbox_width, bbox_height]` (this is not specified in the docs).
 
 You will need a separate COCO file for each dataset. Typically this will include:
 - Train: Labeled source-domain images for supervised burn-in and training
