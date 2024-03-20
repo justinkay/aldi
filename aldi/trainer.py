@@ -5,7 +5,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from detectron2.checkpoint.detection_checkpoint import DetectionCheckpointer
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.engine import hooks, BestCheckpointer
-from detectron2.evaluation import COCOEvaluator, DatasetEvaluators
+from detectron2.evaluation import DatasetEvaluators
 from detectron2.modeling.meta_arch.build import build_model
 from detectron2.solver import build_optimizer
 from detectron2.utils.events import get_event_storage
@@ -17,6 +17,7 @@ from aldi.checkpoint import DetectionCheckpointerWithEMA
 from aldi.distill import Distiller
 from aldi.dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from aldi.dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
+from aldi.helpers import Detectron2COCOEvaluatorAdapter
 from aldi.ema import EMA
 
 
@@ -158,7 +159,7 @@ class DATrainer(DefaultTrainer):
         """Just do COCO Evaluation."""
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
-        return DatasetEvaluators([COCOEvaluator(dataset_name, output_dir=output_folder)])
+        return DatasetEvaluators([Detectron2COCOEvaluatorAdapter(dataset_name, output_dir=output_folder)])
 
      def build_hooks(self):
           ret = super(DATrainer, self).build_hooks()

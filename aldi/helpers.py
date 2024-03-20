@@ -1,6 +1,8 @@
 import random
 import torch
 
+from detectron2.evaluation import COCOEvaluator
+
 
 class SaveIO:
     """Simple PyTorch hook to save the output of a nn.module."""
@@ -59,3 +61,19 @@ class _GradientScalarLayer(torch.autograd.Function):
 
 def grad_reverse(x):
     return _GradientScalarLayer.apply(x, -1.0)
+
+def _maybe_add_iscrowd_annotations(cocoapi) -> None:
+    for ann in cocoapi.dataset["annotations"]:
+        if "iscrowd" not in ann:
+            ann["iscrowd"] = 0
+
+class Detectron2COCOEvaluatorAdapter(COCOEvaluator):
+    """A COCOEvaluator that makes iscrowd optional."""
+    def __init__(
+        self,
+        dataset_name,
+        output_dir=None,
+        distributed=True,
+    ):
+        super().__init__(dataset_name, output_dir=output_dir, distributed=distributed)
+        _maybe_add_iscrowd_annotations(self._coco_api)
