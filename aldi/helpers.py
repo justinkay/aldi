@@ -62,13 +62,15 @@ class _GradientScalarLayer(torch.autograd.Function):
 def grad_reverse(x):
     return _GradientScalarLayer.apply(x, -1.0)
 
-def _maybe_add_iscrowd_annotations(cocoapi) -> None:
+def _maybe_add_optional_annotations(cocoapi) -> None:
     for ann in cocoapi.dataset["annotations"]:
         if "iscrowd" not in ann:
             ann["iscrowd"] = 0
+        if "area" not in ann:
+            ann["area"] = ann["bbox"][1]*ann["bbox"][2]
 
 class Detectron2COCOEvaluatorAdapter(COCOEvaluator):
-    """A COCOEvaluator that makes iscrowd optional."""
+    """A COCOEvaluator that makes iscrowd & area optional."""
     def __init__(
         self,
         dataset_name,
@@ -76,4 +78,4 @@ class Detectron2COCOEvaluatorAdapter(COCOEvaluator):
         distributed=True,
     ):
         super().__init__(dataset_name, output_dir=output_dir, distributed=distributed)
-        _maybe_add_iscrowd_annotations(self._coco_api)
+        _maybe_add_optional_annotations(self._coco_api)
