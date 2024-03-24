@@ -14,7 +14,7 @@ DOMAIN_ADAPT:
     QUALITY_LOSS_WEIGHT_ENABLED: True
   ALIGN:
     SADA_ENABLED: True
-OUTPUT_DIR: "output/cityscapes_mic_noburnin/"
+OUTPUT_DIR: "output/cityscapes_mic/"
 
 # for supercloud issues
 TEST:
