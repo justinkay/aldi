@@ -1,0 +1,6 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+DOMAIN_ADAPT:
+  ALIGN:
+    IMG_DA_ENABLED: True
+    IMG_DA_IMPL: 'at'
+OUTPUT_DIR: "output/cityscapes_at/"
