@@ -47,4 +47,4 @@ srun --nodes=1 bash -c "\
         --num-machines $SLURM_JOB_NUM_NODES \
         --num-gpus 8 \
         --dist-url tcp://$LEADER_ADDR:$LEADER_PORT \
-        --config-file $CFG ${@:2} SOLVER.IMS_PER_GPU 6 DATALOADER.NUM_WORKERS 8"
+        --config-file $CFG ${@:2} SOLVER.IMS_PER_GPU 6"
