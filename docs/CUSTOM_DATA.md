@@ -7,7 +7,7 @@ To run on your own data, you will need:
 
 You will need a separate COCO file for each dataset. Typically this will include:
 - Train: Labeled source-domain images for supervised burn-in and training
-- Unlabeled: Target-domain images for DAOD. These can be optionally labeled if you also want to use them to train a supervised "oracle" for comparison. If unlabeled, the `"annotations"` entry of your COCO file should be an empty list.
+- Unlabeled: Target-domain images for DAOD. These can be optionally labeled if you also want to use them to train a supervised "oracle" for comparison. If unlabeled, the `"annotations"` entry of your COCO file can be an empty list.
 - Test: A labeled validation set. In most DAOD papers this comes from your target domain, even though this breaks the constraints of UDA.
 
 To use your dataset with ALDI, 
