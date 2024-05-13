@@ -77,3 +77,11 @@ python tools/train_net.py --config path/to/your/aldi_config.yaml
 ```
 
 Domain adaptive training is also compatible with standard Detectron2 training options such as `--num-gpus`.
+
+### Evaluation
+
+After training, to run evaluation with your model:
+
+```
+python tools/train_net.py --eval-only --config-file path/to/your/aldi_config.yaml MODEL.WEIGHTS path/to/your/model_best.pth
+```
