@@ -47,7 +47,7 @@ class AlignMixin(GeneralizedRCNN):
         self.proposal_generator.register_forward_hook(self.rpn_io)
         self.roi_heads.register_forward_hook(self.roih_io)
 
-        if ins_da_enabled:
+        if ins_da_enabled or sada_heads is not None:
             assert hasattr(self.roi_heads, 'box_head'), "Instance alignment only implemented for ROI Heads with box_head."
             self.roi_heads.box_head.register_forward_hook(self.boxhead_io)
 
@@ -83,6 +83,7 @@ class AlignMixin(GeneralizedRCNN):
                 if self.sada_heads is not None:
                     img_targets = torch.ones(len(img_features), dtype=torch.long, device=device) * domain_label
                     proposals = [x.proposal_boxes for x in self.roih_io.output[0]] # roih_out = proposals, losses
+                    instance_features = self.boxhead_io.output
                     instance_targets = torch.ones(sum([len(b) for b in proposals]), dtype=torch.long, device=device) * domain_label
                     output.update(self.sada_heads(img_features, instance_features, instance_targets, proposals, img_targets))
                 if self.img_align:
