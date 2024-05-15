@@ -17,8 +17,12 @@ class AlignMixin(GeneralizedRCNN):
         img_da_enabled: bool = False,
         img_da_layer: str = None,
         img_da_weight: float = 0.0,
+        img_da_input_dim: int = 256,
+        img_da_hidden_dims: list = [256,],
         ins_da_enabled: bool = False,
         ins_da_weight: float = 0.0,
+        ins_da_input_dim: int = 1024,
+        ins_da_hidden_dims: list = [1024,],
         **kwargs
     ):
         super(AlignMixin, self).__init__(**kwargs)
@@ -26,8 +30,8 @@ class AlignMixin(GeneralizedRCNN):
         self.img_da_weight = img_da_weight
         self.ins_da_weight = ins_da_weight
 
-        self.img_align = ConvDiscriminator(256, hidden_dims=[256]) if img_da_enabled else None # TODO dims; same as RPN head
-        self.ins_align = FCDiscriminator(1024, hidden_dims=[1024]) if ins_da_enabled else None # TODO dims
+        self.img_align = ConvDiscriminator(img_da_input_dim, hidden_dims=img_da_hidden_dims) if img_da_enabled else None
+        self.ins_align = FCDiscriminator(ins_da_input_dim, hidden_dims=ins_da_hidden_dims) if ins_da_enabled else None 
 
         # register hooks so we can grab output of sub-modules
         self.backbone_io, self.rpn_io, self.roih_io, self.boxhead_io = SaveIO(), SaveIO(), SaveIO(), SaveIO()
@@ -46,8 +50,12 @@ class AlignMixin(GeneralizedRCNN):
         ret.update({"img_da_enabled": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_ENABLED,
                     "img_da_layer": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_LAYER,
                     "img_da_weight": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_WEIGHT,
+                    "img_da_input_dim": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_INPUT_DIM,
+                    "img_da_hidden_dims": cfg.DOMAIN_ADAPT.ALIGN.IMG_DA_HIDDEN_DIMS,
                     "ins_da_enabled": cfg.DOMAIN_ADAPT.ALIGN.INS_DA_ENABLED,
                     "ins_da_weight": cfg.DOMAIN_ADAPT.ALIGN.INS_DA_WEIGHT,
+                    "ins_da_input_dim": cfg.DOMAIN_ADAPT.ALIGN.INS_DA_INPUT_DIM,
+                    "ins_da_hidden_dims": cfg.DOMAIN_ADAPT.ALIGN.INS_DA_HIDDEN_DIMS,
                     })
 
         return ret
