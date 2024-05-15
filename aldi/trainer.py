@@ -1,12 +1,12 @@
 import os
 import copy
+import logging
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 from detectron2.checkpoint.detection_checkpoint import DetectionCheckpointer
 from detectron2.data.build import build_detection_train_loader, get_detection_dataset_dicts
 from detectron2.engine import hooks, BestCheckpointer
 from detectron2.evaluation import DatasetEvaluators
-from detectron2.modeling.meta_arch.build import build_model
 from detectron2.solver import build_optimizer
 from detectron2.utils.events import get_event_storage
 from detectron2.utils import comm
@@ -17,12 +17,13 @@ from aldi.checkpoint import DetectionCheckpointerWithEMA
 from aldi.distill import Distiller
 from aldi.dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from aldi.dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
-from aldi.helpers import Detectron2COCOEvaluatorAdapter
 from aldi.ema import EMA
-
+from aldi.helpers import Detectron2COCOEvaluatorAdapter
+from aldi.model import build_aldi
 
 DEBUG = False
 debug_dict = {}
+
 
 def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong):
      """
@@ -118,7 +119,7 @@ def run_model_labeled_unlabeled(trainer, labeled_weak, labeled_strong, unlabeled
 
 # Extend both Detectron2's AMPTrainer and SimpleTrainer classes with DA capabilities
 # Used by DATrainer below in the same way DefaultTrainer uses the original AMP and Simple Trainers
-class _DATrainer:
+class _ALDITrainer:
      def __init__(self, model, data_loader, optimizer, distiller, backward_at_end=True, model_batch_size=None):
           super().__init__(model, data_loader, optimizer, zero_grad_before_forward=not backward_at_end)
           self.distiller = distiller
@@ -133,26 +134,34 @@ class _DATrainer:
         Can be overridden by setting override=True to always call superclass method."""
         if self.backward_at_end or override:
              super().do_backward(losses)
-class DAAMPTrainer(_DATrainer, AMPTrainer): pass
-class DASimpleTrainer(_DATrainer, SimpleTrainer): pass
+class ALDIAMPTrainer(_ALDITrainer, AMPTrainer): pass
+class ALDISimpleTrainer(_ALDITrainer, SimpleTrainer): pass
 
-class DATrainer(DefaultTrainer):
+class ALDITrainer(DefaultTrainer):
      """Modified DefaultTrainer to support Mean Teacher style training."""
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
-          self.ema = EMA(build_model(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
+          self.ema = EMA(build_aldi(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
           distiller = Distiller.from_config(teacher=self.ema.model if cfg.EMA.ENABLED else model, student=model, cfg=cfg)
-          trainer = (DAAMPTrainer if cfg.SOLVER.AMP.ENABLED else DASimpleTrainer)(model, data_loader, optimizer, distiller,
+          trainer = (ALDIAMPTrainer if cfg.SOLVER.AMP.ENABLED else ALDISimpleTrainer)(model, data_loader, optimizer, distiller,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
           return trainer
      
      def _create_checkpointer(self, model, cfg):
-          checkpointer = super(DATrainer, self)._create_checkpointer(model, cfg, 
+          checkpointer = super(ALDITrainer, self)._create_checkpointer(model, cfg, 
                          ckpt_cls=DetectionCheckpointerWithEMA if cfg. EMA.LOAD_FROM_EMA_ON_START else DetectionCheckpointer)
           if cfg.EMA.ENABLED:
                checkpointer.add_checkpointable("ema", self.ema)
           return checkpointer
+
+     @classmethod
+     def build_model(cls, cfg):
+          model = build_aldi(cfg)
+          logger = logging.getLogger(__name__)
+          logger.info("Model:\n{}".format(model))
+          print(model) # TODO: Not sure why logging not working
+          return model
 
      @classmethod
      def build_evaluator(cls, cfg, dataset_name, output_folder=None):
@@ -162,7 +171,7 @@ class DATrainer(DefaultTrainer):
         return DatasetEvaluators([Detectron2COCOEvaluatorAdapter(dataset_name, output_dir=output_folder)])
 
      def build_hooks(self):
-          ret = super(DATrainer, self).build_hooks()
+          ret = super(ALDITrainer, self).build_hooks()
 
           # add hooks to evaluate/save teacher model if applicable
           if self.cfg.EMA.ENABLED:
@@ -184,7 +193,6 @@ class DATrainer(DefaultTrainer):
                     for test_set in self.cfg.DATASETS.TEST:
                          ret.insert(-1, BestCheckpointer(self.cfg.TEST.EVAL_PERIOD, self.checkpointer,
                                                     f"{test_set}/bbox/AP50", "max", file_prefix=f"{test_set}_model_best"))
-
           return ret
      
      @classmethod
@@ -193,7 +201,7 @@ class DATrainer(DefaultTrainer):
           - Enable use of alternative optimizers (e.g. AdamW for ViTDet)
           """
           if cfg.SOLVER.OPTIMIZER.upper() == "SGD":
-               return super(DATrainer, cls).build_optimizer(cfg, model)
+               return super(ALDITrainer, cls).build_optimizer(cfg, model)
           elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW" and cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone":
                return get_adamw_optim(model, include_vit_lr_decay=True)
           else:
@@ -233,7 +241,7 @@ class DATrainer(DefaultTrainer):
      
      def before_step(self):
           """Update the EMA model every step."""
-          super(DATrainer, self).before_step()
+          super(ALDITrainer, self).before_step()
           if self.cfg.EMA.ENABLED:
                self.ema.update_weights(self._trainer.model, self.iter)
                

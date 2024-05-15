@@ -13,6 +13,7 @@ from fvcore.nn import smooth_l1_loss
 from aldi.helpers import SaveIO, ManualSeed, ReplaceProposalsOnce, set_attributes
 from aldi.pseudolabeler import PseudoLabeler
 
+
 class Distiller:
 
     def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, do_hard_roi_reg=False,

@@ -4,7 +4,7 @@
 from detectron2.config import CfgNode as CN
 
 
-def add_da_config(cfg):
+def add_aldi_config(cfg):
     _C = cfg
 
     # Datasets and sampling

@@ -7,6 +7,7 @@ from detectron2.structures import Instances, Boxes
 from aldi.aug import WEAK_IMG_KEY
 from aldi.dropin import DatasetMapper
 
+
 class SaveWeakDatasetMapper(DatasetMapper):
     """
     DatasetMapper that retrieves the weakly augmented image from the aug_input object

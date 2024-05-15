@@ -2,7 +2,7 @@ import argparse
 import os
 from urllib.request import urlretrieve
 
-from aldi.config import add_da_config
+from aldi.config import add_aldi_config
 
 
 PTH_URL = 'https://github.com/justinkay/aldi/releases/download/v0.0.1/'
@@ -28,7 +28,7 @@ For python-based LazyConfig, use "path.key=value".
 
 def main(args):
     cfg = get_cfg()
-    add_da_config(cfg)
+    add_aldi_config(cfg)
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
 
