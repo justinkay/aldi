@@ -17,6 +17,8 @@ from aldi.trainer import DATrainer
 import aldi.datasets # register datasets with Detectron2
 import aldi.rcnn # register ALDI R-CNN model with Detectron2
 import aldi.backbone # register ViT FPN backbone with Detectron2
+from aldi.checkpoint import DetectionCheckpointerWithEMA
+from aldi.ema import EMA
 
 def setup(args):
     """
@@ -43,9 +45,13 @@ def main(args):
 
     if args.eval_only:
         model = DATrainer.build_model(cfg)
-        DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
-            cfg.MODEL.WEIGHTS, resume=args.resume
-        )
+        ## Change here
+        ckpt = DetectionCheckpointerWithEMA(model, save_dir=cfg.OUTPUT_DIR)
+        if cfg.EMA.ENABLED and cfg.EMA.LOAD_FROM_EMA_ON_START:
+            ema = EMA(DATrainer.build_model(cfg), cfg.EMA.ALPHA)
+            ckpt.add_checkpointable("ema", ema)
+        ckpt.resume_or_load(cfg.MODEL.WEIGHTS, resume=args.resume)
+        ## End change
         res = DATrainer.test(cfg, model)
         if cfg.TEST.AUG.ENABLED:
             raise NotImplementedError("TTA not supported")

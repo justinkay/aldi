@@ -27,7 +27,8 @@ def add_da_config(cfg):
     _C.EMA.ENABLED = False
     _C.EMA.ALPHA = 0.9996
      # when loading a model at the start of training (i.e. not resuming mid-training run),
-     # if MODEL.WEIGHTS contains both ["model", "ema"], initialize with the EMA weights
+     # if MODEL.WEIGHTS contains both ["model", "ema"], initialize with the EMA weights.
+     # also determines if EMA is used for eval when running tools/train_net.py --eval-only.
     _C.EMA.LOAD_FROM_EMA_ON_START = True
 
     # Begin domain adaptation settings
