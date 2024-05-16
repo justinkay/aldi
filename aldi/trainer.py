@@ -14,7 +14,7 @@ from detectron2.utils import comm
 from aldi.aug import WEAK_IMG_KEY, get_augs
 from aldi.backbone import get_adamw_optim
 from aldi.checkpoint import DetectionCheckpointerWithEMA
-from aldi.distill import Distiller
+from aldi.distill import build_distiller
 from aldi.dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
 from aldi.dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from aldi.ema import EMA
@@ -142,7 +142,7 @@ class ALDITrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
           self.ema = EMA(build_aldi(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
-          distiller = Distiller.from_config(teacher=self.ema.model if cfg.EMA.ENABLED else model, student=model, cfg=cfg)
+          distiller = build_distiller(teacher=self.ema.model if cfg.EMA.ENABLED else model, student=model, cfg=cfg)
           trainer = (ALDIAMPTrainer if cfg.SOLVER.AMP.ENABLED else ALDISimpleTrainer)(model, data_loader, optimizer, distiller,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)

@@ -3,7 +3,6 @@ from typing import Dict, List
 
 from detectron2.config import configurable
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
-from detectron2.layers import cat, cross_entropy
 from detectron2.utils.logger import _log_api_usage
 
 from aldi.align import AlignMixin
