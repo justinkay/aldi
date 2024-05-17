@@ -21,7 +21,13 @@ ALDI is built on top of the [Detectron2](https://github.com/facebookresearch/det
 <details open>
 <summary><h3>Install</h3></summary>
 
-Pip install the `aldi` package including all [requirements]() in a **Python>=3.8** environment with [**PyTorch>=1.13**](https://pytorch.org/get-started/locally/).
+**Install PyTorch and torchvision:** Use the [official installation guide](https://pytorch.org/get-started/locally/) to ensure you have the right versions for your CUDA version.
+
+**Install Detectron2:** We have prebuilt some wheels for a recent version of Detectron2 ("v0.7ish") [here](https://github.com/justinkay/detectron2_v07ish/releases/tag/detectron2-0.7).
+
+TODO
+
+Pip install the `aldi` package including all [requirements]() in a **Python>=3.8** environment with [**PyTorch>=1.13**].
 
 ```bash
 pip install aldi
