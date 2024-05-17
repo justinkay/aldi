@@ -21,21 +21,28 @@ ALDI is built on top of the [Detectron2](https://github.com/facebookresearch/det
 <details open>
 <summary><h3>Install</h3></summary>
 
+For CUDA 12.1, PyTorch 2.2.2 and torchvision 0.17.2:
+
+```bash
+pip install aldi
+```
+
+<details closed>
+<summary>Other PyTorch/CUDA versions</summary>
+
+<br>
+
 **Install PyTorch and torchvision:** Use the [official installation guide](https://pytorch.org/get-started/locally/) to ensure you have the right versions for your CUDA version.
 
 **Install Detectron2:** We have prebuilt some wheels for a recent version of Detectron2 ("v0.7ish") [here](https://github.com/justinkay/detectron2_v07ish/releases/tag/detectron2-0.7).
 
 TODO
 
-Pip install the `aldi` package including all [requirements]() in a **Python>=3.8** environment with [**PyTorch>=1.13**].
-
-```bash
-pip install aldi
-```
-
 To instead install from source see these [instructions](docs/INSTALL.md).
+
 </details>
 
+</details>
 
 <details open>
 <summary><h3>Data setup</h3></summary>
@@ -57,6 +64,7 @@ There are three kinds of datasets in domain adaptive object detection. You will 
 Note that by default Detectron2 assumes all paths are relative to `./datasets` relative to your current working directory. You can change this location if desired using the `DETECTRON2_DATASETS` environment variable, e.g.: `export DETECTRON2_DATASETS=/path/to/datasets`.
 
 <details closed>
+ <br>
  <summary><b>Set up DAOD benchmarks (Cityscapes, Sim10k, CFC)</b></summary>
  
 Follow [these instructions](docs/DATASETS.md) to set up data and reproduce benchmark results on the datasets in [our paper](https://arxiv.org/abs/2403.12029): Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
