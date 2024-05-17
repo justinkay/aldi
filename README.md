@@ -16,12 +16,12 @@ Official codebase for [Align and Distill: Unifying and Improving Domain Adaptive
 
 Align and Distill (ALDI) is a framework for domain adaptive object detection that is state-of-the-art, fast to train, and easy to extend. 
 
-ALDI is built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library and follows the same design patterns where possible. In particular, training settings are managed by [config files](configs), datasets are managed by a [dataset registry](aldi/datasets.py), training is handled by a custom [`Trainer`]() class that extends [`DefaultTrainer`](), and we provide a training script in [tools/train_net.py](tools/train_net.py) that comes with [all the same functionality](https://detectron2.readthedocs.io/en/latest/tutorials/getting_started.html) as the Detectron2 script by the same name.
+ALDI is built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library and follows the same design patterns where possible. In particular, training settings are managed by [config files](configs), datasets are managed by a [dataset registry](aldi/datasets.py), training is handled by a custom [`Trainer`](aldi/trainer.py) class that extends [`DefaultTrainer`](https://github.com/facebookresearch/detectron2/blob/0ae803b1449cd2d3f8fa1b7c0f59356db10b3083/detectron2/engine/defaults.py#L323), and we provide a training script in [tools/train_net.py](tools/train_net.py) that comes with [all the same functionality](https://detectron2.readthedocs.io/en/latest/tutorials/getting_started.html) as the [Detectron2 script](https://github.com/facebookresearch/detectron2/blob/main/tools/train_net.py) by the same name.
 
 <details open>
 <summary><h3>Install</h3></summary>
 
-Pip install the `aldi` package including all [requirements]() in a **Python>=3.8** environment with [**PyTorch>=1.8**](https://pytorch.org/get-started/locally/).
+Pip install the `aldi` package including all [requirements]() in a **Python>=3.8** environment with [**PyTorch>=1.13**](https://pytorch.org/get-started/locally/).
 
 ```bash
 pip install aldi
@@ -42,15 +42,20 @@ from detectron2.data.datasets import register_coco_instances
 register_coco_instances("your_dataset_name", {}, "path/to/your_coco_labels.json", "path/to/your/images/")
 ```
 
-Because ALDI is designed for unsupervised domain adaptation, you will likely register multiple "datasets":
+There are three kinds of datasets in domain adaptive object detection. You will register each separately:
 
-- Train: Labeled source-domain images for supervised burn-in and training
-- Unlabeled: Target-domain images for DAOD. These can be optionally labeled if you also want to use them to train a supervised "oracle" for comparison. If unlabeled, the `"annotations"` entry of your COCO file can be an empty list.
-- Test: A labeled validation set. In most DAOD papers this comes from your target domain, even though this breaks the constraints of UDA.
+| Train (source) | Unlabeled (target) | Test (source or target) |
+| -------- | -------- | -------- |
+| Labeled source-domain images. Used for source-only baseline training, supervised burn-in, and domain-adaptive training. | Target-domain images that are optionally labeled. If unlabeled, used for domain-adaptive training only. If labeled, can be used to train "oracle" methods (see [paper](https://arxiv.org/abs/2403.12029)). Labels, if provided, will be ignored during domain-adaptive training. | A labeled source- or target-domain validation set. In most DAOD papers this comes from the target domain, even though this breaks the constraints of unsupervised domain adaptation. |
 
 Note that by default Detectron2 assumes all paths are relative to `./datasets` relative to your current working directory. You can change this location if desired using the `DETECTRON2_DATASETS` environment variable, e.g.: `export DETECTRON2_DATASETS=/path/to/datasets`.
 
-**DAOD benchmarks:** Follow [these instructions](docs/DATASETS.md) to set up data and reproduce benchmark results on the datasets in [our paper](https://arxiv.org/abs/2403.12029): Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
+<details closed>
+ <summary><b>Set up DAOD benchmarks (Cityscapes, Sim10k, CFC)</b></summary>
+ 
+Follow [these instructions](docs/DATASETS.md) to set up data and reproduce benchmark results on the datasets in [our paper](https://arxiv.org/abs/2403.12029): Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
+
+</details>
 
 </details>
 
