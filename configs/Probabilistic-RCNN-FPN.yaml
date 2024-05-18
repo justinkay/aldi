@@ -1,0 +1,14 @@
+_BASE_: "./Base-RCNN-FPN.yaml"
+MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
+  ANCHOR_GENERATOR:
+    NAME: "DifferentiableAnchorGenerator"
+  PROPOSAL_GENERATOR:
+    NAME: "GaussianRPN"
+  RPN:
+    HEAD_NAME: "GaussianRPNHead"
+    # POSITIVE_FRACTION: 0.25 # 0.25 is used in PT repo
+  ROI_HEADS:
+    NAME: "GaussianROIHead"
+GRCNN:
+  LEARN_ANCHORS_LABELED: True

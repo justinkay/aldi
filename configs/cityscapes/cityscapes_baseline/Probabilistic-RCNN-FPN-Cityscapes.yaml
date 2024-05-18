@@ -1,0 +1,8 @@
+_BASE_: "../../Probabilistic-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 8
+DATASETS:
+  TRAIN: ("cityscapes_train",)
+  TEST: ("cityscapes_val", "cityscapes_foggy_val",)
+OUTPUT_DIR: "output/cityscapes_probabilistic_baseline/"
