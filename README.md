@@ -1,6 +1,8 @@
-# Align and Distill (ALDI): Unifying and Improving Domain Adaptive Object Detection
+# <div align="center"> Align and Distill: Unifying and Improving <br>Domain Adaptive Object Detection</div>
 
-This is the official codebase for [Align and Distill: Unifying and Improving Domain Adaptive Object Detection](https://arxiv.org/abs/2403.12029).
+<div align="center">
+ 
+Official codebase for [Align and Distill: Unifying and Improving Domain Adaptive Object Detection](https://arxiv.org/abs/2403.12029).
 
 \[[Project Page](https://aldi-daod.github.io/)\] \[[Arxiv](https://arxiv.org/abs/2403.12029)\] \[[PDF](https://arxiv.org/pdf/2403.12029.pdf)\] 
 
@@ -8,39 +10,121 @@ This is the official codebase for [Align and Distill: Unifying and Improving Dom
 
 ![](docs/aldi_banner_4.png)
 
-Align and Distill (ALDI) is a state-of-the-art framework for domain adaptive object detection (DAOD), built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library. ALDI is:
+</div>
 
-**Accurate:** ALDI's default settings achieve <ins>state-of-the-art results</ins> on DAOD benchmarks including Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
+## Documentation
 
-**Fast to train:** Thanks to efficient dataloading and optimized burn-in settings, ALDI <ins>trains upwards of 20x faster</ins> than other DAOD methods.
+Align and Distill (ALDI) is a state-of-the-art framework for domain adaptive object detection. 
+
+ALDI is built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library and follows the same design patterns where possible. In particular, training settings are managed by [config files](configs), datasets are managed by a [dataset registry](aldi/datasets.py), training is handled by a custom [`Trainer`](aldi/trainer.py) class that extends [`DefaultTrainer`](https://github.com/facebookresearch/detectron2/blob/0ae803b1449cd2d3f8fa1b7c0f59356db10b3083/detectron2/engine/defaults.py#L323), and we provide a training script in [tools/train_net.py](tools/train_net.py) that comes with [all the same functionality](https://detectron2.readthedocs.io/en/latest/tutorials/getting_started.html) as the [Detectron2 script](https://github.com/facebookresearch/detectron2/blob/main/tools/train_net.py) by the same name.
+
+<details open>
+<summary><h3>Install</h3></summary>
+
+**1. Install PyTorch and torchvision.** Follow the [official install guide](https://pytorch.org/get-started/locally/) to install the correct versions for your CUDA version.
+
+**2. Install ALDI.** Clone this repository and run:
+
+```bash
+pip install -e .
+```
+
+Optionally include the `--no-cache-dir` flag if you run into OOM issues.
+
+</details>
+
+<details open>
+<summary><h3>Data setup</h3></summary>
+
+There are three kinds of "datasets" in domain adaptive object detection:
+
+| Train (source) | Unlabeled (target) | Test (source or target) |
+| -------- | -------- | -------- |
+| Labeled source-domain images. Used for source-only baseline training, supervised burn-in, and domain-adaptive training. | Target-domain images that are optionally labeled. If unlabeled, used for domain-adaptive training only. If labeled, can be used to train "oracle" methods (see [paper](https://arxiv.org/abs/2403.12029)). Labels, if provided, will be ignored during domain-adaptive training. | A labeled source- or target-domain validation set. In most DAOD papers this comes from the target domain, even though this breaks the constraints of unsupervised domain adaptation. |
+
+<details open>
+
+ <summary><b>Custom data</b></summary>
+
+The easiest way to use your own dataset is to create a [COCO-formatted JSON files](https://docs.aws.amazon.com/rekognition/latest/customlabels-dg/md-coco-overview.html) and [register your datasets with Detectron2](https://detectron2.readthedocs.io/en/latest/tutorials/datasets.html#register-a-coco-format-dataset). You will register each separately:
+
+```python
+# add this to the top of tools/train_net.py (or aldi/datasets.py if you installed from source)
+from detectron2.data.datasets import register_coco_instances
+register_coco_instances("your_train_dataset_name", {}, "path/to/your_train_coco_labels.json", "path/to/your/train/images/")
+register_coco_instances("your_unlabeled_dataset_name", {}, "path/to/your_unlabeled_coco_labels.json", "path/to/your/unlabeled/images/")
+register_coco_instances("your_test_dataset_name", {}, "path/to/your_test_coco_labels.json", "path/to/your/test/images/")
+```
+
+Note that by default Detectron2 assumes all paths are relative to `./datasets` relative to your current working directory. You can change this location if desired using the `DETECTRON2_DATASETS` environment variable, e.g.: `export DETECTRON2_DATASETS=/path/to/datasets`.
+
+<details closed>
+ <br>
+ <summary><b>Set up DAOD benchmarks (Cityscapes, Sim10k, CFC)</b></summary>
  
-**Easy to use:** Training DAOD models on your own data requires just a couple steps; see [setting up your own data](docs/CUSTOM_DATA.md) and [training ALDI](docs/TRAINING.md).
+Follow [these instructions](docs/DATASETS.md) to set up data and reproduce benchmark results on the datasets in [our paper](https://arxiv.org/abs/2403.12029): Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
 
-**Extensible:** The framework is lightweight, reusing default components from Detectron2 wherever possible. See [code documentation](docs/CODEBASE.md) for an overview of the code structure and design decisions.
+</details>
 
-## Installation
+</details>
 
-See [installation instructions](docs/INSTALL.md).
+
+<details open>
+<summary><h3>Training</h3></summary>
+
+See our [detailed training instructions](docs/TRAINING.md). The TL;DR is:
+ 
+**Config setup**
+
+Training is managed through [config files](configs/). We provide example configs for burn-in/baseline models, oracle models, and ALDI++.
+
+You will need to modify (at least) the following values for any custom data:
+
+```
+DATASETS:
+  TRAIN: ("your_training_dataset_name",) # needs to be a tuple, and can contain multiple datasets if you want
+  UNLABELED: ("your_unlabeled_dataset_name",) # needs to be a tuple, and can contain multiple datasets if you want
+  TEST: ("your_test_dataset_name",)  # needs to be a tuple, and can contain multiple datasets if you want
+```
+
+```
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 9 # change to match your number of classes
+```
+
+**Run training**
+
+ALDI involves two training phases: (1) burn-in, (2) domain adaptation. Again, please reference the [detailed training instructions](docs/TRAINING.md). Training involves running [tools/train_net.py](../tools/train_net.py) for each training phase:
+
+```
+python tools/train_net.py --config path/to/your/config.yaml
+```
+
+The script is compatible with all [Detectron2 training options]((https://detectron2.readthedocs.io/en/latest/tutorials/getting_started.html#training-evaluation-in-command-line)) (`--num-gpus`, in-line config modifications, etc.).
+
+<details open>
+<summary><h3>Evaluation</h3></summary>
+
+After training, to run evaluation with your model:
+
+```
+python tools/train_net.py --eval-only --config-file path/to/your/aldi_config.yaml MODEL.WEIGHTS path/to/your/model_best.pth
+```
+
+We welcome any PRs to add `DefaultPredictor` inference functionality!
+
+</details>
 
 ## Model zoo
 
 We provide burn-in checkpoints and final models for DAOD benchmarks (Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel) in [the model zoo](docs/MODELS.md).
 
-For compatibility with existing config files, download models to the `models/` directory in this repo.
+You can download the required model weights for any config file we provide using 
 
-You can download the required model weights for any config file we provide using `python tools/download_model_for_config.py --config-file path/to/config.yaml`
-
-## Benchmark dataset setup
-
-Follow [these instructions](docs/DATASETS.md) to set up data and reproduce benchmark results on Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel.
-
-## <a id="own-data"></a>Using your own data 
-
-To use ALDI on your own data, see [instructions for custom datasets](docs/CUSTOM_DATA.md).
-
-## Training ALDI
-
-See [training instructions](docs/TRAINING.md).
+```bash
+python tools/download_model_for_config.py --config-file path/to/config.yaml
+```
 
 ## Extras
 

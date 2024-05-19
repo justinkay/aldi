@@ -22,7 +22,7 @@ You will need a custom Detectron2 configuration file for every training run. We 
 - Stronger augmentations
 - Exponential moving average (EMA)
 
-We have found these settings to both increase overall performance (in terms of mAP) as well as reduce training time during the domain adaptation step. See our [paper]() for more details.
+We have found these settings to both increase overall performance (in terms of mAP) as well as reduce training time during the domain adaptation step. See our [paper](https://arxiv.org/abs/2403.12029) for more details.
 
 **Modifications you must make** To use with your dataset, make a copy of [configs/cityscapes/Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml](../configs/cityscapes/Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml) and change the following values:
 

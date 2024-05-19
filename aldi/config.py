@@ -4,7 +4,7 @@
 from detectron2.config import CfgNode as CN
 
 
-def add_da_config(cfg):
+def add_aldi_config(cfg):
     _C = cfg
 
     # Datasets and sampling
@@ -48,6 +48,7 @@ def add_da_config(cfg):
 
     # Self-distillation
     _C.DOMAIN_ADAPT.DISTILL = CN()
+    _C.DOMAIN_ADAPT.DISTILL.DISTILLER_NAME = "ALDIDistiller"
     # 'Pseudo label' approaches
     _C.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED = False
     _C.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED = False

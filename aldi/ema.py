@@ -1,5 +1,5 @@
+import copy
 from collections import OrderedDict
-import copy 
 from torch import nn
 
 import detectron2.utils.comm as comm

@@ -8,12 +8,55 @@ from detectron2.layers import cat
 from detectron2.layers.wrappers import cross_entropy
 from detectron2.modeling.sampling import subsample_labels
 from detectron2.modeling.box_regression import _dense_box_regression_loss
+from detectron2.utils.registry import Registry
 from fvcore.nn import smooth_l1_loss
 
 from aldi.helpers import SaveIO, ManualSeed, ReplaceProposalsOnce, set_attributes
 from aldi.pseudolabeler import PseudoLabeler
 
+DISTILLER_REGISTRY = Registry("DISTILLER")
+DISTILLER_REGISTRY.__doc__ = """
+Registry for Distillers, which calculate distillation losses between a student and a teacher.
+
+The registered object will be constructed with 
+    `obj(teacher: nn.Module, student: nn.Module, cfg)`.
+
+A Distiller is expected to implement: 
+
+    __call__(self, teacher_batched_inputs, student_batched_inputs)
+        outputs: a dict {"loss_name": loss_value, ...}
+
+    distill_enabled(self):
+        outputs: boolean, whether any distillation loss will be calculated
+"""
+
+
+def build_distiller(teacher, student, cfg):
+    name = cfg.DOMAIN_ADAPT.DISTILL.DISTILLER_NAME
+    return DISTILLER_REGISTRY.get(name)(teacher, student, cfg)
+
+
+@DISTILLER_REGISTRY.register()
 class Distiller:
+    """This Distiller does nothing."""
+    def __init__(self, teacher, student):
+        pass
+
+    @classmethod
+    def from_config(cls, teacher, student, cfg):
+        return Distiller(teacher, student)
+
+    def __call__(self, teacher_batched_inputs, student_batched_inputs):
+        return {}
+    
+    def distill_enabled(self):
+        return False
+    
+
+@DISTILLER_REGISTRY.register()
+class ALDIDistiller(Distiller):
+    """Compute hard or soft distillation (based on config values) for Faster R-CNN based students/teachers.
+    """
 
     def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, do_hard_roi_reg=False,
                  do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roih_reg_dst=False,
@@ -24,7 +67,7 @@ class Distiller:
 
     @classmethod
     def from_config(cls, teacher, student, cfg):
-        return Distiller(teacher, student,
+        return ALDIDistiller(teacher, student,
                         do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
                         do_hard_obj=cfg.DOMAIN_ADAPT.DISTILL.HARD_OBJ_ENABLED,
                         do_hard_rpn_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_RPN_REG_ENABLED,

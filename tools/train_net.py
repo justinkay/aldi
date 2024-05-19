@@ -12,13 +12,14 @@ from detectron2.data import MetadataCatalog
 from detectron2.engine import default_argument_parser, default_setup, launch
 from detectron2.evaluation import verify_results
 
-from aldi.config import add_da_config
-from aldi.trainer import DATrainer
-import aldi.datasets # register datasets with Detectron2
-import aldi.rcnn # register ALDI R-CNN model with Detectron2
-import aldi.backbone # register ViT FPN backbone with Detectron2
 from aldi.checkpoint import DetectionCheckpointerWithEMA
+from aldi.config import add_aldi_config
 from aldi.ema import EMA
+from aldi.trainer import ALDITrainer
+import aldi.datasets # register datasets with Detectron2
+import aldi.model # register ALDI R-CNN model with Detectron2
+import aldi.backbone # register ViT FPN backbone with Detectron2
+
 
 def setup(args):
     """
@@ -27,7 +28,7 @@ def setup(args):
     cfg = get_cfg()
 
     ## Change here
-    add_da_config(cfg)
+    add_aldi_config(cfg)
     ## End change
 
     cfg.merge_from_file(args.config_file)
@@ -44,22 +45,22 @@ def main(args):
     cfg = setup(args)
 
     if args.eval_only:
-        model = DATrainer.build_model(cfg)
+        model = ALDITrainer.build_model(cfg)
         ## Change here
         ckpt = DetectionCheckpointerWithEMA(model, save_dir=cfg.OUTPUT_DIR)
         if cfg.EMA.ENABLED and cfg.EMA.LOAD_FROM_EMA_ON_START:
-            ema = EMA(DATrainer.build_model(cfg), cfg.EMA.ALPHA)
+            ema = EMA(ALDITrainer.build_model(cfg), cfg.EMA.ALPHA)
             ckpt.add_checkpointable("ema", ema)
         ckpt.resume_or_load(cfg.MODEL.WEIGHTS, resume=args.resume)
         ## End change
-        res = DATrainer.test(cfg, model)
+        res = ALDITrainer.test(cfg, model)
         if cfg.TEST.AUG.ENABLED:
             raise NotImplementedError("TTA not supported")
         if comm.is_main_process():
             verify_results(cfg, res)
         return res
 
-    trainer = DATrainer(cfg)
+    trainer = ALDITrainer(cfg)
     trainer.resume_or_load(resume=args.resume)
     return trainer.train()
 
