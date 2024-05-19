@@ -36,19 +36,25 @@ Optionally include the `--no-cache-dir` flag if you run into OOM issues.
 <details open>
 <summary><h3>Data setup</h3></summary>
 
-**Custom data:** The easiest way to use your own dataset is to create a [COCO-formatted JSON file](https://docs.aws.amazon.com/rekognition/latest/customlabels-dg/md-coco-overview.html) and [register your dataset with Detectron2](https://detectron2.readthedocs.io/en/latest/tutorials/datasets.html#register-a-coco-format-dataset):
-
-```python
-# add this to the top of tools/train_net.py (or aldi/datasets.py if you installed from source)
-from detectron2.data.datasets import register_coco_instances
-register_coco_instances("your_dataset_name", {}, "path/to/your_coco_labels.json", "path/to/your/images/")
-```
-
-There are three kinds of datasets in domain adaptive object detection. You will register each separately:
+There are three kinds of "datasets" in domain adaptive object detection:
 
 | Train (source) | Unlabeled (target) | Test (source or target) |
 | -------- | -------- | -------- |
 | Labeled source-domain images. Used for source-only baseline training, supervised burn-in, and domain-adaptive training. | Target-domain images that are optionally labeled. If unlabeled, used for domain-adaptive training only. If labeled, can be used to train "oracle" methods (see [paper](https://arxiv.org/abs/2403.12029)). Labels, if provided, will be ignored during domain-adaptive training. | A labeled source- or target-domain validation set. In most DAOD papers this comes from the target domain, even though this breaks the constraints of unsupervised domain adaptation. |
+
+<details open>
+
+ <summary><b>Custom data</b></summary>
+
+The easiest way to use your own dataset is to create a [COCO-formatted JSON files](https://docs.aws.amazon.com/rekognition/latest/customlabels-dg/md-coco-overview.html) and [register your datasets with Detectron2](https://detectron2.readthedocs.io/en/latest/tutorials/datasets.html#register-a-coco-format-dataset). You will register each separately:
+
+```python
+# add this to the top of tools/train_net.py (or aldi/datasets.py if you installed from source)
+from detectron2.data.datasets import register_coco_instances
+register_coco_instances("your_train_dataset_name", {}, "path/to/your_train_coco_labels.json", "path/to/your/train/images/")
+register_coco_instances("your_unlabeled_dataset_name", {}, "path/to/your_unlabeled_coco_labels.json", "path/to/your/unlabeled/images/")
+register_coco_instances("your_test_dataset_name", {}, "path/to/your_test_coco_labels.json", "path/to/your/test/images/")
+```
 
 Note that by default Detectron2 assumes all paths are relative to `./datasets` relative to your current working directory. You can change this location if desired using the `DETECTRON2_DATASETS` environment variable, e.g.: `export DETECTRON2_DATASETS=/path/to/datasets`.
 
@@ -64,11 +70,15 @@ Follow [these instructions](docs/DATASETS.md) to set up data and reproduce bench
 
 
 <details open>
-<summary><h3>Config setup</h3></summary>
+<summary><h3>Training</h3></summary>
+
+See our [detailed training instructions](docs/TRAINING.md). The TL;DR is:
+ 
+**Config setup**
 
 Training is managed through [config files](configs/). We provide example configs for burn-in/baseline models, oracle models, and ALDI++.
 
-TODO
+You will need to modify (at least) the following values for any custom data:
 
 ```
 DATASETS:
@@ -83,20 +93,26 @@ MODEL:
     NUM_CLASSES: 9 # change to match your number of classes
 ```
 
-</details>
+**Run training**
 
-<details open>
-<summary><h3>Training</h3></summary>
+ALDI involves two training phases: (1) burn-in, (2) domain adaptation. Again, please reference the [detailed training instructions](docs/TRAINING.md). Training involves running [tools/train_net.py](../tools/train_net.py) for each training phase:
 
-TODO
+```
+python tools/train_net.py --config path/to/your/config.yaml
+```
 
-</details>
-
+The script is compatible with all [Detectron2 training options]((https://detectron2.readthedocs.io/en/latest/tutorials/getting_started.html#training-evaluation-in-command-line)) (`--num-gpus`, in-line config modifications, etc.).
 
 <details open>
 <summary><h3>Evaluation</h3></summary>
 
-TODO
+After training, to run evaluation with your model:
+
+```
+python tools/train_net.py --eval-only --config-file path/to/your/aldi_config.yaml MODEL.WEIGHTS path/to/your/model_best.pth
+```
+
+We welcome any PRs to add `DefaultPredictor` inference functionality!
 
 </details>
 
@@ -104,9 +120,11 @@ TODO
 
 We provide burn-in checkpoints and final models for DAOD benchmarks (Cityscapes &rarr; Foggy Cityscapes, Sim10k &rarr; Cityscapes, and CFC Kenai &rarr; Channel) in [the model zoo](docs/MODELS.md).
 
-For compatibility with existing config files, download models to the `models/` directory in this repo.
+You can download the required model weights for any config file we provide using 
 
-You can download the required model weights for any config file we provide using `python tools/download_model_for_config.py --config-file path/to/config.yaml`
+```bash
+python tools/download_model_for_config.py --config-file path/to/config.yaml
+```
 
 ## Extras
 
