@@ -1,0 +1,5 @@
+_BASE_: "../cityscapes_startingpoint/DA-RCNN-FPN-Cityscapes_strongaugemastart.yaml"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_weak", "unlabeled_strong")
+  BATCH_RATIOS: (2,1)
+OUTPUT_DIR: "output/cityscapes_sourceweak_onethirdtarget/"
