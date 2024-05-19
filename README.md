@@ -49,7 +49,7 @@ There are three kinds of "datasets" in domain adaptive object detection:
 The easiest way to use your own dataset is to create a [COCO-formatted JSON files](https://docs.aws.amazon.com/rekognition/latest/customlabels-dg/md-coco-overview.html) and [register your datasets with Detectron2](https://detectron2.readthedocs.io/en/latest/tutorials/datasets.html#register-a-coco-format-dataset). You will register each separately:
 
 ```python
-# add this to the top of tools/train_net.py (or aldi/datasets.py if you installed from source)
+# add this to the top of tools/train_net.py or aldi/datasets.py
 from detectron2.data.datasets import register_coco_instances
 register_coco_instances("your_train_dataset_name", {}, "path/to/your_train_coco_labels.json", "path/to/your/train/images/")
 register_coco_instances("your_unlabeled_dataset_name", {}, "path/to/your_unlabeled_coco_labels.json", "path/to/your/unlabeled/images/")
