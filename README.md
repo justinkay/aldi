@@ -14,33 +14,22 @@ Official codebase for [Align and Distill: Unifying and Improving Domain Adaptive
 
 ## Documentation
 
-Align and Distill (ALDI) is a framework for domain adaptive object detection that is state-of-the-art, fast to train, and easy to extend. 
+Align and Distill (ALDI) is a state-of-the-art framework for domain adaptive object detection. 
 
 ALDI is built on top of the [Detectron2](https://github.com/facebookresearch/detectron2/) object detection library and follows the same design patterns where possible. In particular, training settings are managed by [config files](configs), datasets are managed by a [dataset registry](aldi/datasets.py), training is handled by a custom [`Trainer`](aldi/trainer.py) class that extends [`DefaultTrainer`](https://github.com/facebookresearch/detectron2/blob/0ae803b1449cd2d3f8fa1b7c0f59356db10b3083/detectron2/engine/defaults.py#L323), and we provide a training script in [tools/train_net.py](tools/train_net.py) that comes with [all the same functionality](https://detectron2.readthedocs.io/en/latest/tutorials/getting_started.html) as the [Detectron2 script](https://github.com/facebookresearch/detectron2/blob/main/tools/train_net.py) by the same name.
 
 <details open>
 <summary><h3>Install</h3></summary>
 
-For CUDA 12.1, PyTorch 2.2.2 and torchvision 0.17.2:
+**1. Install PyTorch and torchvision.** Follow the [official install guide](https://pytorch.org/get-started/locally/) to install the correct versions for your CUDA version.
+
+**2. Install ALDI.** Clone this repository and run:
 
 ```bash
-pip install aldi
+pip install -e .
 ```
 
-<details closed>
-<summary>Other PyTorch/CUDA versions</summary>
-
-<br>
-
-**Install PyTorch and torchvision:** Use the [official installation guide](https://pytorch.org/get-started/locally/) to ensure you have the right versions for your CUDA version.
-
-**Install Detectron2:** We have prebuilt some wheels for a recent version of Detectron2 ("v0.7ish") [here](https://github.com/justinkay/detectron2_v07ish/releases/tag/detectron2-0.7).
-
-TODO
-
-To instead install from source see these [instructions](docs/INSTALL.md).
-
-</details>
+Optionally include the `--no-cache-dir` flag if you run into OOM issues.
 
 </details>
 
