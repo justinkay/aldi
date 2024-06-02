@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aldi"
-version = "0.1.0"
+version = "0.1.1"
 description = "Align and distill: Unifying and improving domain adaptive object detection"
 readme = "README.md"
 authors = [

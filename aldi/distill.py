@@ -31,9 +31,9 @@ A Distiller is expected to implement:
 """
 
 
-def build_distiller(teacher, student, cfg):
+def build_distiller(cfg, teacher, student):
     name = cfg.DOMAIN_ADAPT.DISTILL.DISTILLER_NAME
-    return DISTILLER_REGISTRY.get(name)(teacher, student, cfg)
+    return DISTILLER_REGISTRY.get(name).from_config(cfg, teacher, student)
 
 
 @DISTILLER_REGISTRY.register()
@@ -43,7 +43,7 @@ class Distiller:
         pass
 
     @classmethod
-    def from_config(cls, teacher, student, cfg):
+    def from_config(cls, cfg, teacher, student):
         return Distiller(teacher, student)
 
     def __call__(self, teacher_batched_inputs, student_batched_inputs):
@@ -66,7 +66,7 @@ class ALDIDistiller(Distiller):
         self.pseudo_labeler = PseudoLabeler(teacher, pseudo_label_threshold)
 
     @classmethod
-    def from_config(cls, teacher, student, cfg):
+    def from_config(cls, cfg, teacher, student):
         return ALDIDistiller(teacher, student,
                         do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
                         do_hard_obj=cfg.DOMAIN_ADAPT.DISTILL.HARD_OBJ_ENABLED,

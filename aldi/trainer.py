@@ -142,7 +142,7 @@ class ALDITrainer(DefaultTrainer):
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
           self.ema = EMA(build_aldi(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
-          distiller = build_distiller(teacher=self.ema.model if cfg.EMA.ENABLED else model, student=model, cfg=cfg)
+          distiller = build_distiller(cfg=cfg, teacher=self.ema.model if cfg.EMA.ENABLED else model, student=model)
           trainer = (ALDIAMPTrainer if cfg.SOLVER.AMP.ENABLED else ALDISimpleTrainer)(model, data_loader, optimizer, distiller,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
                                                                                   model_batch_size=cfg.SOLVER.IMS_PER_GPU)
