@@ -58,6 +58,8 @@ register_coco_instances("your_test_dataset_name", {}, "path/to/your_test_coco_la
 
 Note that by default Detectron2 assumes all paths are relative to `./datasets` relative to your current working directory. You can change this location if desired using the `DETECTRON2_DATASETS` environment variable, e.g.: `export DETECTRON2_DATASETS=/path/to/datasets`.
 
+</details>
+
 <details closed>
  <br>
  <summary><b>Set up DAOD benchmarks (Cityscapes, Sim10k, CFC)</b></summary>
