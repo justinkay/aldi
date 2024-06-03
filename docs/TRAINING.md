@@ -85,3 +85,13 @@ After training, to run evaluation with your model:
 ```
 python tools/train_net.py --eval-only --config-file path/to/your/aldi_config.yaml MODEL.WEIGHTS path/to/your/model_best.pth
 ```
+
+### Feature visualization
+
+To visualize a trained model's feature space, run:
+
+```
+python tools/visualize_featurespace.py --config-file path/to/your/aldi_config.yaml MODEL.WEIGHTS path/to/your/model.pth
+```
+
+The plots will be written into that config's `OUTPUT_DIR`.
