@@ -69,8 +69,8 @@ def main(args):
     if len(cfg.DATASETS.TEST) == 2:
         dataset_names = cfg.DATASETS.TEST
     elif len(cfg.DATASETS.TEST) == 1:
-        assert len(cfg.DATASET.TRAIN) == 1
-        dataset_names = [cfg.DATASET.TRAIN[0], cfg.DATASET.TEST[0]]
+        assert len(cfg.DATASETS.TRAIN) == 1
+        dataset_names = [cfg.DATASETS.TRAIN[0], cfg.DATASETS.TEST[0]]
     else:
         raise ValueError("Ambiguous which datasets represent source and target")
 
