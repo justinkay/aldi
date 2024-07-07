@@ -23,7 +23,7 @@ import aldi.backbone # register ViT FPN backbone with Detectron2
 
 def setup(args):
     """
-    Copied directly from detectron2/tools/train_net.py
+    Copied from detectron2/tools/train_net.py
     """
     cfg = get_cfg()
 
@@ -39,7 +39,7 @@ def setup(args):
 
 def main(args):
     """
-    Copied directly from detectron2/tools/train_net.py
+    Copied from detectron2/tools/train_net.py
     But replace Trainer with DATrainer and disable TTA.
     """
     cfg = setup(args)
@@ -67,6 +67,14 @@ def main(args):
 if __name__ == "__main__":
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
+
+    ## Change here
+    try: 
+        import wandb; wandb.init(sync_tensorboard=True)
+    except:
+        print("Running without WandB.")
+    ## End change
+
     launch(
         main,
         args.num_gpus,
