@@ -4,6 +4,7 @@ from typing import Dict, List
 
 from detectron2.config import configurable
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
+from detectron2.modeling.meta_arch.rcnn import GeneralizedRCNN
 from detectron2.utils.logger import _log_api_usage
 
 from aldi.align import AlignMixin
