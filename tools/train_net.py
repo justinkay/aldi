@@ -20,6 +20,9 @@ import aldi.datasets # register datasets with Detectron2
 import aldi.model # register ALDI R-CNN model with Detectron2
 import aldi.backbone # register ViT FPN backbone with Detectron2
 
+# import PT componenets
+import aldi.gaussian_rcnn.roi_heads
+import aldi.gaussian_rcnn.rpn
 
 def setup(args):
     """
