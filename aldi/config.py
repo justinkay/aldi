@@ -69,6 +69,7 @@ def add_aldi_config(cfg):
     _C.DOMAIN_ADAPT.TEACHER = CN()
     _C.DOMAIN_ADAPT.TEACHER.ENABLED = False
     _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
+    _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # one of: { "thresholding", "probabilistic" }
 
     # Vision Transformer settings
     _C.VIT = CN()

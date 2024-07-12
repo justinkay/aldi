@@ -1,6 +1,6 @@
 _BASE_: "../Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml"
 EMA:
-  ENABLED: True
+  ENABLED: False
 DOMAIN_ADAPT:
   ALIGN:
     SADA_ENABLED: True

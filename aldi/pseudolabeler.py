@@ -1,18 +1,19 @@
 import torch
 
 from detectron2.structures.boxes import Boxes
-from detectron2.structures.instances import Instances
-
+# from detectron2.structures.instances import Instances
+from aldi.gaussian_rcnn.instances import FreeInstances as Instances # TODO: only when necessary
 
 class PseudoLabeler:
-    def __init__(self, model, threshold):
+    def __init__(self, model, threshold, method):
         self.model = model
         self.threshold = threshold
+        self.method = method
 
     def __call__(self, unlabeled_weak, unlabeled_strong):
-        return pseudo_label_inplace(self.model, unlabeled_weak, unlabeled_strong, self.threshold)
+        return pseudo_label_inplace(self.model, unlabeled_weak, unlabeled_strong, self.threshold, self.method)
 
-def pseudo_label_inplace(model, unlabeled_weak, unlabeled_strong, threshold):
+def pseudo_label_inplace(model, unlabeled_weak, unlabeled_strong, threshold, method):
     with torch.no_grad():
         # get predictions from teacher model on weakly-augmented data
         # do_postprocess=False to disable transforming outputs back into original image space
@@ -22,7 +23,7 @@ def pseudo_label_inplace(model, unlabeled_weak, unlabeled_strong, threshold):
         if was_training: model.train()
 
         # postprocess pseudo labels (thresholding)
-        teacher_preds, _ = process_pseudo_label(teacher_preds, threshold)
+        teacher_preds, _ = process_pseudo_label(teacher_preds, threshold, method)
         
         # add pseudo labels back as "ground truth"
         add_label(unlabeled_weak, teacher_preds)
@@ -31,14 +32,23 @@ def pseudo_label_inplace(model, unlabeled_weak, unlabeled_strong, threshold):
 
 # Modified from Adaptive Teacher ATeacherTrainer:
 # - Remove RPN option
-def process_pseudo_label(proposals, cur_threshold):
+# - Add scores_logists and boxes_sigma from PT if available
+def process_pseudo_label(proposals, cur_threshold, pseudo_label_method=""):
     list_instances = []
     num_proposal_output = 0.0
     for proposal_bbox_inst in proposals:
-        proposal_bbox_inst = process_bbox(
-            proposal_bbox_inst,
-            thres=cur_threshold, 
-        )
+        if pseudo_label_method == "thresholding":
+            proposal_bbox_inst = process_bbox(
+                proposal_bbox_inst,
+                thres=cur_threshold, 
+            )
+        elif pseudo_label_method == "probabilistic":
+            proposal_bbox_inst = process_bbox(
+                proposal_bbox_inst,
+                thres=-1.0, 
+            )
+        else:
+            raise NotImplementedError("Pseudo label method {} not implemented".format(pseudo_label_method))
         num_proposal_output += len(proposal_bbox_inst)
         list_instances.append(proposal_bbox_inst)
         
@@ -48,6 +58,7 @@ def process_pseudo_label(proposals, cur_threshold):
 # Modified from Adaptive Teacher ATeacherTrainer threshold_bbox:
 # - Remove RPN option
 # - Put new labels on CPU (for compatibility with Visualizer, e.g.)
+# - Compatible with Proababilistic Teacher outputs
 def process_bbox(proposal_bbox_inst, thres=0.7):
     valid_map = proposal_bbox_inst.scores > thres
 
@@ -63,6 +74,12 @@ def process_bbox(proposal_bbox_inst, thres=0.7):
     new_proposal_inst.gt_boxes = new_boxes.to("cpu")
     new_proposal_inst.gt_classes = proposal_bbox_inst.pred_classes[valid_map].to("cpu")
     new_proposal_inst.scores = proposal_bbox_inst.scores[valid_map].to("cpu")
+
+    # add probabilistic outputs for gaussian RCNN
+    if proposal_bbox_inst.has('scores_logists'):
+        new_proposal_inst.scores_logists = proposal_bbox_inst.scores_logists.to("cpu")
+    if proposal_bbox_inst.has('boxes_sigma'):
+        new_proposal_inst.boxes_sigma = proposal_bbox_inst.boxes_sigma.to("cpu")
 
     return new_proposal_inst
 

@@ -60,10 +60,10 @@ class ALDIDistiller(Distiller):
 
     def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, do_hard_roi_reg=False,
                  do_cls_dst=False, do_obj_dst=False, do_rpn_reg_dst=False, do_roih_reg_dst=False,
-                 cls_temperature=1.0, obj_temperature=1.0, cls_loss_type="CE", pseudo_label_threshold=0.8):
+                 cls_temperature=1.0, obj_temperature=1.0, cls_loss_type="CE", pseudo_label_threshold=0.8, pseudo_label_method="thresholding"):
         set_attributes(self, locals())
         self.register_hooks()
-        self.pseudo_labeler = PseudoLabeler(teacher, pseudo_label_threshold)
+        self.pseudo_labeler = PseudoLabeler(teacher, pseudo_label_threshold, method=pseudo_label_method)
 
     @classmethod
     def from_config(cls, cfg, teacher, student):
@@ -79,7 +79,8 @@ class ALDIDistiller(Distiller):
                         cls_temperature=cfg.DOMAIN_ADAPT.DISTILL.CLS_TMP,
                         obj_temperature=cfg.DOMAIN_ADAPT.DISTILL.OBJ_TMP,
                         cls_loss_type=cfg.DOMAIN_ADAPT.CLS_LOSS_TYPE,
-                        pseudo_label_threshold=cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD)
+                        pseudo_label_threshold=cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD,
+                        pseudo_label_method=cfg.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD)
 
     def register_hooks(self):
         self.student_rpn_io, self.student_rpn_head_io, self.student_boxpred_io = SaveIO(), SaveIO(), SaveIO()

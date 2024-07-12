@@ -15,9 +15,3 @@ DOMAIN_ADAPT:
   ALIGN:
     SADA_ENABLED: True
 OUTPUT_DIR: "output/cityscapes_mic/"
-
-# for supercloud issues
-TEST:
-  EVAL_PERIOD: 100000
-SOLVER:
-  CHECKPOINT_PERIOD: 1000

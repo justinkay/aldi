@@ -36,7 +36,7 @@ class AlignMixin(GeneralizedRCNN):
         self.img_align = None
         if img_da_enabled:
             if img_da_impl == 'at':
-                self.img_align = ATDiscriminator(512) # TODO dims; only works for VGG; maybe: self.backbone._out_feature_channels['img_da_layer']
+                self.img_align = ATDiscriminator(img_da_input_dim)
             else:
                 self.img_align = ConvDiscriminator(img_da_input_dim, hidden_dims=img_da_hidden_dims) if img_da_enabled else None
         self.ins_align = FCDiscriminator(ins_da_input_dim, hidden_dims=ins_da_hidden_dims) if ins_da_enabled else None

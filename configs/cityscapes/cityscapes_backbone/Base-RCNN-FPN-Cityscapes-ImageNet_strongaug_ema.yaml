@@ -1,6 +1,0 @@
-_BASE_: "../Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml"
-MODEL:
-  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
-SOLVER:
-  BASE_LR: 0.01 # diverges 0.06
-OUTPUT_DIR: "output/cityscapes/cityscapes_baseline_imagenet_strongaug_ema/"
