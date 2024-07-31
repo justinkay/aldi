@@ -1,0 +1,6 @@
+_BASE_: "../MeanTeacher-CFC.yaml"
+DOMAIN_ADAPT:
+  ALIGN:
+    IMG_DA_ENABLED: True
+    IMG_DA_IMPL: 'at'
+OUTPUT_DIR: "output/cfc/cfc_at/"
