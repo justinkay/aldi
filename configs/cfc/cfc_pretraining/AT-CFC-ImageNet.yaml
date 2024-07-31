@@ -1,0 +1,4 @@
+_BASE_: "../cfc_priorart/AT-CFC.yaml"
+MODEL:
+  WEIGHTS: "models/cfc_channel_test_model_best_strongaug_ema_667.pth"
+OUTPUT_DIR: "output/cfc/cfc_at_imagenet/"

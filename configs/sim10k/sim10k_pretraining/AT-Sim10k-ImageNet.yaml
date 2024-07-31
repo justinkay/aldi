@@ -1,0 +1,11 @@
+_BASE_: "../sim10k_prior_art/AT-Sim10k.yaml"
+MODEL:
+  WEIGHTS: "models/sim10k_baseline_imagenet_cityscapes_cars_val_model_best_513.pth"
+SOLVER:
+  # BASE_LR: 0.01
+  STEPS: (49999,)
+  MAX_ITER: 50000
+DOMAIN_ADAPT:
+  ALIGN:
+    IMG_DA_WEIGHT: 0.005
+OUTPUT_DIR: "output/sim10k/sim10k_at_imagenet/"

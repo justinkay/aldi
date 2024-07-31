@@ -1,0 +1,8 @@
+_BASE_: "../OracleST-RCNN-FPN-CFC_strongaug_ema.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+SOLVER:
+  BASE_LR: 0.01
+  STEPS: (19999,)
+  MAX_ITER: 20000
+OUTPUT_DIR: "output/cfc/cfc_oracle-st_strongaug_ema_imagenet/"

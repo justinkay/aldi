@@ -1,0 +1,6 @@
+_BASE_: "../sim10k_prior_art/SADA_Sim10k.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+SOLVER:
+  BASE_LR: 0.01 
+OUTPUT_DIR: "output/sim10k/sim10k_sada_imagenet/"
