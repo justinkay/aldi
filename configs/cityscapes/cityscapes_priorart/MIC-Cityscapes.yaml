@@ -14,4 +14,6 @@ DOMAIN_ADAPT:
     QUALITY_LOSS_WEIGHT_ENABLED: True
   ALIGN:
     SADA_ENABLED: True
+EMA:
+  ALPHA: 0.9
 OUTPUT_DIR: "output/cityscapes_mic/"

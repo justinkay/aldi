@@ -1,7 +1,6 @@
 _BASE_: "detectron2/Base-RCNN-DilatedC5.yaml"
 MODEL:
   META_ARCHITECTURE: "ALDI"
-  WEIGHTS: ""
   MASK_ON: False
 INPUT:
   MIN_SIZE_TRAIN: (800, 832, 864, 896, 928, 960, 992, 1024)

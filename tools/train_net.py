@@ -72,10 +72,10 @@ if __name__ == "__main__":
     print("Command Line Args:", args)
 
     ## Change here
-    try: 
-        import wandb; wandb.init(sync_tensorboard=True)
-    except:
-        print("Running without WandB.")
+    # try: 
+    #     import wandb; wandb.init(sync_tensorboard=True)
+    # except:
+    #     print("Running without WandB.")
     ## End change
 
     launch(

@@ -1,0 +1,10 @@
+_BASE_: "../OracleT-RCNN-FPN-Cityscapes_strongaug_ema.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+DATASETS:
+  TRAIN: ("cityscapes_train","cityscapes_foggy_train",)
+SOLVER:
+  BASE_LR: 0.01
+  STEPS: (19999,)
+  MAX_ITER: 20000
+OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-st_strongaug_ema_imagenet/"

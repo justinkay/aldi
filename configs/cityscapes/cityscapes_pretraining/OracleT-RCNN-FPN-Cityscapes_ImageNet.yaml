@@ -1,0 +1,12 @@
+_BASE_: "../Base-RCNN-FPN-Cityscapes.yaml"
+DATASETS:
+  TRAIN: ("cityscapes_foggy_train",)
+  TEST: ("cityscapes_val","cityscapes_foggy_val",)
+  BATCH_CONTENTS: ("labeled_weak", )
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+SOLVER:
+  BASE_LR: 0.01
+  STEPS: (9999,)
+  MAX_ITER: 10000
+OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-t_imagenet/"

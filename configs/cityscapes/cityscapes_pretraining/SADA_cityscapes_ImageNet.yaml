@@ -1,0 +1,6 @@
+_BASE_: "../cityscapes_priorart/SADA_cityscapes.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+SOLVER:
+  BASE_LR: 0.01 # diverges 0.06
+OUTPUT_DIR: "output/cityscapes_sada_imagenet_withbug/"

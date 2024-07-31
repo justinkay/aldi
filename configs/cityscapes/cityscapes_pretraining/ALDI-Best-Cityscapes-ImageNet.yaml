@@ -1,12 +1,8 @@
-_BASE_: "./Base-RCNN-FPN-Sim10k_strongaug_ema.yaml"
+_BASE_: "../Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml"
 MODEL:
-  WEIGHTS: "models/sim10k_baseline_strongaug_ema_cityscapes_cars_val_model_best_768.pth"
+  WEIGHTS: "models/cityscapes_baseline_imagenet_strongaug_ema_foggy_val_model_best_519.pth"
 EMA:
   ENABLED: True
-DATASETS:
-  UNLABELED: ("cityscapes_cars_train",)
-  BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
-  BATCH_RATIOS: (1,1)
 DOMAIN_ADAPT:
   TEACHER:
     ENABLED: True
@@ -24,8 +20,13 @@ AUG:
   UNLABELED_INCLUDE_RANDOM_ERASING: False
   LABELED_MIC_AUG: False
   UNLABELED_MIC_AUG: True
+DATASETS:
+  UNLABELED: ("cityscapes_foggy_train",)
+  BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1)
 SOLVER:
-  STEPS: (14999,)
-  MAX_ITER: 15000
+  BASE_LR: 0.01
+  STEPS: (49999,)
+  MAX_ITER: 50000
   BACKWARD_AT_END: False
-OUTPUT_DIR: "output/sim10k/sim10k_aldi_best/"
+OUTPUT_DIR: "output/cityscapes/cityscapes_aldi_best_imagenet/"

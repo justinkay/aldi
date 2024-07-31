@@ -18,6 +18,4 @@ SOLVER:
   STEPS: (49999,)
   MAX_ITER: 50000
   CHECKPOINT_PERIOD: 1000 
-TEST:
-  EVAL_PERIOD: 50000 # dont save checkpoints because supercloud is died
 OUTPUT_DIR: "output/sim10k_mic_noburnin/"

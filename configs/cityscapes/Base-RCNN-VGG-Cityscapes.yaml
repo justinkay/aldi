@@ -5,7 +5,6 @@ MODEL:
     IN_FEATURES: ["vgg4"]
   BACKBONE:
     NAME: "build_vgg_backbone"
-  WEIGHTS: ""
   RPN:
     IN_FEATURES: ["vgg4"]
 SOLVER:
