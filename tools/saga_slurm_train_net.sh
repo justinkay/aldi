@@ -22,7 +22,7 @@ TRUNC_JOB_ID=$(echo -n $SLURM_JOB_ID | tail -c 4)
 echo "Truncated job id with 0 is ${TRUNC_JOB_ID}"
 chars="0"
 # Use sed to remove the specified characters
-PORT=$(echo "TRUNC_JOB_ID" | sed "s/[$chars]//g")
+PORT=$(echo $TRUNC_JOB_ID | sed "s/[$chars]//g")
 echo
 echo " and job id without 0 is ${PORT}"
 

@@ -16,11 +16,46 @@ from aldi.backbone import get_adamw_optim
 from aldi.checkpoint import DetectionCheckpointerWithEMA
 from aldi.distill import build_distiller
 from aldi.dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-#from aldi.dataloader import SaveWeakDatasetMapper, UMTDatasetMapper, UnlabeledSaveWeakDatasetMapper, UnlabeledUMTDatasetMapper, WeakStrongDataloader
-from aldi.dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
+from aldi.dataloader import SaveWeakDatasetMapper, UMTDatasetMapper, UnlabeledSaveWeakDatasetMapper, UnlabeledUMTDatasetMapper, WeakStrongDataloader
 from aldi.ema import EMA
 from aldi.helpers import Detectron2COCOEvaluatorAdapter
 from aldi.model import build_aldi
+
+def visualize_batch(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong, max_rows=-1, umt_labels=False):
+     """Helper method to visualize an entire or parts of a batch."""
+     
+     assert len(labeled_weak) == len(labeled_strong) == len(unlabeled_weak) == len(unlabeled_strong)
+     
+     from detectron2.utils.visualizer import Visualizer
+     import matplotlib.pyplot as plt
+     from mpl_toolkits.axes_grid1 import ImageGrid
+     
+     labels = ["target-like", "source", "source-like", "target"] if umt_labels else ["labeled weak", "labeled strong", "unlabeled weak", "unlabeled strong"]
+     
+     fig = plt.figure(figsize=(20., 20.))
+     grid = ImageGrid(fig, 111, 
+          nrows_ncols=(len(labeled_weak) if max_rows < 0 else min(max_rows, len(labeled_weak)), 4),
+          axes_pad=0.1,
+     )
+     grid_iter = iter(grid)
+     
+     for row_idx, (lw, ls, uw, us) in enumerate(zip(labeled_weak, labeled_strong, unlabeled_weak, unlabeled_strong)):
+          if max_rows >= 0 and row_idx >= max_rows:
+               break
+          for e, label in zip([lw, ls, uw, us], labels):
+               ax = next(grid_iter)
+               ax.imshow(Visualizer(e["image"].numpy().transpose(1, 2, 0)[..., ::-1]).draw_dataset_dict(e).get_image())
+               ax.tick_params(
+                    axis="both",
+                    which="both",
+                    left=False,
+                    bottom=False,
+                    labelleft=False,
+                    labelbottom=False)
+               if row_idx == 0:
+                    ax.set_title(label)
+     return fig
+
 
 DEBUG = False
 debug_dict = {}
@@ -176,7 +211,6 @@ class ALDITrainer(DefaultTrainer):
 
           # add hooks to evaluate/save teacher model if applicable
           if self.cfg.EMA.ENABLED:
-               #todo: add some flag so that ema evaluation saves separately to student
                def test_and_save_results_ema():
                     self._last_eval_results = self.test(self.cfg, self.ema.model)
                     return self._last_eval_results
@@ -226,16 +260,20 @@ class ALDITrainer(DefaultTrainer):
           # create labeled dataloader
           labeled_loader = None
           if labeled_bs > 0 and len(cfg.DATASETS.TRAIN):
+               DatasetMapper = SaveWeakDatasetMapper if not cfg.MODEL.UMT.ENABLED else UMTDatasetMapper
                labeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.TRAIN, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                    mapper=SaveWeakDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True, include_strong_augs="labeled_strong" in batch_contents)),
+                    mapper=DatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=True, include_strong_augs="labeled_strong" in batch_contents and not cfg.MODEL.UMT.ENABLED),
+                    dataset_type="source"),
                     num_workers=cfg.DATALOADER.NUM_WORKERS, 
                     total_batch_size=labeled_bs)
 
           # create unlabeled dataloader
           unlabeled_loader = None
           if unlabeled_bs > 0 and len(cfg.DATASETS.UNLABELED):
+               UnlabeledDatasetMapper = UnlabeledSaveWeakDatasetMapper if not cfg.MODEL.UMT.ENABLED else UnlabeledUMTDatasetMapper
                unlabeled_loader = build_detection_train_loader(get_detection_dataset_dicts(cfg.DATASETS.UNLABELED, filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS), 
-                    mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=False, include_strong_augs="unlabeled_strong" in batch_contents)),
+                    mapper=UnlabeledDatasetMapper(cfg, is_train=True, augmentations=get_augs(cfg, labeled=False, include_strong_augs="unlabeled_strong" in batch_contents),
+                    dataset_type="target"),
                     num_workers=cfg.DATALOADER.NUM_WORKERS,
                     total_batch_size=unlabeled_bs)
 
