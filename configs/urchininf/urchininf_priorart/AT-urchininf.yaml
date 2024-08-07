@@ -1,0 +1,11 @@
+_BASE_: "../MeanTeacher-urchininf.yaml"
+DOMAIN_ADAPT:
+  ALIGN:
+    IMG_DA_ENABLED: True
+    IMG_DA_IMPL: 'at'
+SOLVER:
+  BASE_LR: 0.04 # 
+  STEPS: (8999,) # no lr decay
+OUTPUT_DIR: "outputs/urchininf/urchininf_AT/"
+LOGGING:
+  TAGS: "RCCN-FPN,AT,Inf2UDD"

@@ -28,4 +28,4 @@ SOLVER:
   STEPS: (14999,)
   MAX_ITER: 15000
   BACKWARD_AT_END: False
-OUTPUT_DIR: "output/cityscapes/cityscapes_aldi_best/"
+OUTPUT_DIR: "output/cityscapes/cityscapes_aldi_best2/"

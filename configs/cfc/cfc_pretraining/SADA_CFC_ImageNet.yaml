@@ -1,0 +1,6 @@
+_BASE_: "../cfc_priorart/SADA_CFC.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+SOLVER:
+  BASE_LR: 0.01
+OUTPUT_DIR: "output/cfc/cfc_sada_imagenet/"

@@ -1,0 +1,14 @@
+_BASE_: "../../Probabilistic-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("urchininf_v0_train",)
+  TEST: ("UDD_test",)
+SOLVER:
+  #BASE_LR: 0.01 # diverges with 0.06
+  STEPS: (400,)
+  MAX_ITER: 400
+OUTPUT_DIR: "outputs/urchininf/urchininf_ptbaseline/"
+LOGGING:
+  TAGS: "RCCN-FPN,PTBase"

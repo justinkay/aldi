@@ -1,0 +1,21 @@
+_BASE_: "../Base-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("squidle_urchin_2009_train",)
+  TEST: ("squidle_urchin_2011_test",)
+  BATCH_CONTENTS: ("labeled_weak", )
+EMA:
+  ENABLED: False
+SOLVER:
+  BASE_LR: 0.005 #0.02 / 8
+  STEPS: (2999,)
+  MAX_ITER: 3000
+  IMS_PER_BATCH: 4
+  IMS_PER_GPU: 4
+  CHECKPOINT_PERIOD: 5000
+VIS_PERIOD: 0
+TEST:
+  EVAL_PERIOD: 1000
+OUTPUT_DIR: "outputs/urchinsquidle/urchinsquidle_baseline_weakaug/"

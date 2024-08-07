@@ -1,0 +1,4 @@
+_BASE_: "../cfc_priorart/UMT-CFC.yaml"
+MODEL:
+  WEIGHTS: "models/model_final_f10217.pkl" # UMT does no burn in
+OUTPUT_DIR: "output/cfc/cfc_umt_imagenet/"

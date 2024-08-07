@@ -1,0 +1,17 @@
+_BASE_: "../MeanTeacher-Sim10k.yaml"
+MODEL:
+  WEIGHTS: "models/model_final_f10217.pkl" # UMT does no burn in
+  UMT:
+    ENABLED: True
+DATASETS:
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,2)
+AUG:
+  LABELED_INCLUDE_RANDOM_ERASING: False
+  UNLABELED_INCLUDE_RANDOM_ERASING: False
+DOMAIN_ADAPT:
+  DISTILL:
+    # UMT does not disable loc losses
+    HARD_ROIH_REG_ENABLED: False
+    HARD_RPN_REG_ENABLED: False
+OUTPUT_DIR: "output/sim10k_umt/"

@@ -1,0 +1,8 @@
+_BASE_: "../Probabilistic-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("cfc_train",)
+  TEST: ("cfc_val", "cfc_channel_test",)
+OUTPUT_DIR: "output/cfc/cfc_probabilistic_baseline/"

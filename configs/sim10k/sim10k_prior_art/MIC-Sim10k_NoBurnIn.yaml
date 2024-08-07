@@ -1,0 +1,21 @@
+_BASE_: "../MeanTeacher-Sim10k.yaml"
+MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
+  WEIGHTS: "models/model_final_f10217.pkl"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_weak", "unlabeled_strong")
+  BATCH_RATIOS: (1,1)
+AUG:
+  LABELED_INCLUDE_RANDOM_ERASING: False
+  UNLABELED_INCLUDE_RANDOM_ERASING: False
+  UNLABELED_MIC_AUG: True
+DOMAIN_ADAPT:
+  LOSSES:
+    QUALITY_LOSS_WEIGHT_ENABLED: True
+  ALIGN:
+    SADA_ENABLED: True
+SOLVER:
+  STEPS: (49999,)
+  MAX_ITER: 50000
+  CHECKPOINT_PERIOD: 1000 
+OUTPUT_DIR: "output/sim10k_mic_noburnin/"

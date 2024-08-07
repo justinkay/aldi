@@ -1,0 +1,17 @@
+_BASE_: "../Base-RCNN-DilatedC5.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 8
+    IN_FEATURES: ["vgg4"]
+  BACKBONE:
+    NAME: "build_vgg_backbone"
+  RPN:
+    IN_FEATURES: ["vgg4"]
+SOLVER:
+  STEPS: (18000,)
+  MAX_ITER: 20000
+DATASETS:
+  TRAIN: ("cityscapes_train",)
+  TEST: ("cityscapes_val", "cityscapes_foggy_val",)
+  BATCH_CONTENTS: ("labeled_weak", )
+OUTPUT_DIR: "output/cityscapes/cityscapes_vgg_baseline_long/"

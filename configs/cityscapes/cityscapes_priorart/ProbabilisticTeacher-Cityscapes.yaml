@@ -1,0 +1,28 @@
+_BASE_: "../cityscapes_baseline/Probabilistic-RCNN-FPN-Cityscapes.yaml"
+MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
+  WEIGHTS: "models/cityscapes_probabilistic_baseline_foggy_val_model_best_512.pth"
+EMA:
+  ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_foggy_train",)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
+GRCNN:
+  LEARN_ANCHORS_LABELED: False
+  LEARN_ANCHORS_UNLABELED: True
+  EFL: True
+SOLVER:
+  BASE_LR: 0.01
+  # IMS_PER_BATCH: 8
+  STEPS: (99999,)
+  MAX_ITER: 100000
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_VALUE: 10.0 # this mimics PT trainer
+DOMAIN_ADAPT:
+  TEACHER:
+    PSEUDO_LABEL_METHOD: "probabilistic"
+TEST:
+  EVAL_PERIOD: 625
+OUTPUT_DIR: "output/cityscapes_probabilisticteacher/"

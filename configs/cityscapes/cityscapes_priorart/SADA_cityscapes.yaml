@@ -1,0 +1,13 @@
+_BASE_: "../Base-RCNN-FPN-Cityscapes_strongaug_ema.yaml"
+EMA:
+  ENABLED: False
+DOMAIN_ADAPT:
+  ALIGN:
+    SADA_ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_foggy_train",)
+  BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
+  BATCH_RATIOS: (1,1)
+TEST:
+  EVAL_PERIOD: 25 # 1/4 epoch
+OUTPUT_DIR: "output/cityscapes_sada_weakaug/"

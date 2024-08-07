@@ -1,0 +1,4 @@
+_BASE_: "../cfc_priorart/ProbabilisticTeacher-CFC.yaml"
+MODEL:
+  WEIGHTS: "models/cfc_probabilistic_baseline_imagenet_cfc_channel_test_model_best_663.pth"
+OUTPUT_DIR: "output/cfc/cfc_probabilisticteacher_imagenet/"

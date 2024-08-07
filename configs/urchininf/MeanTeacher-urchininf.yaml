@@ -1,0 +1,24 @@
+_BASE_: "./Base-RCNN-FPN-urchininf_strongaug_ema.yaml"
+MODEL:
+  WEIGHTS: "outputs/urchininf/urchininf_baseline_strongaug_ema/model_final.pth" 
+EMA:
+  ENABLED: True
+DATASETS:
+  UNLABELED: ("UDD_train",)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
+DOMAIN_ADAPT:
+  TEACHER:
+    ENABLED: True
+  DISTILL:
+    # By default, disable localization losses (done by AT, UBT, MIC, ...)
+    HARD_ROIH_CLS_ENABLED: True
+    HARD_ROIH_REG_ENABLED: False
+    HARD_OBJ_ENABLED: True
+    HARD_RPN_REG_ENABLED: False
+SOLVER:
+  IMS_PER_BATCH: 24
+  IMS_PER_GPU: 3
+OUTPUT_DIR: "outputs/urchininf/urchininf_meanteacher/"
+LOGGING:
+  TAGS: "RCCN-FPN,MT"

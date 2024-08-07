@@ -1,0 +1,4 @@
+_BASE_: "../cityscapes_priorart/ProbabilisticTeacher-Cityscapes.yaml"
+MODEL:
+  WEIGHTS: "models/cityscapes_probabilistic_baseline_imagenet_foggy_val_model_best_421.pth"
+OUTPUT_DIR: "output/cityscapes_probabilisticteacher_imagenet/"

@@ -1,0 +1,13 @@
+_BASE_: "../Base-RCNN-FPN-CFC_strongaug_ema.yaml"
+EMA:
+  ENABLED: False
+DOMAIN_ADAPT:
+  ALIGN:
+    SADA_ENABLED: True
+DATASETS:
+  UNLABELED: ("cfc_channel_train",)
+  BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
+  BATCH_RATIOS: (1,1)
+TEST:
+  EVAL_PERIOD: 25 
+OUTPUT_DIR: "output/cfc/cfc_sada_weakaug/"

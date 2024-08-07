@@ -1,0 +1,7 @@
+_BASE_: "../MeanTeacher-Cityscapes-VGG.yaml"
+DOMAIN_ADAPT:
+  ALIGN:
+    IMG_DA_ENABLED: True
+    IMG_DA_IMPL: 'at'
+    IMG_DA_LAYER: 'vgg4'
+OUTPUT_DIR: "output/cityscapes_at_vgg/"

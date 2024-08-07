@@ -1,0 +1,13 @@
+_BASE_: "../Base-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("urchininf_v0_train",)
+  TEST: ("UDD_test",)
+  BATCH_CONTENTS: ("labeled_weak", )
+EMA:
+  ENABLED: False
+OUTPUT_DIR: "outputs/urchininf/urchininf_baseline_weakaug/"
+LOGGING:
+  TAGS: "Base,RCCN-FPN,WeakAug"

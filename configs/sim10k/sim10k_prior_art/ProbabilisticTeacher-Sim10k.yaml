@@ -1,0 +1,27 @@
+_BASE_: "../Probabilistic-RCNN-FPN-Sim10k.yaml"
+MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
+  WEIGHTS: "" # TODO
+EMA:
+  ENABLED: True
+DATASETS:
+  UNLABELED: ("cityscapes_cars_train",)
+  BATCH_CONTENTS: ("labeled_weak", "labeled_strong", "unlabeled_strong")
+  BATCH_RATIOS: (1,1,1)
+GRCNN:
+  LEARN_ANCHORS_LABELED: False
+  LEARN_ANCHORS_UNLABELED: True
+  EFL: True
+SOLVER:
+  BASE_LR: 0.01
+  STEPS: (99999,)
+  MAX_ITER: 100000
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_VALUE: 10.0 # this mimics PT trainer
+DOMAIN_ADAPT:
+  TEACHER:
+    PSEUDO_LABEL_METHOD: "probabilistic"
+TEST:
+  EVAL_PERIOD: 625
+OUTPUT_DIR: "output/sim10k/sim10k_probabilisticteacher/"

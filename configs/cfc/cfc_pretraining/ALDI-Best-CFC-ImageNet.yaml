@@ -1,0 +1,9 @@
+_BASE_: "../ALDI-Best-CFC.yaml"
+MODEL:
+  WEIGHTS: "models/cfc_imagenet_channel_test_model_best_strongaug_ema_673.pth"
+SOLVER:
+  BASE_LR: 0.01
+  STEPS: (34999,)
+  MAX_ITER: 35000
+  BACKWARD_AT_END: False
+OUTPUT_DIR: "output/cfc/cfc_aldi_best_imagenet/"

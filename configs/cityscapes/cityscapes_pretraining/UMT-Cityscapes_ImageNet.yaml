@@ -1,0 +1,6 @@
+_BASE_: "../cityscapes_priorart/UMT-Cityscapes.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+SOLVER:
+  BASE_LR: 0.01 
+OUTPUT_DIR: "output/cityscapes_umt_imagenet/"

@@ -1,0 +1,13 @@
+_BASE_: "../Base-RCNN-FPN-urchininf_strongaug_ema.yaml"
+EMA:
+  ENABLED: False
+DOMAIN_ADAPT:
+  ALIGN:
+    SADA_ENABLED: True
+DATASETS:
+  UNLABELED: ("UDD_train",)
+  BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
+  BATCH_RATIOS: (1,1)
+OUTPUT_DIR: "outputs/urchininf/urchininf_sada/"
+LOGGING:
+  TAGS: "RCCN-FPN,SADA,Inf2UDD"

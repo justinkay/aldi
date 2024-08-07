@@ -1,10 +1,10 @@
-_BASE_: "./Base-RCNN-FPN-Sim10k_strongaug_ema.yaml"
+_BASE_: "./Base-RCNN-FPN-urchininf_strongaug_ema.yaml"
 MODEL:
-  WEIGHTS: "models/sim10k_baseline_strongaug_ema_cityscapes_cars_val_model_best_768.pth"
+  WEIGHTS: "outputs/urchininf/urchininf_baseline_strongaug_ema/model_final.pth" 
 EMA:
   ENABLED: True
 DATASETS:
-  UNLABELED: ("cityscapes_cars_train",)
+  UNLABELED: ("UDD_train",)
   BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
 DOMAIN_ADAPT:
@@ -24,8 +24,6 @@ AUG:
   UNLABELED_INCLUDE_RANDOM_ERASING: False
   LABELED_MIC_AUG: False
   UNLABELED_MIC_AUG: True
-SOLVER:
-  STEPS: (14999,)
-  MAX_ITER: 15000
-  BACKWARD_AT_END: False
-OUTPUT_DIR: "output/sim10k/sim10k_aldi_best/"
+OUTPUT_DIR: "outputs/urchininf/urchininf_aldi/"
+LOGGING:
+  TAGS: "RCCN-FPN,ALDI"

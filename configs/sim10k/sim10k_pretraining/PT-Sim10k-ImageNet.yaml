@@ -1,0 +1,4 @@
+_BASE_: "../sim10k_prior_art/ProbabilisticTeacher-Sim10k.yaml"
+MODEL:
+  WEIGHTS: "models/sim10k_probabilistic_baseline_imagenetcityscapes_val_model_best.pth"
+OUTPUT_DIR: "output/sim10k/sim10k_probabilisticteacher_imagenet/"

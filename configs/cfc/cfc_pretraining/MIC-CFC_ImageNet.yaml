@@ -1,0 +1,11 @@
+_BASE_: "../cfc_priorart/MIC-CFC_NoBurnIn.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+SOLVER:
+  BASE_LR: 0.01
+# DOMAIN_ADAPT:
+#   ALIGN:
+#     SADA_IMG_GRL_WEIGHT: 0.005 # default 0.025
+#     SADA_INS_GRL_WEIGHT: 0.05 # default 0.1
+#     SADA_COS_WEIGHT: 0.05 # default 0.1
+OUTPUT_DIR: "output/cfc/cfc_mic_imagenet_2/"

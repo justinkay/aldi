@@ -1,0 +1,13 @@
+_BASE_: "../Base-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("UDD_train",)
+  TEST: ("UDD_test",)
+  BATCH_CONTENTS: ("labeled_weak", )
+EMA:
+  ENABLED: True
+OUTPUT_DIR: "outputs/urchininf/urchininf_oracle_weakaug_ema/"
+LOGGING:
+  TAGS: "RCCN-FPN,Oracle,WeakAugEMA"

@@ -1,0 +1,19 @@
+_BASE_: "../MeanTeacher-Cityscapes.yaml"
+MODEL:
+  META_ARCHITECTURE: "ExtraRCNN"
+  WEIGHTS: "models/model_final_f10217.pkl"
+DATASETS:
+  BATCH_CONTENTS: ("labeled_weak", "unlabeled_strong")
+  BATCH_RATIOS: (1,1)
+AUG:
+  LABELED_INCLUDE_RANDOM_ERASING: False
+  UNLABELED_INCLUDE_RANDOM_ERASING: False
+  UNLABELED_MIC_AUG: True
+DOMAIN_ADAPT:
+  LOSSES:
+    QUALITY_LOSS_WEIGHT_ENABLED: True
+  ALIGN:
+    SADA_ENABLED: True
+EMA:
+  ALPHA: 0.9
+OUTPUT_DIR: "output/cityscapes_mic/"
