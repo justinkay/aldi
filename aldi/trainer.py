@@ -16,7 +16,8 @@ from aldi.backbone import get_adamw_optim
 from aldi.checkpoint import DetectionCheckpointerWithEMA
 from aldi.distill import build_distiller
 from aldi.dropin import DefaultTrainer, AMPTrainer, SimpleTrainer
-from aldi.dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
+from aldi.dataloader import SaveWeakDatasetMapper, UMTDatasetMapper, UnlabeledSaveWeakDatasetMapper, UnlabeledUMTDatasetMapper, WeakStrongDataloader
+#from aldi.dataloader import SaveWeakDatasetMapper, UnlabeledDatasetMapper, WeakStrongDataloader
 from aldi.ema import EMA
 from aldi.helpers import Detectron2COCOEvaluatorAdapter
 from aldi.model import build_aldi
@@ -175,6 +176,7 @@ class ALDITrainer(DefaultTrainer):
 
           # add hooks to evaluate/save teacher model if applicable
           if self.cfg.EMA.ENABLED:
+               #todo: add some flag so that ema evaluation saves separately to student
                def test_and_save_results_ema():
                     self._last_eval_results = self.test(self.cfg, self.ema.model)
                     return self._last_eval_results

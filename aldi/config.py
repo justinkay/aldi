@@ -41,6 +41,7 @@ def add_aldi_config(cfg):
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_WEIGHT = 0.01
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_INPUT_DIM = 256 # = output channels of backbone
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_HIDDEN_DIMS = [256,]
+    _C.DOMAIN_ADAPT.ALIGN.IMG_DA_IMPL = "ours" # {ours, at}
     _C.DOMAIN_ADAPT.ALIGN.INS_DA_ENABLED = False
     _C.DOMAIN_ADAPT.ALIGN.INS_DA_WEIGHT = 0.01
     _C.DOMAIN_ADAPT.ALIGN.INS_DA_INPUT_DIM = 1024 # = output channels of box head
@@ -68,6 +69,7 @@ def add_aldi_config(cfg):
     _C.DOMAIN_ADAPT.TEACHER = CN()
     _C.DOMAIN_ADAPT.TEACHER.ENABLED = False
     _C.DOMAIN_ADAPT.TEACHER.THRESHOLD = 0.8
+    _C.DOMAIN_ADAPT.TEACHER.PSEUDO_LABEL_METHOD = "thresholding" # one of: { "thresholding", "probabilistic" }
 
     # Vision Transformer settings
     _C.VIT = CN()
@@ -78,6 +80,10 @@ def add_aldi_config(cfg):
     # num_gradient_accum_steps = IMS_PER_BATCH / (NUM_GPUS * IMS_PER_GPU)
     _C.SOLVER.IMS_PER_GPU = 2
 
+    # Unbiased Mean Teacher style feature alignment
+    _C.MODEL.UMT = CN()
+    _C.MODEL.UMT.ENABLED = False
+
     # We use gradient accumulation to run the weak/strong/unlabeled data separately
     # Should we call backward intermittently during accumulation or at the end?
     # The former is slower but less memory usage
@@ -85,3 +91,28 @@ def add_aldi_config(cfg):
 
     # Enable use of different optimizers (necessary to match VitDet settings)
     _C.SOLVER.OPTIMIZER = "SGD"
+
+    # to reproduce MIC
+    _C.DOMAIN_ADAPT.ALIGN.SADA_ENABLED = False
+    _C.DOMAIN_ADAPT.ALIGN.SADA_IMG_GRL_WEIGHT = 0.01
+    _C.DOMAIN_ADAPT.ALIGN.SADA_INS_GRL_WEIGHT = 0.1
+    _C.DOMAIN_ADAPT.ALIGN.SADA_COS_WEIGHT = 0.1
+    _C.DOMAIN_ADAPT.LOSSES = CN()
+    _C.DOMAIN_ADAPT.LOSSES.QUALITY_LOSS_WEIGHT_ENABLED = False
+
+    # to reproduce PT (incomplete)
+    _C.GRCNN = CN()
+    _C.GRCNN.LEARN_ANCHORS_LABELED = False
+    _C.GRCNN.LEARN_ANCHORS_UNLABELED = False
+    _C.GRCNN.TAU = [0.5, 0.5]
+    _C.GRCNN.EFL = False
+    _C.GRCNN.EFL_LAMBDA = [0.5, 0.5]
+    _C.GRCNN.MODEL_TYPE = "GAUSSIAN"
+
+    # Neptune logging
+    _C.LOGGING = CN()
+    _C.LOGGING.PROJECT = "login/project_code"
+    _C.LOGGING.API_TOKEN = "xxxxx"
+    _C.LOGGING.ITERS = 100
+    _C.LOGGING.TAGS = ""
+    _C.LOGGING.GROUP_TAGS = ""
