@@ -8,6 +8,6 @@ DATASETS:
   BATCH_CONTENTS: ("labeled_weak", )
 EMA:
   ENABLED: False
-OUTPUT_DIR: "outputs/urchininf/urchininf_baseline_weakaug/"
+OUTPUT_DIR: "outputs/urchininf/urchininf_base_weakaug/"
 LOGGING:
   TAGS: "Base,RCCN-FPN,WeakAug"

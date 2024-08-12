@@ -1,7 +1,7 @@
 _BASE_: "../MeanTeacher-urchininf.yaml"
 MODEL:
   META_ARCHITECTURE: "ExtraRCNN"
-  WEIGHTS: "outputs/urchininf/urchininf_baseline_weakaug/model_final.pth" # UMT does no burn in
+  WEIGHTS: "outputs/urchininf/urchininf_base_weakaug/model_final.pth" # UMT does no burn in
 DATASETS:
   BATCH_CONTENTS: ("labeled_weak", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
@@ -14,6 +14,6 @@ DOMAIN_ADAPT:
     QUALITY_LOSS_WEIGHT_ENABLED: True
   ALIGN:
     SADA_ENABLED: True
-OUTPUT_DIR: "outputs/urchininf/urchininf_mic/"
+OUTPUT_DIR: "outputs/urchininf/urchininf_MIC/"
 LOGGING:
   TAGS: "RCCN-FPN,MIC,Inf2UDD"

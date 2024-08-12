@@ -8,6 +8,6 @@ DATASETS:
   UNLABELED: ("UDD_train",)
   BATCH_CONTENTS: ("labeled_weak","unlabeled_weak")
   BATCH_RATIOS: (1,1)
-OUTPUT_DIR: "outputs/urchininf/urchininf_sada/"
+OUTPUT_DIR: "outputs/urchininf/urchininf_SADA/"
 LOGGING:
   TAGS: "RCCN-FPN,SADA,Inf2UDD"

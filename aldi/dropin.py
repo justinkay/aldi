@@ -50,7 +50,7 @@ class DefaultTrainer(_DefaultTrainer):
             data_loader = self.build_train_loader(cfg)
 
             ### Change is here ###
-            model = self.create_ddp_model(model, broadcast_buffers=False, cfg=cfg)
+            model = self.create_ddp_model(model, broadcast_buffers=False, cfg=cfg, find_unused_parameters=True)
             ###   End change   ###
 
             ## Change is here ##
@@ -81,8 +81,8 @@ class DefaultTrainer(_DefaultTrainer):
                 trainer=weakref.proxy(self),
             )
 
-    def create_ddp_model(self, model, broadcast_buffers, cfg):
-        return create_ddp_model(model, broadcast_buffers=broadcast_buffers)
+    def create_ddp_model(self, model, broadcast_buffers, cfg, find_unused_parameters):
+        return create_ddp_model(model, broadcast_buffers=broadcast_buffers, find_unused_parameters=find_unused_parameters)
     
 class SimpleTrainer(_SimpleTrainer):
     """

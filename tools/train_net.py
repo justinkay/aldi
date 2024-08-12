@@ -17,7 +17,11 @@ from detectron2.evaluation import verify_results
 
 import neptune
 from neptune_detectron2 import NeptuneHook
-
+try:
+    from neptune.utils import stringify_unsupported
+except ImportError:
+    from neptune.new.utils import stringify_unsupported
+    
 from aldi.checkpoint import DetectionCheckpointerWithEMA
 from aldi.config import add_aldi_config
 from aldi.ema import EMA
@@ -64,6 +68,14 @@ def main(args):
             raise NotImplementedError("TTA not supported")
         if comm.is_main_process():
             verify_results(cfg, res)
+
+            # Neptune logging results
+            run, hook = setup_neptune_logging(cfg.LOGGING.PROJECT, cfg.LOGGING.API_TOKEN, cfg.LOGGING.ITERS, cfg.LOGGING.TAGS, cfg.LOGGING.GROUP_TAGS, args.eval_only)
+            hook.base_handler["config"] = stringify_unsupported(cfg)
+            for j, u in res.items():
+                for k, v in u.items():
+                    hook.base_handler[f"metrics/{j}/{k}"].append(v)
+            run.stop()
         return res
 
     cfg = adjust_lr_for_ims_per_gpu(cfg, comm.get_world_size())
@@ -79,13 +91,14 @@ def main(args):
 
     # Neptune logging
 @functools.lru_cache()
-def setup_neptune_logging(project, api_token, freq, tags, group_tags):
+def setup_neptune_logging(project, api_token, freq, tags, group_tags, eval_only=False):
     run = neptune.init_run(project=project, api_token=api_token)
     if len(tags) > 0:
         run['sys/tags'].add(tags.split(','))
     if len(group_tags) > 0:
         run['sys/group_tags'].add(group_tags.split(','))
     hook = NeptuneHook(run=run, log_model=False, metrics_update_freq=freq)
+    hook.base_handler["config/EVAL_ONLY"] = eval_only
     return run, hook
 
 def adjust_lr_for_ims_per_gpu(cfg, world_size):

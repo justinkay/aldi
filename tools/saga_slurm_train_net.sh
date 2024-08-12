@@ -6,7 +6,7 @@
 #SBATCH --nodes=1                # node count
 #SBATCH --ntasks-per-node=1      # total number of tasks per node
 #SBATCH --cpus-per-task=16       # no of threads
-#SBATCH --mem=16G                 # memory per node
+#SBATCH --mem=20G                 # memory per node
 #SBATCH --output=slurm/slurm-%j.out           # slurm output files
 #SBATCH --error=slurm/slurm-%j.err
 
@@ -40,10 +40,10 @@ export CUDA_VISIBLE_DEVICES="0,1"
 # setup module system
 module --quiet purge
 module load Anaconda3/2022.10
-CONDA_ENV="/cluster/projects/nn10058k/hdoi5324_daod/conda/py310_torch"
+CONDA_ENV="../conda/py310_torch"
 
 # configuration values
-CFG_DIR="/cluster/home/hdoi5324/aldi-extras/configs/urchininf/"
+CFG_DIR="configs/urchininf/"
 CFG_FILE="$1" #"Base-RCNN-FPN-urchininf_weakaug.yaml"
 CLI=${@:2}
 echo "${CFG_FILE} ${CLI}"

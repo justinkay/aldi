@@ -1,6 +1,6 @@
 _BASE_: "./Base-RCNN-FPN-urchininf_strongaug_ema.yaml"
 MODEL:
-  WEIGHTS: "outputs/urchininf/urchininf_baseline_strongaug_ema/model_final.pth" 
+  WEIGHTS: "outputs/urchininf/urchininf_base_strongaug_ema/model_final.pth" 
 EMA:
   ENABLED: True
 DATASETS:
@@ -24,6 +24,6 @@ AUG:
   UNLABELED_INCLUDE_RANDOM_ERASING: False
   LABELED_MIC_AUG: False
   UNLABELED_MIC_AUG: True
-OUTPUT_DIR: "outputs/urchininf/urchininf_aldi/"
+OUTPUT_DIR: "outputs/urchininf/urchininf_ALDI/"
 LOGGING:
   TAGS: "RCCN-FPN,ALDI"

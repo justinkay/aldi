@@ -41,3 +41,5 @@ register_coco_instances("UDD_train", {}, "datasets/UDD/annotations/instances_tra
 register_coco_instances("squidle_urchin_2011_test", {}, "datasets/squidle_coco/squidle_urchin_2011/annotations/instances_test2023.json", "datasets/squidle_coco/squidle_urchin_2011/test2023")
 register_coco_instances("squidle_urchin_2009_train", {}, "datasets/squidle_coco/squidle_urchin_2009/annotations/instances_train2023.json", "datasets/squidle_coco/squidle_urchin_2009/train2023")
 
+# S-UODAC2020 https://github.com/mousecpn/DMC-Domain-Generalization-for-Underwater-Object-Detection
+register_coco_instances("SUODAC2020_test", {}, "datasets/S-UODAC2020/COCO_Annotations/instances_urchin_target.json", "datasets/S-UODAC2020/type7")
