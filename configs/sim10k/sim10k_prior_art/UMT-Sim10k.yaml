@@ -12,6 +12,6 @@ AUG:
 DOMAIN_ADAPT:
   DISTILL:
     # UMT does not disable loc losses
-    HARD_ROIH_REG_ENABLED: False
-    HARD_RPN_REG_ENABLED: False
-OUTPUT_DIR: "output/sim10k_umt/"
+    HARD_ROIH_REG_ENABLED: True
+    HARD_RPN_REG_ENABLED: True
+OUTPUT_DIR: "output/sim10k_umt_fixed/"

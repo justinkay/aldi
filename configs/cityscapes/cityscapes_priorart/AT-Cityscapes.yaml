@@ -3,4 +3,4 @@ DOMAIN_ADAPT:
   ALIGN:
     IMG_DA_ENABLED: True
     IMG_DA_IMPL: 'at'
-OUTPUT_DIR: "output/cityscapes_at/"
+OUTPUT_DIR: "output/cityscapes_at_vit/"

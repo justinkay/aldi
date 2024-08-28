@@ -1,4 +1,6 @@
 _BASE_: "../sim10k_prior_art/UMT-Sim10k.yaml"
 MODEL:
   WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl" 
-OUTPUT_DIR: "output/sim10k_umt_imagenet/"
+OUTPUT_DIR: "output/sim10k_umt_imagenet_fixed/"
+SOLVER:
+  BASE_LR: 0.01

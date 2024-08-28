@@ -1,8 +1,10 @@
 _BASE_: "../Base-RCNN-FPN-CFC_strongaug_ema.yaml"
 MODEL:
   WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+EMA:
+  ALPHA: 0.9
 SOLVER:
   BASE_LR: 0.01 
   STEPS: (15999,)
   MAX_ITER: 16000
-OUTPUT_DIR: "output/cfc/cfc_baseline_imagenet_strongaug_ema/"
+OUTPUT_DIR: "output/cfc/cfc_baseline_imagenet_strongaug_ema_alpha09/"

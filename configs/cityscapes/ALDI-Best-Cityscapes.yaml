@@ -25,7 +25,7 @@ DATASETS:
   BATCH_CONTENTS: ("labeled_strong", "unlabeled_strong")
   BATCH_RATIOS: (1,1)
 SOLVER:
-  STEPS: (14999,)
-  MAX_ITER: 15000
+  STEPS: (44999,)
+  MAX_ITER: 45000
   BACKWARD_AT_END: False
-OUTPUT_DIR: "output/cityscapes/cityscapes_aldi_best2/"
+OUTPUT_DIR: "output/cityscapes/cityscapes_aldi_best/"
