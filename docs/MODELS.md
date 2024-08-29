@@ -46,7 +46,7 @@ Here we provide the models trained using ALDI++.
 
 | Backbone      | Download links |
 | ----------- | ----------- |
-| Resnet50 w/ FPN | [Config](https://github.com/justinkay/aldi/blob/main/configs/cityscapes/ALDI-Best-Cityscapes.yaml) [Model--TODO]() |
+| Resnet50 w/ FPN | [Config](https://github.com/justinkay/aldi/blob/main/configs/cityscapes/ALDI-Best-Cityscapes.yaml) [Model](https://github.com/justinkay/aldi/releases/download/v0.0.1/aldi++_cityscapes_foggy_val_model_best.pth) [Log](https://github.com/justinkay/aldi/releases/download/v0.0.1/aldi++_cs_to_fcs_log.txt) |
 | VitDet-B | [Config](https://github.com/justinkay/aldi/blob/main/configs/cityscapes/ALDI-Best-ViT-Cityscapes.yaml) [Model--TODO]() |
 
 #### Sim10k &rarr; Cityscapes
