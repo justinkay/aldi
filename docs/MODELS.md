@@ -53,10 +53,10 @@ Here we provide the models trained using ALDI++.
 
 | Backbone      | Download links |
 | ----------- | ----------- |
-| Resnet50 w/ FPN | [Config](https://github.com/justinkay/aldi/blob/main/configs/sim10k/ALDI-Best-Sim10k.yaml) [Model--TODO]() |
+| Resnet50 w/ FPN | [Config](https://github.com/justinkay/aldi/blob/main/configs/sim10k/ALDI-Best-Sim10k.yaml) [Model](https://github.com/justinkay/aldi/releases/download/v0.0.1/aldi++_sim10k_cityscapes_cars_val_model_best.pth) [Log](https://github.com/justinkay/aldi/releases/download/v0.0.1/aldi++_sim10k_log.txt) |
 
 #### CFC Kenai &rarr; Channel
 
 | Backbone      | Download links |
 | ----------- | ----------- |
-| Resnet50 w/ FPN | [Config](https://github.com/justinkay/aldi/blob/main/configs/cfc/ALDI-Best-CFC.yaml) [Model--TODO]() |
+| Resnet50 w/ FPN | [Config](https://github.com/justinkay/aldi/blob/main/configs/cfc/ALDI-Best-CFC.yaml) [Model](https://github.com/justinkay/aldi/releases/download/v0.0.1/aldi++_cfc_channel_test_model_best.pth) [Log](https://github.com/justinkay/aldi/releases/download/v0.0.1/aldi++_cfc_log.txt) |
