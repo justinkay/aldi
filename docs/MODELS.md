@@ -8,7 +8,7 @@ For compatibility with the config files we provide, download any models here to 
 
 Here we provide links to models from the [Detectron2 model zoo](https://github.com/facebookresearch/detectron2/blob/main/MODEL_ZOO.md) that we use for pre-training. All baseline and oracle models in our experiments start with these weights. Note we did not train these models, but provide links here for convenience.
 
-**COCO pretrained Mask R-CNN w/ Res50-FPN backbone and 3x schedule:** [Config](https://github.com/facebookresearch/detectron2/blob/main/configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml) [Model](https://dl.fbaipublicfiles.com/detectron2/COCO-Detection/faster_rcnn_R_50_FPN_3x/137849458/model_final_280758.pkl)
+**COCO pretrained Mask R-CNN w/ Res50-FPN backbone and 3x schedule:** [Config](https://github.com/facebookresearch/detectron2/blob/main/configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml) [Model](https://dl.fbaipublicfiles.com/detectron2/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl)
 
 ### Baselines / Burn-in checkpoints
 
