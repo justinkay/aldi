@@ -87,3 +87,13 @@ def add_aldi_config(cfg):
 
     # Enable use of different optimizers (necessary to match VitDet settings)
     _C.SOLVER.OPTIMIZER = "SGD"
+
+    # Extra configs for convnext
+    # Default is ConvNext-T (Resnet-50 equiv.)
+    _C.MODEL.CONVNEXT = CN()
+    _C.MODEL.CONVNEXT.DEPTHS= [3, 3, 9, 3]
+    _C.MODEL.CONVNEXT.DIMS= [96, 192, 384, 768]
+    _C.MODEL.CONVNEXT.DROP_PATH_RATE= 0.2
+    _C.MODEL.CONVNEXT.LAYER_SCALE_INIT_VALUE= 1e-6
+    _C.MODEL.CONVNEXT.OUT_FEATURES= [0, 1, 2, 3]
+    _C.SOLVER.WEIGHT_DECAY_RATE= 0.95

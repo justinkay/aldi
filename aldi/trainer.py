@@ -202,8 +202,8 @@ class ALDITrainer(DefaultTrainer):
           """
           if cfg.SOLVER.OPTIMIZER.upper() == "SGD":
                return super(ALDITrainer, cls).build_optimizer(cfg, model)
-          elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW" and cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone":
-               return get_adamw_optim(model, include_vit_lr_decay=True)
+          elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW":
+               return get_adamw_optim(model, include_vit_lr_decay=cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone")
           else:
                raise ValueError(f"Unsupported optimizer/backbone combination {cfg.SOLVER.OPTIMIZER} {cfg.MODEL.BACKBONE.NAME}.")
 
