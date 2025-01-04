@@ -21,6 +21,7 @@ dependencies = [
     "ipython", # for yolo
     "psutil", # for yolo
     "seaborn", # for yolo
+    "timm", # for vit
 ]
 
 [project.urls]
