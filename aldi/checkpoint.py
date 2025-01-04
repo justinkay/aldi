@@ -20,7 +20,7 @@ class DetectionCheckpointerWithEMA(DetectionCheckpointer):
         if (not resume) and path.endswith(".pth") and "ema" in ret.keys():
             self.logger.info("Loading EMA weights as model starting point.")
             ema_dict = {
-                k.replace('model.',''): v for k, v in ret['ema'].items()
+                k.replace('model.', '', 1): v for k, v in ret['ema'].items()
             }
             incompatible = self.model.load_state_dict(ema_dict, strict=False)
             if incompatible is not None:

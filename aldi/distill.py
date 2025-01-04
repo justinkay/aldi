@@ -30,6 +30,11 @@ A Distiller is expected to implement:
         outputs: boolean, whether any distillation loss will be calculated
 """
 
+DISTILL_MIXIN_REGISTRY = Registry("DISTILL_MIXIN")
+DISTILL_MIXIN_REGISTRY.__doc__ = """
+TODO
+"""
+
 
 def build_distiller(cfg, teacher, student):
     name = cfg.DOMAIN_ADAPT.DISTILL.DISTILLER_NAME
@@ -247,7 +252,8 @@ class ALDIDistiller(Distiller):
         return losses
 
 
-# Any modifications to the torch module itself go here and are mixed in in rcnn.ALDI
+# Any modifications to the torch module itself go here and are mixed in
 # See align.py for an example
 # For now, no modifications are needed
+@DISTILL_MIXIN_REGISTRY.register()
 class DistillMixin(GeneralizedRCNN): pass

@@ -16,7 +16,9 @@ from aldi.checkpoint import DetectionCheckpointerWithEMA
 from aldi.config import add_aldi_config
 from aldi.ema import EMA
 from aldi.trainer import ALDITrainer
+import aldi.align # register align mixins with Detectron2
 import aldi.datasets # register datasets with Detectron2
+import aldi.distill # register distillers and distill mixins with Detectron2
 import aldi.model # register ALDI R-CNN model with Detectron2
 import aldi.backbone # register ViT FPN backbone with Detectron2
 
@@ -29,9 +31,18 @@ def setup(args):
 
     ## Change here
     add_aldi_config(cfg)
+    try:
+        cfg.merge_from_file(args.config_file)
+    except: 
+        # optionally add YOLO config options (only do this if necessary; otherwise we will unnecessarily add them)
+        # TODO probably a better way to do this
+        from aldi.yolo.helpers import add_yolo_config
+        import aldi.yolo.align # register align mixins with Detectron2
+        import aldi.yolo.distill # register distillers and distill mixins with Detectron2
+        add_yolo_config(cfg)
+        cfg.merge_from_file(args.config_file)
     ## End change
 
-    cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
     default_setup(cfg, args)

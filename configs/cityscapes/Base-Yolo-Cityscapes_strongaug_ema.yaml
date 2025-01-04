@@ -1,0 +1,11 @@
+_BASE_: "../Base-Yolo.yaml"
+MODEL:
+  YOLO:
+    NUM_CLASSES: 8
+DATASETS:
+  TRAIN: ("cityscapes_train",)
+  TEST: ("cityscapes_val", "cityscapes_foggy_val",)
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+OUTPUT_DIR: "output/cityscapes/cityscapes_baseline_yolo_strongaug_ema/"

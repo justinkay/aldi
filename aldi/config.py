@@ -36,6 +36,7 @@ def add_aldi_config(cfg):
 
     # Source-target alignment
     _C.DOMAIN_ADAPT.ALIGN = CN()
+    _C.DOMAIN_ADAPT.ALIGN.MIXIN_NAME = "AlignMixin"
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_ENABLED = False
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_LAYER = "p2"
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_WEIGHT = 0.01
@@ -49,6 +50,7 @@ def add_aldi_config(cfg):
     # Self-distillation
     _C.DOMAIN_ADAPT.DISTILL = CN()
     _C.DOMAIN_ADAPT.DISTILL.DISTILLER_NAME = "ALDIDistiller"
+    _C.DOMAIN_ADAPT.DISTILL.MIXIN_NAME = "DistillMixin"
     # 'Pseudo label' approaches
     _C.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED = False
     _C.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED = False
