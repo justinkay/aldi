@@ -6,10 +6,11 @@ import detectron2.utils.comm as comm
 
 
 class EMA(nn.Module):
-    def __init__(self, model, alpha):
+    def __init__(self, model, alpha, start_iter=0):
         super(EMA, self).__init__()
         self.model = copy.deepcopy(model)
         self.alpha = alpha
+        self.start_iter = start_iter
 
     def _get_student_dict(self, model):
         # account for DDP
@@ -42,7 +43,7 @@ class EMA(nn.Module):
 
     def update_weights(self, model, iter):
         # Init/update ema model
-        if iter == 0:
+        if iter <= self.start_iter:
             self._init_ema_weights(model)
         if iter > 0:
             self._update_ema(model, iter)

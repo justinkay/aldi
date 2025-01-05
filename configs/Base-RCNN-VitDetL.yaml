@@ -2,7 +2,8 @@ _BASE_: "./Base-RCNN-FPN.yaml"
 MODEL:
   BACKBONE:
     NAME: "build_vitdet_l_backbone"
-  WEIGHTS: "models/model_final_6146ed.pkl"
+  # WEIGHTS: "models/model_final_6146ed.pkl"
+  WEIGHTS: "models/clip_vitl_backbone.pkl"
 ## See detectron2/configs/common/models/mask_rcnn_vitdet.py
   ROI_BOX_HEAD:
     NORM: "LN"

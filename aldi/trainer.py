@@ -141,7 +141,7 @@ class ALDITrainer(DefaultTrainer):
      """Modified DefaultTrainer to support Mean Teacher style training."""
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
-          self.ema = EMA(build_aldi(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
+          self.ema = EMA(build_aldi(cfg), cfg.EMA.ALPHA, cfg.EMA.START_ITER) if cfg.EMA.ENABLED else None
           distiller = build_distiller(cfg=cfg, teacher=self.ema.model if cfg.EMA.ENABLED else model, student=model)
           trainer = (ALDIAMPTrainer if cfg.SOLVER.AMP.ENABLED else ALDISimpleTrainer)(model, data_loader, optimizer, distiller,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,

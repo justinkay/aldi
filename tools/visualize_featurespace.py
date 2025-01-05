@@ -58,7 +58,7 @@ def main(args):
     model = ALDITrainer.build_model(cfg)
     ckpt = DetectionCheckpointerWithEMA(model, save_dir=cfg.OUTPUT_DIR)
     if cfg.EMA.ENABLED and cfg.EMA.LOAD_FROM_EMA_ON_START:
-        ema = EMA(ALDITrainer.build_model(cfg), cfg.EMA.ALPHA)
+        ema = EMA(ALDITrainer.build_model(cfg), cfg.EMA.ALPHA, cfg.EMA.START_ITER)
         ckpt.add_checkpointable("ema", ema)
     ckpt.resume_or_load(cfg.MODEL.WEIGHTS, resume=args.resume)
     

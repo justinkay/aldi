@@ -30,6 +30,7 @@ def add_aldi_config(cfg):
      # if MODEL.WEIGHTS contains both ["model", "ema"], initialize with the EMA weights.
      # also determines if EMA is used for eval when running tools/train_net.py --eval-only.
     _C.EMA.LOAD_FROM_EMA_ON_START = True
+    _C.EMA.START_ITER = 0
 
     # Begin domain adaptation settings
     _C.DOMAIN_ADAPT = CN()
