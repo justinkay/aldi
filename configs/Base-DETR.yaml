@@ -1,6 +1,6 @@
 MODEL:
   META_ARCHITECTURE: "DeformableDETR"
-  WEIGHTS: "" #"detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  WEIGHTS: "" # Pre-trained weights auto-loaded from torchvision in the code
   PIXEL_MEAN: [123.675, 116.280, 103.530]
   PIXEL_STD: [58.395, 57.120, 57.375]
   DEFORMABLE_DETR:
@@ -45,11 +45,12 @@ INPUT:
     SIZE: (384, 600)
   FORMAT: "RGB"
 SOLVER:
-  BASE_LR: 0.06
+  # BASE_LR: 0.06
+  BASE_LR: 0.0001
   STEPS: (1600,)
   MAX_ITER: 2000
   IMS_PER_BATCH: 48
-  IMS_PER_GPU: 2
+  IMS_PER_GPU: 16
   BACKWARD_AT_END: False
   AMP:
     ENABLED: False # not supported for multiscale deformable conv
