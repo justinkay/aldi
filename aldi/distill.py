@@ -57,6 +57,22 @@ class Distiller:
     def distill_enabled(self):
         return False
     
+    
+@DISTILLER_REGISTRY.register()
+class HardDistiller(Distiller):
+    """Just do hard psuedo-label self-distillation; should work with any kind of detector."""
+    def __init__(self, teacher, student, pseudo_label_threshold=0.8):
+        set_attributes(self, locals())
+        self.pseudo_labeler = PseudoLabeler(teacher, pseudo_label_threshold)
+
+    def __call__(self, teacher_batched_inputs, student_batched_inputs):
+        self.pseudo_labeler(teacher_batched_inputs, student_batched_inputs)
+        standard_losses = self.student(student_batched_inputs)
+        return standard_losses
+
+    def distill_enabled(self):
+        return True
+
 
 @DISTILLER_REGISTRY.register()
 class ALDIDistiller(Distiller):
