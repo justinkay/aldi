@@ -1,12 +1,16 @@
 _BASE_: "detectron2/Base-RCNN-FPN.yaml"
 MODEL:
-  WEIGHTS: "models/model_final_f10217.pkl"
+  WEIGHTS: "models/convnext_large_1k_384_backbone.pkl"
   MASK_ON: False
   BACKBONE:
     NAME: "build_convnext_fpn_backbone"
   CONVNEXT:
-    DEPTHS: [3, 3, 9, 3]
-    DIMS: [96, 192, 384, 768]
+    # convnext-T:
+    # DEPTHS: [3, 3, 9, 3]
+    # DIMS: [96, 192, 384, 768]
+    # convnext-L:
+    DEPTHS: [3, 3, 27, 3]
+    DIMS: [192, 384, 768, 1536]
     DROP_PATH_RATE: 0.2
     LAYER_SCALE_INIT_VALUE: 1e-6
     OUT_FEATURES: [0, 1, 2, 3]
@@ -43,7 +47,7 @@ SOLVER:
   STEPS: (1600,)
   MAX_ITER: 2000
   IMS_PER_BATCH: 48
-  IMS_PER_GPU: 2
+  IMS_PER_GPU: 4
   BACKWARD_AT_END: False
   AMP:
     ENABLED: True
@@ -56,3 +60,5 @@ SOLVER:
 VIS_PERIOD: 100
 TEST:
   EVAL_PERIOD: 100
+EMA:
+  START_ITER: 250 # to speed up training ; assuming 2 GPUS ~= 10 epochs

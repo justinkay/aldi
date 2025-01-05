@@ -26,3 +26,5 @@ SOLVER:
   BASE_LR: 0.0001
 VIT:
   USE_ACT_CHECKPOINT: True
+EMA:
+  START_ITER: 500 # to speed up training ; assuming 2 GPUS ~= 10 epochs

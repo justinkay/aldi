@@ -4,7 +4,7 @@ MODEL:
     NUM_CLASSES: 8
 DATASETS:
   TRAIN: ("cityscapes_train",)
-  TEST: ("cityscapes_val", "cityscapes_foggy_val",)
+  TEST: ("cityscapes_foggy_val",)
   BATCH_CONTENTS: ("labeled_strong", )
 EMA:
   ENABLED: True
