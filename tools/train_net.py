@@ -31,18 +31,26 @@ def setup(args):
 
     ## Change here
     add_aldi_config(cfg)
+
     try:
-        cfg.merge_from_file(args.config_file)
-    except: 
-        # optionally add YOLO config options (only do this if necessary; otherwise we will unnecessarily add them)
-        # TODO probably a better way to do this
         from aldi.yolo.helpers import add_yolo_config
         import aldi.yolo.align # register align mixins with Detectron2
         import aldi.yolo.distill # register distillers and distill mixins with Detectron2
         add_yolo_config(cfg)
-        cfg.merge_from_file(args.config_file)
+    except:
+        print("Could not load YOLO library.")
+
+# try: 
+    from aldi.detr.helpers import add_deformable_detr_config
+    import aldi.detr.align # register align mixins with Detectron2
+    import aldi.detr.distill # register distillers and distill mixins with Detectron2
+    add_deformable_detr_config(cfg)
+# except:
+    # print("Could not load DETR library.")
+
     ## End change
 
+    cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
     default_setup(cfg, args)

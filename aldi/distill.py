@@ -61,9 +61,19 @@ class Distiller:
 @DISTILLER_REGISTRY.register()
 class HardDistiller(Distiller):
     """Just do hard psuedo-label self-distillation; should work with any kind of detector."""
-    def __init__(self, teacher, student, pseudo_label_threshold=0.8):
+    def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, 
+                 do_hard_roi_reg=False, pseudo_label_threshold=0.8):
         set_attributes(self, locals())
         self.pseudo_labeler = PseudoLabeler(teacher, pseudo_label_threshold)
+
+    @classmethod
+    def from_config(cls, cfg, teacher, student):
+        return HardDistiller(teacher, student, 
+                        do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
+                        do_hard_obj=cfg.DOMAIN_ADAPT.DISTILL.HARD_OBJ_ENABLED,
+                        do_hard_rpn_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_RPN_REG_ENABLED,
+                        do_hard_roi_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED,
+                        pseudo_label_threshold=cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD)
 
     def __call__(self, teacher_batched_inputs, student_batched_inputs):
         self.pseudo_labeler(teacher_batched_inputs, student_batched_inputs)
@@ -71,7 +81,7 @@ class HardDistiller(Distiller):
         return standard_losses
 
     def distill_enabled(self):
-        return True
+        return any([self.do_hard_cls, self.do_hard_obj, self.do_hard_rpn_reg, self.do_hard_roi_reg])
 
 
 @DISTILLER_REGISTRY.register()
