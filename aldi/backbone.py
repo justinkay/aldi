@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 from torch.utils.checkpoint import checkpoint
 import torch.nn.functional as F
-import torch.utils.checkpoint as checkpoint
 
 from detectron2 import model_zoo
 from detectron2.config import instantiate
@@ -60,8 +59,7 @@ def build_vitdet_l_backbone(cfg, input_shape):
 
     backbone = instantiate(backbone)
 
-    # TODO doesn't work yet
-    # backbone.net.forward = partial(checkpointed_vit_forward, backbone.net, cfg.VIT.USE_ACT_CHECKPOINT)
+    backbone.net.forward = partial(checkpointed_vit_forward, backbone.net, cfg.VIT.USE_ACT_CHECKPOINT)
    
     return backbone
 
