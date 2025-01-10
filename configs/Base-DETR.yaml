@@ -1,6 +1,6 @@
 MODEL:
   META_ARCHITECTURE: "DeformableDETR"
-  WEIGHTS: "" # Pre-trained weights auto-loaded from torchvision in the code
+  WEIGHTS: "models/r50_deformable_detr-checkpoint-converted.pth" # "" # Pre-trained ImageNet weights auto-loaded from torchvision in the code
   PIXEL_MEAN: [123.675, 116.280, 103.530]
   PIXEL_STD: [58.395, 57.120, 57.375]
   DEFORMABLE_DETR:

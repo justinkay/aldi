@@ -2,8 +2,7 @@ _BASE_: "./Base-RCNN-FPN.yaml"
 MODEL:
   BACKBONE:
     NAME: "build_vitdet_l_backbone"
-  # WEIGHTS: "models/model_final_6146ed.pkl"
-  WEIGHTS: "models/clip_vitl_backbone.pkl"
+  WEIGHTS: "models/model_final_6146ed.pkl"
 ## See detectron2/configs/common/models/mask_rcnn_vitdet.py
   ROI_BOX_HEAD:
     NORM: "LN"
@@ -27,4 +26,4 @@ SOLVER:
 VIT:
   USE_ACT_CHECKPOINT: True
 EMA:
-  START_ITER: 500 # to speed up training ; assuming 2 GPUS ~= 10 epochs
+  START_ITER: 200

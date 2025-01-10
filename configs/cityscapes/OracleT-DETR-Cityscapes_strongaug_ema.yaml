@@ -5,4 +5,7 @@ DATASETS:
   BATCH_CONTENTS: ("labeled_strong", )
 EMA:
   ENABLED: True
-OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-t_detr_strongaug_ema/"
+SOLVER:
+  STEPS: (19999,)
+  MAX_ITER: 20000
+OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-t_detr_coco_strongaug_ema/"
