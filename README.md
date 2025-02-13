@@ -1,4 +1,4 @@
-# boop <div align="center"> Align and Distill: Unifying and Improving <br>Domain Adaptive Object Detection</div>
+# <div align="center"> Align and Distill: Unifying and Improving <br>Domain Adaptive Object Detection</div>
 
 <div align="center">
  
