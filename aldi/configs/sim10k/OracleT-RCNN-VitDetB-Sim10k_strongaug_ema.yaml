@@ -1,0 +1,17 @@
+_BASE_: "../Base-RCNN-VitDetB.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("cityscapes_cars_train",)
+  TEST: ("cityscapes_cars_val",)
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+SOLVER:
+  STEPS: (11999,)
+  MAX_ITER: 12000
+  CHECKPOINT_PERIOD: 3000
+TEST:
+  EVAL_PERIOD: 1000
+OUTPUT_DIR: "output/sim10k/sim10k_vitdetb_oraclet_strongaug_ema/"
