@@ -3,71 +3,78 @@ import json
 import pandas as pd
 import sys
 
+def load_json(file):
+    o = {}
+    with open(file, 'r') as f:
+        o = json.load(f)
+    return o
+
 def image(row):
     image = {}
-    image["height"] = row.height
-    image["width"] = row.width
     image["id"] = row.fileid
+    image["height"] = 3420 # FIXME currently hardcoded - update after cropping?
+    image["width"] = 6080 # FIXME
     image["file_name"] = row.filename
     return image
 
-def category(row):
-    category = {}
-    category["supercategory"] = 'None'
-    category["id"] = row.categoryid
-    category["name"] = row[2]
-    return category
-
-def annotation(row):
+def annotation(row, category_id):
     annotation = {}
-    area = (row.xmax -row.xmin)*(row.ymax - row.ymin)
-    annotation["segmentation"] = []
-    annotation["iscrowd"] = 0
-    annotation["area"] = area
+    annotation["id"] = row.fileid + str(row.region_id)
     annotation["image_id"] = row.fileid
-
-    annotation["bbox"] = [row.xmin, row.ymin, row.xmax -row.xmin,row.ymax-row.ymin ]
-
-    annotation["category_id"] = row.categoryid
-    annotation["id"] = row.annid
+    annotation["category_id"] = category_id
+    annotation["segmentation"] = [] # NOTE blank? We don't have this. Wondering if this needs to be disabled if we use flat-bug data 
+    shape = json.loads(row.region_shape_attributes)
+    annotation["area"] = shape["width"]*shape["height"]
+    annotation["bbox"] = [shape["x"], shape["y"], shape["width"], shape["height"]]
+    annotation["iscrowd"] = 0
     return annotation
 
-def convert(csv_file, coco_file_destination):
-    data = pd.read_csv(csv_file)
+def get_category_id_from_name(categories, name):
+    for c in categories:
+        if c["name"] == name:
+            return c["id"]
+    KeyError("Category didn't exist")
 
+def convert(identifier, info_file, categories_file, csv_file, coco_file_destination):
+    data = pd.read_csv(csv_file, on_bad_lines='skip')
+    data['fileid'] = pd.Categorical(data['filename'], ordered=True).codes # create a unique file id for each unique filename-row
+    data['fileid'] = identifier + data['fileid'].astype(str)
+    
+    info_json = load_json(info_file)[identifier]["info"]
+
+    # Create images entries, one for each image
     images = []
-    categories = []
-    annotations = []
-
-    category = {}
-    category["supercategory"] = 'none'
-    category["id"] = 0
-    category["name"] = 'None'
-    categories.append(category)
-
-    data['fileid'] = data['filename'].astype('category').cat.codes
-    data['categoryid']= pd.Categorical(data['class'],ordered= True).codes
-    data['categoryid'] = data['categoryid']+1
-    data['annid'] = data.index
-    for row in data.itertuples():
-        annotations.append(annotation(row))
-
     imagedf = data.drop_duplicates(subset=['fileid']).sort_values(by='fileid')
     for row in imagedf.itertuples():
         images.append(image(row))
+    
+    # Create categories entries 
+    categories = load_json(categories_file)["categories"]
 
-    catdf = data.drop_duplicates(subset=['categoryid']).sort_values(by='categoryid')
-    for row in catdf.itertuples():
-        categories.append(category(row))
-
+    # Create annotations entries
+    annotations = []
+    for row in data.itertuples():
+        if row.region_count == 0:
+            continue
+        # if there is a detection, append the annotation
+        category_name = list((json.loads(row.region_attributes))["Insect"].keys())[0] 
+        category_id = get_category_id_from_name(categories, category_name)
+        annotations.append(annotation(row,category_id))
+    
+    # Create final coco-json file 
     data_coco = {}
-    data_coco["images"] = images
+    data_coco["info"] = info_json
+    data_coco["license"] = None
     data_coco["categories"] = categories
+    data_coco["images"] = images
     data_coco["annotations"] = annotations
-    json.dump(data_coco, open(coco_file_destination, "w"), indent=4)
+    with open(coco_file_destination, "w") as f:
+        json.dump(data_coco, f, indent=4)
 
 if __name__ == "__main__":
-    args = sys.argv()
-    path_to_csv_file = args[0]
-    save_coco_path = args[1]
-    convert(path_to_csv_file, save_coco_path)
+    title = "200601-HF2G-f" # sys.argv[0]
+    info_file = "../ERDA/bugmaster/datasets/pitfall-cameras/info.json"
+    categories_file = "../ERDA/bugmaster/datasets/pitfall-cameras/categories.json"
+    csv_file = "../ERDA/bugmaster/datasets/pitfall-cameras/annotations/010620 HF2G Flash on_csv.csv"
+    save_coco_path = "../ERDA/bugmaster/datasets/pitfall-cameras/annotations/200601-HF2G-f.json"
+    convert(title, info_file, categories_file, csv_file, save_coco_path)
