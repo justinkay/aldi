@@ -1,12 +1,12 @@
 from detectron2.data.datasets import register_coco_instances
 
 # Cityscapes 
-register_coco_instances("cityscapes_train", {},         "../DATA/cityscapes/annotations/cityscapes_train_instances.json",                  "../DATA/cityscapes/leftImg8bit/train/")
-register_coco_instances("cityscapes_val",   {},         "../DATA/cityscapes/annotations/cityscapes_val_instances.json",                    "../DATA/cityscapes/leftImg8bit/val/")
+register_coco_instances("cityscapes_train", {},         "../../DATA/cityscapes/annotations/cityscapes_train_instances.json",                  "../../DATA/cityscapes/leftImg8bit/train/")
+register_coco_instances("cityscapes_val",   {},         "../../DATA/cityscapes/annotations/cityscapes_val_instances.json",                    "../../DATA/cityscapes/leftImg8bit/val/")
 
 # Foggy Cityscapes
-register_coco_instances("cityscapes_foggy_train", {},   "../DATA/cityscapes/annotations/cityscapes_train_instances_foggyALL.json",   "../DATA/cityscapes/leftImg8bit_foggy/train/")
-register_coco_instances("cityscapes_foggy_val", {},     "../DATA/cityscapes/annotations/cityscapes_val_instances_foggyALL.json",     "../DATA/cityscapes/leftImg8bit_foggy/val/")
+register_coco_instances("cityscapes_foggy_train", {},   "../../DATA/cityscapes/annotations/cityscapes_train_instances_foggyALL.json",   "../../DATA/cityscapes/leftImg8bit_foggy/train/")
+register_coco_instances("cityscapes_foggy_val", {},     "../../DATA/cityscapes/annotations/cityscapes_val_instances_foggyALL.json",     "../../DATA/cityscapes/leftImg8bit_foggy/val/")
 # for evaluating COCO-pretrained models: category IDs are remapped to match
 register_coco_instances("cityscapes_foggy_val_coco_ids", {},     "datasets/cityscapes/annotations/cityscapes_val_instances_foggyALL_coco.json",     "datasets/cityscapes/leftImg8bit_foggy/val/")
 
