@@ -5,4 +5,4 @@ DATASETS:
   BATCH_CONTENTS: ("labeled_strong", )
 EMA:
   ENABLED: True
-OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-t_strongaug_ema/"
+OUTPUT_DIR: "output/cityscapes/cityscapes_oracle_RCNN_FPN_strongaug_ema/"

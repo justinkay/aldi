@@ -14,4 +14,4 @@ SOLVER:
   CHECKPOINT_PERIOD: 3000
 TEST:
   EVAL_PERIOD: 1250
-OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-t_strongaug_ema/"
+OUTPUT_DIR: "output/cityscapes/cityscapes_oracle_RCNN_FPN_strongaug_ema_corrected/"
