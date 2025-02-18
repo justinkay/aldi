@@ -1,0 +1,17 @@
+_BASE_: "../backbone/Base-RCNN-FPN.yaml"
+MODEL:
+  ROI_HEADS:
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("cityscapes_foggy_train",)
+  TEST: ("cityscapes_val","cityscapes_foggy_val",)
+  BATCH_CONTENTS: ("labeled_strong", )
+EMA:
+  ENABLED: True
+SOLVER:
+  STEPS: (11999,)
+  MAX_ITER: 12000
+  CHECKPOINT_PERIOD: 3000
+TEST:
+  EVAL_PERIOD: 1250
+OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-t_strongaug_ema/"
