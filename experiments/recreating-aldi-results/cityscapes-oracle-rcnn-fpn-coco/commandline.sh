@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# Point to your dataset folder containing both images and COCO formatted annotations here
+# Point to your dataset folder containing both images and COCO formatted annotations here.
+# Link name MUST be 'datasets' to be compatible with ALDI
 ln -sfT ~/DATA datasets
 
 # Run experiment
