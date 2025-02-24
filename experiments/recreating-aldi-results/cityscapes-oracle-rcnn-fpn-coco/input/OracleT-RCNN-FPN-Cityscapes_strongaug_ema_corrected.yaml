@@ -1,4 +1,4 @@
-_BASE_: "../../../common-configs/backbone/Base-RCNN-FPN.yaml"
+_BASE_: "backbone/Base-RCNN-FPN.yaml"
 MODEL:
   ROI_HEADS:
     NUM_CLASSES: 8
@@ -12,4 +12,4 @@ SOLVER:
   STEPS: (11999,)
   MAX_ITER: 10000
   CHECKPOINT_PERIOD: 3000
-OUTPUT_DIR: "../../experiments/recreating-aldi-results/cityscapes-oracle-rcnn-fpn-coco/output/"
+OUTPUT_DIR: "output"
