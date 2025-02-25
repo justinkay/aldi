@@ -36,6 +36,8 @@ def extract_category_name_from_region_attributes(attr):
     cat = set()
     try:
         attr_dict = json.loads(attr)
+        keys = list(attr_dict.keys())
+        if ("Insect ID" not in keys) and ("Insect" not in keys) and ("Insects" not in keys): print(keys)
         for key in ["Insect ID"]:
             if key in attr_dict:
                 return set([attr_dict[key]])
