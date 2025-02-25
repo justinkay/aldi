@@ -30,26 +30,6 @@ def annotation(row, category_id):
     annotation["iscrowd"] = 0
     return annotation
 
-def extract_categories(df):
-
-    unique_categories = set()  # Store unique category names
-
-    for attributes in df['region_attributes']:
-        try:
-            attr_dict = json.loads(attributes)  # Convert string to dictionary
-            if "Insect" in attr_dict:  # Check if 'Insect' key exists
-                unique_categories.update(attr_dict["Insect"].keys())  # Extract category names
-        except json.JSONDecodeError:
-            continue  # Skip if JSON is malformed
-
-    # Create category dictionary with unique, sorted category names
-    categories = [
-        {"id": idx + 1, "name": cat, "supercategory": "Insect"}
-        for idx, cat in enumerate(sorted(unique_categories))  # Sorted to ensure consistency
-    ]
-
-    return categories
-
 def get_category_id_from_name(categories, name):
     for c in categories:
         if c["name"] == name:
