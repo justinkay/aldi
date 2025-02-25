@@ -3,6 +3,28 @@ import json
 import pandas as pd
 import sys
 import argparse
+import COCO_util as ccu
+
+def create_title(field, crop, camera, date, flash=False):
+    location = f"{field}_{crop}_{camera}"
+    flashstr = "_fl" if flash else ""
+    return f"{location}_{date}{flashstr}.json"
+
+def get_src_csv_name(date:str, camera, flash=False):
+    date_list = date.split("-")
+    date_list.reverse()
+    print(date_list)
+    src_date = "".join(date_list)
+    flash = "on" if flash else "off"
+    return f"{src_date} {camera} Flash {flash}_csv.csv"
+
+def get_prefix(field, crop, camera, date, flash=False):
+    location = f"{field}_{crop}_{camera}"
+    flashstr = "_fl" if flash else ""
+    return f"{location}_{date}{flashstr}_"
+
+def get_img_folder_name(field, crop, camera):
+    return f"{field}-{crop}-{camera}"
 
 def load_json(file):
     o = {}
@@ -15,7 +37,7 @@ def image(row):
     image["id"] = row.fileid
     image["height"] = 3420 # FIXME currently hardcoded - update after cropping?
     image["width"] = 6080 # FIXME
-    image["file_name"] = + row.filename
+    image["file_name"] = row.filename
     return image
 
 def annotation(row, category_id):
@@ -48,41 +70,34 @@ def gen_info(img_folder_name):
 
 def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     data = pd.read_csv(csv_file, on_bad_lines='skip')
-    
+    data['fileid'] = file_prefix + data['filename'].astype(str) # create fileid column
+                                                                # id is the file prefix prepended to the original filename (this corresponds to the correct filename in OUR system)
+    data['filename'] = f"{img_folder_name}/{data['fileid'].astype(str)}" # update the filename to have the entire path (and of course the correct filename, which we just saved in the fileid-column)
+
     # Create categories entries 
-    # categories = load_json(categories_file)["categories"]
-    categories = extract_categories(data)
+    categories = load_json(categories_file)["categories"]
     category_name_to_id = {cat["name"]: cat["id"] for cat in categories}
     
-    #data['fileid'] = pd.Categorical(data['filename'], ordered=True).codes # create a unique file id for each unique filename-row
-    data['fileid'] = file_prefix + data['filename'].astype(str)
-    data['filename'] = f"{img_folder_name}/{data['fileid'].astype(str)}"
-    # data['categoryid'] = pd.Categorical(data['filename'], ordered=True).codes
-
     # Create images entries, one for each image
     images = []
     imagedf = data.drop_duplicates(subset=['fileid']).sort_values(by='fileid')
     for row in imagedf.itertuples():
         images.append(image(row))
     
-
     # Create annotations entries
     annotations = []
     for row in data.itertuples():
-        if row.region_count == 0:
+        if row.region_count <= 0:
             continue
         # if there is a detection, append the annotation
-        try:
-            region_attributes = json.loads(row.region_attributes)
-            category_name = list(region_attributes["Insect"].keys())[0]
-            category_id = category_name_to_id.get(category_name)
-            annotations.append(annotation(row, category_id))                         
-        except json.JSONDecodeError:
-            continue # ignore malformed json
-
-        #category_name = list((json.loads(row.region_attributes))["Insect"].keys())[0] 
-        #category_id = category_name_to_id.get(category_name)# get_category_id_from_name(categories, category_name)
-        #annotations.append(annotation(row,category_id))
+        print(json.loads(row.region_attributes))
+        category_name = ccu.extract_category_name_from_region_attributes(row.region_attributes)
+        category_name = ccu.normalise_category_name(category_name)
+        if category_name in categories["name_mappings"]:
+            category_name = categories["name_mappings"][category_name] # make correction, if needed
+        category_id = category_name_to_id[category_name]
+        ann = annotation(row,category_id)
+        annotations.append(ann)
     
     # Create final coco-json file 
     data_coco = {}
@@ -94,27 +109,8 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     with open(coco_file_destination, "w") as f:
         json.dump(data_coco, f, indent=4)
 
-def create_title(field, crop, camera, date, flash=False):
-    location = f"{field}_{crop}_{camera}"
-    flashstr = "_fl" if flash else ""
-    return f"{location}_{date}{flashstr}.json"
-
-def get_src_csv_name(date:str, camera, flash=False):
-    date_list = date.split("-").reverse()
-    src_date = "".join(date_list)
-    flashstr = " Flash on" if flash else ""
-    return f"{src_date} {camera}{flashstr}_csv.csv"
-
-def get_prefix(field, crop, camera, date, flash=False):
-    location = f"{field}_{crop}_{camera}"
-    flashstr = "_fl" if flash else ""
-    return f"{location}_{date}{flashstr}_"
-
-def get_img_folder_name(field, crop, camera):
-    return f"{field}-{crop}-{camera}"
-
 info_file = "../ERDA/bugmaster/datasets/pitfall-cameras/info.json"
-categories_file = "../ERDA/bugmaster/datasets/pitfall-cameras/categories.json"
+categories_file = "../ERDA/bugmaster/datasets/pitfall-cameras/annotations/categories.json"
 
 def main():
     # Set up command-line argument parsing
@@ -128,7 +124,7 @@ def main():
     # Parse the arguments
     args = parser.parse_args()
 
-    src_csv = f"../ERDA/bugmaster/datasets/pitfall-cameras/annotations/{get_src_csv_name(args.date, args.camera, flash=args.f)}"
+    src_csv = f"../ERDA/bugmaster/datasets/pitfall-cameras/annotations/Annotations and other files/CSV files/{get_src_csv_name(args.date, args.camera, flash=args.f)}"
     dest = f"../ERDA/bugmaster/datasets/pitfall-cameras/annotations-converted/{create_title(args.field, args.crop, args.camera, args.date, flash=args.f)}" # sys.argv[0]
     
     file_prefix = get_prefix(args.field, args.crop, args.camera, args.date, flash=args.f)

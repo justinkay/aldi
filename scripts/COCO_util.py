@@ -1,4 +1,5 @@
 import re
+import json
 
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
@@ -29,3 +30,18 @@ def reorder_unknown(name):
         words.remove("unknown")
         words.append("unknown")  # Place "unknown" last
     return " ".join(words)
+
+
+def extract_category_name_from_region_attributes(attr):
+    cat = set()
+    try:
+        attr_dict = json.loads(attr)
+        for key in ["Insect ID"]:
+            if key in attr_dict:
+                return set([attr_dict[key]])
+        for key in ["Insect", "Insects"]:
+            if key in attr_dict:
+                return attr_dict[key].keys() # NOTE - we assume that the supercategory is always insect (or insects, lol)
+    except json.JSONDecodeError:
+        cat = set() # ignore malformed json
+    return cat

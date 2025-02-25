@@ -10,16 +10,27 @@ import re
 name_mappings = { # corrections for typos and redundancies that weren't caught by stanadardizing the name
     "arachnid": "arachnida",
     "amara sp": "amara",
+    "braconid": "braconidae",
     "carabid": "carabidae", 
     "carabid unknown": "carabidae",  
     "carabids": "carabidae",  
     "carabid lar": "beetle",  
+    "chalcidae": "chalcididae",
+    "dipteran larvae": "diptera larvae",
+    "gnaposidae": "gnaphosidae",
+    "isopod": "isopoda",
     "linyphiiidae": "linyphiidae",
+    "molllusc": "mollusca",
     "molllusca": "mollusca",
+    "mollluska": "mollusca",
+    "myriapod": "myriapoda",
     "phyllotreta sp": "phyllotreta",
+    "poecilius cupreus": "poecilus cupreus",
     "psyllidoes chrysocephalus": "psylliodes chrysocephalus",
     "spider": "arachnida",
-    "tachyprous hypnorum": "tachyporus hypnorum"
+    "tachyporus hyphorum": "tachyporus hypnorum",
+    "tachyprous hypnorum": "tachyporus hypnorum",
+    "unsure": "unknown"
     }
 
 def clean_categories(cats):
@@ -40,17 +51,6 @@ def clean_categories(cats):
 
     return cleaned_set
 
-def extract_category_name_from_region_attributes(attr):
-    cat = set()
-    try:
-        attr_dict = json.loads(attr)
-        for key in ["Insect", "Insects"]:
-            if key in attr_dict:
-                return  attr_dict[key].keys() # NOTE - we assume that the supercategory is always insect (or insects, lol)
-    except json.JSONDecodeError:
-        cat = set() # ignore malformed json
-    return cat
-
 def extract_categories_from_vgg_csv(src):
     df = pd.read_csv(src, on_bad_lines='skip')
     unique_categories = set()  # Store unique category names
@@ -58,7 +58,7 @@ def extract_categories_from_vgg_csv(src):
         if row.region_count <= 0:
             continue
         # if there is a detection, append the annotation
-        cat = extract_category_name_from_region_attributes(row.region_attributes)
+        cat = ccu.extract_category_name_from_region_attributes(row.region_attributes)
         unique_categories.update(cat)
     return unique_categories
 
