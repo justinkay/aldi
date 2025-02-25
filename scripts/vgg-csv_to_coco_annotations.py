@@ -30,6 +30,26 @@ def annotation(row, category_id):
     annotation["iscrowd"] = 0
     return annotation
 
+def extract_categories(df):
+
+    unique_categories = set()  # Store unique category names
+
+    for attributes in df['region_attributes']:
+        try:
+            attr_dict = json.loads(attributes)  # Convert string to dictionary
+            if "Insect" in attr_dict:  # Check if 'Insect' key exists
+                unique_categories.update(attr_dict["Insect"].keys())  # Extract category names
+        except json.JSONDecodeError:
+            continue  # Skip if JSON is malformed
+
+    # Create category dictionary with unique, sorted category names
+    categories = [
+        {"id": idx + 1, "name": cat, "supercategory": "Insect"}
+        for idx, cat in enumerate(sorted(unique_categories))  # Sorted to ensure consistency
+    ]
+
+    return categories
+
 def get_category_id_from_name(categories, name):
     for c in categories:
         if c["name"] == name:
@@ -48,9 +68,16 @@ def gen_info(img_folder_name):
 
 def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     data = pd.read_csv(csv_file, on_bad_lines='skip')
+    
+    # Create categories entries 
+    # categories = load_json(categories_file)["categories"]
+    categories = extract_categories(data)
+    category_name_to_id = {cat["name"]: cat["id"] for cat in categories}
+    
     #data['fileid'] = pd.Categorical(data['filename'], ordered=True).codes # create a unique file id for each unique filename-row
     data['fileid'] = file_prefix + data['filename'].astype(str)
-    data['filename'] = f"{img_folder_name}/{file_prefix}{data['filename'].astype(str)}"
+    data['filename'] = f"{img_folder_name}/{data['fileid'].astype(str)}"
+    # data['categoryid'] = pd.Categorical(data['filename'], ordered=True).codes
 
     # Create images entries, one for each image
     images = []
@@ -58,8 +85,6 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     for row in imagedf.itertuples():
         images.append(image(row))
     
-    # Create categories entries 
-    categories = load_json(categories_file)["categories"]
 
     # Create annotations entries
     annotations = []
@@ -67,9 +92,17 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
         if row.region_count == 0:
             continue
         # if there is a detection, append the annotation
-        category_name = list((json.loads(row.region_attributes))["Insect"].keys())[0] 
-        category_id = get_category_id_from_name(categories, category_name)
-        annotations.append(annotation(row,category_id))
+        try:
+            region_attributes = json.loads(row.region_attributes)
+            category_name = list(region_attributes["Insect"].keys())[0]
+            category_id = category_name_to_id.get(category_name)
+            annotations.append(annotation(row, category_id))                         
+        except json.JSONDecodeError:
+            continue # ignore malformed json
+
+        #category_name = list((json.loads(row.region_attributes))["Insect"].keys())[0] 
+        #category_id = category_name_to_id.get(category_name)# get_category_id_from_name(categories, category_name)
+        #annotations.append(annotation(row,category_id))
     
     # Create final coco-json file 
     data_coco = {}
