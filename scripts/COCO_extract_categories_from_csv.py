@@ -22,36 +22,23 @@ name_mappings = { # corrections for typos and redundancies that weren't caught b
     "tachyprous hypnorum": "tachyporus hypnorum"
     }
 
+def clean_categories(cats):
+    """Normalises all category names and merges according to typos/redundancies (manually defined in the dict above)"""
+    cleaned_set = set()
 
-def merge_similar_categories(categories, cat):
-    """Merges redundant categories and keeps track of changes."""
-    merged_categories = {}  # {standardized_name: preferred_name}
-    category_mapping = {}  # {original_name: merged_name}
-
-    for category in categories:
-        # carabid unknown = unknown carabid
-        std_name = " ".join(sorted(category["name"].split()))
-        if std_name in merged_categories:
-            merged_name = merged_categories[std_name]
+    for category in cats:
+        normalized = ccu.normalise_category_name(category) # lower case, space separation, "unknown" comes last
+        
+        if normalized in name_mappings: # overwrite with the correction if it's there!
+            category_name = name_mappings[normalized]
+            print("True: "+ category_name)
+            print("Wrong: "+ normalized)
         else:
-            merged_name = category["name"]  # Use the first seen name as the official one
-            merged_categories[std_name] = merged_name
+            category_name = normalized  
 
-        category_mapping[category["name"]] = merged_name
+        cleaned_set.add(category_name) # insert the (corrected) category 
 
-    # Create new unique category list
-    unique_categories = [
-        {"id": idx + 1, "name": name, "supercategory": "Insect"}
-        for idx, name in enumerate(sorted(set(merged_categories.values())))
-    ]
-
-    return unique_categories, category_mapping
-
-def save_merge_mapping(mappings, dest_dir, filename):
-    path = os.path.join(dest_dir, filename+"_redundancy-mappings.json")
-    with open(path, "w") as f:
-        json.dump(mappings, f, indent=4)
-
+    return cleaned_set
 
 def extract_category_name_from_region_attributes(attr):
     cat = set()
@@ -74,27 +61,6 @@ def extract_categories_from_vgg_csv(src):
         cat = extract_category_name_from_region_attributes(row.region_attributes)
         unique_categories.update(cat)
     return unique_categories
-
-def clean_categories(cats):
-    """Merges and standardizes categories by normalizing and lemmatizing them."""
-    
-    #name_mappings = {} # keep track of any merged categories, e.g. "unknown carabid" should be the same as "carabid unknown"
-    cleaned_set = set()
-
-    for category in cats:
-        normalized = ccu.normalise_category_name(category) # lower case, space separation, "unknown" comes last
-        #standardized = ccu.standardise_category_name(category) # remove most redundant category names and pluralis names
-        if normalized in name_mappings: # overwrite with the correction if it's there!
-            category_name = name_mappings[normalized]
-            print("True: "+ category_name)
-            print("Wrong: "+ normalized)
-        else:
-            category_name = normalized  # First occurrence becomes official
-            # name_mappings[category] = true_name
-
-        cleaned_set.add(category_name)
-
-    return cleaned_set
 
 def extract_categories_from_vgg_csv_dir(src_dir):
     """Runs through a given directory of vgg-csv annotation files and extracts all unique categories (returned as a set)"""
@@ -124,10 +90,9 @@ def save_categories_to_file(cats, mappings, dest_dir, filename):
     path = os.path.join(dest_dir, filename+".json")
     categories = {}
     categories["categories"] = cats
-    categories["name_mappings"] = mappings
+    categories["name_mappings"] = mappings # also save the mappings to use when generating the annotations from the csv-files that have those typos
     with open(path, "w") as f:
         json.dump(categories, f, indent=4)
-
 
 def main():
     # Set up command-line argument parsing

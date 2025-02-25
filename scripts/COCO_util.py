@@ -1,6 +1,4 @@
 import re
-from nltk.stem import PorterStemmer
-stemmer = PorterStemmer()
 
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
@@ -31,12 +29,3 @@ def reorder_unknown(name):
         words.remove("unknown")
         words.append("unknown")  # Place "unknown" last
     return " ".join(words)
-
-def standardise_category_name(name:str):
-    normalized = normalise_category_name(name)
-    
-    stemmer = PorterStemmer() # handles pluralis
-    lemmatized = " ".join([stemmer.stem(word) for word in normalized.split()])
-    
-    #standardized = " ".join(sorted(lemmatized.split()))  # Sort words alphabetically
-    return lemmatized
