@@ -1,13 +1,8 @@
-import numpy as np
 import json
 import pandas as pd
-import sys
-import argparse
 import COCO_util as ccu
 import os
 import re
-
-
 
 def get_filename_for_csv_annotations(date:str, camera, flash=False):
     date_list = date.split("-")
