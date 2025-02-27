@@ -1,16 +1,25 @@
 import re
 import json
 
+INFO_FILE_PATH =  "../ERDA/bugmaster/datasets/pitfall-cameras/info.json"
+
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
     flashstr = "_fl" if flash else ""
     return f"{location}_{date}{flashstr}.json"
 
 
-def get_specs(filename):
-    pass
+def get_specs_from_info(img_folder_name, info_file_path=INFO_FILE_PATH):
+    info = {}
+    with open(info_file_path, 'r') as f:
+        info = json.load(f)
+        specs = info["folders"][img_folder_name]["specs"]
+    return specs
 
-def get_prefix_from_specs(field, crop, camera, date, flash=False):
+def get_img_folder_name_from_specs(field, crop, camera):
+    return f"{field}-{crop}-{camera}"
+
+def get_file_prefix_from_specs(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
     flashstr = "_fl" if flash else ""
     return f"{location}_{date}{flashstr}_"

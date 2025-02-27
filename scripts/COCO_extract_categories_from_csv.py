@@ -57,7 +57,7 @@ def extract_categories_from_vgg_csv(src):
     for row in df.itertuples():
         if row.region_count <= 0:
             continue
-        # if there is a detection, append the annotation
+        # if there is a detection, append the category name
         cat = ccu.extract_category_name_from_region_attributes(row.region_attributes)
 
         # ignore the detection, if there is not associated label with the annotation
@@ -70,8 +70,6 @@ def extract_categories_from_vgg_csv(src):
             continue
         
         unique_categories.add(cat)
-        
-        
     return unique_categories
 
 def extract_categories_from_vgg_csv_dir(src_dir):

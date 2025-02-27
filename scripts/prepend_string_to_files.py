@@ -7,10 +7,13 @@ def rename_files_in_directory(src_dir, dest_dir, prefix):
     Renames all files in the given directory with the provided prefix.
     """
     os.makedirs(dest_dir, exist_ok=True)
-    files = [f for f in os.listdir(src_dir) if (os.path.isfile(os.path.join(src_dir, f)) and os.path.splitext(f)[1].lower().endswith((".png", ".jpg", ".jpeg")))]
+    files = [f for f in os.listdir(src_dir) if (os.path.isfile(os.path.join(src_dir, f)))]
     total_files = len(files)
-
-    for index, filename in enumerate(files, start=1):     
+    print(total_files)
+    for index, filename in enumerate(files, start=1):
+        if not filename.lower().endswith((".png", ".jpg", ".jpeg")):
+            continue # skip if it's not an image
+             
         # Build the full path to the file
         src_file_path = os.path.join(src_dir, filename)
         
@@ -30,7 +33,7 @@ def create_prefix(field, crop, camera, date, flash=False):
     return f"{location}_{date}{flashstr}_"
 
 def get_dir(field, crop, camera):
-    return f"../ERDA/bugmaster/datasets/pitfall-cameras/images/{field}-{crop}-{camera}"
+    return f"{field}-{crop}-{camera}"
 
 def main():
     # Set up command-line argument parsing
@@ -48,8 +51,11 @@ def main():
     # Call the function with the parsed arguments
     prefix = create_prefix(args.field, args.crop, args.camera, args.date, flash=args.f)
     dir = get_dir(args.field, args.crop, args.camera)
-    src_dir = f"../ERDA/bugmaster/datasets/pitfall-cameras/images/{args.src_dir}"
+    src_dir = f"downloaded/{args.src_dir}"
     rename_files_in_directory(src_dir, dir, prefix)
 
 if __name__ == "__main__":
     main()
+
+    # Example use (note the src paths though):
+    # python .\prepend_string_to_files.py "150620/OSR/LS3E Flash on" LG OSR LS3E -f 20-06-15

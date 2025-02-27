@@ -10,21 +10,12 @@ def create_title(field, crop, camera, date, flash=False):
     flashstr = "_fl" if flash else ""
     return f"{location}_{date}{flashstr}.json"
 
-def get_src_csv_name(date:str, camera, flash=False):
+def get_filename_for_csv_annotations(date:str, camera, flash=False):
     date_list = date.split("-")
     date_list.reverse()
-    print(date_list)
     src_date = "".join(date_list)
     flash = "on" if flash else "off"
     return f"{src_date} {camera} Flash {flash}_csv.csv"
-
-def get_prefix(field, crop, camera, date, flash=False):
-    location = f"{field}_{crop}_{camera}"
-    flashstr = "_fl" if flash else ""
-    return f"{location}_{date}{flashstr}_"
-
-def get_img_folder_name(field, crop, camera):
-    return f"{field}-{crop}-{camera}"
 
 def load_json(file):
     o = {}
@@ -42,7 +33,7 @@ def image(row):
 
 def annotation(row, category_id):
     annotation = {}
-    annotation["id"] = row.fileid + str(row.region_id)
+    annotation["id"] = row.fileid + "_" + str(row.region_id) 
     annotation["image_id"] = row.fileid
     annotation["category_id"] = category_id
     annotation["segmentation"] = [] # NOTE blank? We don't have this. Wondering if this needs to be disabled if we use flat-bug data 
@@ -59,12 +50,18 @@ def get_category_id_from_name(categories, name):
     KeyError("Category didn't exist")
 
 def gen_info(img_folder_name):
-    info_json = load_json(info_file)
-    specs = load_json(info_file)[img_folder_name]["specs"]
+    info_json = load_json(ccu.INFO_FILE_PATH)
+    specs = info_json["folders"][img_folder_name]["specs"]
+    field = specs["field"]
+    crop = info_json["crops"][specs["crop"]]["name"]
+    camera = specs["camera"]
+    date_first = specs["dates"][0]
+    date_last = specs["dates"][-1]
+
     info = {}
-    description = f"{info_json["fields"][specs["field"]]} {info_json["crops"][specs["crop"]]}, camera {specs["camera"]}."
+    description = f"{field} {crop} field, camera {camera} - recorded from {date_first} to {date_last} (specific date in filename)."
     info["description"] = description
-    info["date_created"] = specs["dates"][0]
+    info["date_created"] = date_first
     return info
 
 
@@ -72,11 +69,10 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     data = pd.read_csv(csv_file, on_bad_lines='skip')
     data['fileid'] = file_prefix + data['filename'].astype(str) # create fileid column
                                                                 # id is the file prefix prepended to the original filename (this corresponds to the correct filename in OUR system)
-    data['filename'] = f"{img_folder_name}/{data['fileid'].astype(str)}" # update the filename to have the entire path (and of course the correct filename, which we just saved in the fileid-column)
+    data['filename'] = img_folder_name + "/" + data['fileid'].astype(str) # update the filename to have the entire path (and of course the correct filename, which we just saved in the fileid-column)
 
     # Create categories entries 
     categories = load_json(categories_file)["categories"]
-    category_name_to_id = {cat["name"]: cat["id"] for cat in categories}
     
     # Create images entries, one for each image
     images = []
@@ -86,15 +82,16 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     
     # Create annotations entries
     annotations = []
+    name_mappings = load_json(categories_file)["name_mappings"]
+    category_name_to_id = {cat["name"]: cat["id"] for cat in categories}
     for row in data.itertuples():
         if row.region_count <= 0:
             continue
         # if there is a detection, append the annotation
-        print(json.loads(row.region_attributes))
         category_name = ccu.extract_category_name_from_region_attributes(row.region_attributes)
         category_name = ccu.normalise_category_name(category_name)
-        if category_name in categories["name_mappings"]:
-            category_name = categories["name_mappings"][category_name] # make correction, if needed
+        if category_name in name_mappings.keys():
+            category_name = name_mappings[category_name] # make correction, if needed
         category_id = category_name_to_id[category_name]
         ann = annotation(row,category_id)
         annotations.append(ann)
@@ -103,13 +100,13 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     data_coco = {}
     data_coco["info"] = gen_info(img_folder_name)
     data_coco["license"] = None
-    data_coco["categories"] = categories
     data_coco["images"] = images
     data_coco["annotations"] = annotations
+    data_coco["categories"] = categories
     with open(coco_file_destination, "w") as f:
         json.dump(data_coco, f, indent=4)
 
-info_file = "../ERDA/bugmaster/datasets/pitfall-cameras/info.json"
+# info_file = "../ERDA/bugmaster/datasets/pitfall-cameras/info.json"
 categories_file = "../ERDA/bugmaster/datasets/pitfall-cameras/annotations/categories.json"
 
 def main():
@@ -124,13 +121,16 @@ def main():
     # Parse the arguments
     args = parser.parse_args()
 
-    src_csv = f"../ERDA/bugmaster/datasets/pitfall-cameras/annotations/Annotations and other files/CSV files/{get_src_csv_name(args.date, args.camera, flash=args.f)}"
+    src_csv = f"../ERDA/bugmaster/datasets/pitfall-cameras/annotations/Annotations and other files/CSV files/{get_filename_for_csv_annotations(args.date, args.camera, flash=args.f)}"
     dest = f"../ERDA/bugmaster/datasets/pitfall-cameras/annotations-converted/{create_title(args.field, args.crop, args.camera, args.date, flash=args.f)}" # sys.argv[0]
     
-    file_prefix = get_prefix(args.field, args.crop, args.camera, args.date, flash=args.f)
-    img_folder_name = get_img_folder_name(args.field, args.crop, args.camera)
+    file_prefix = ccu.get_file_prefix_from_specs(args.field, args.crop, args.camera, args.date, flash=args.f)
+    img_folder_name = ccu.get_img_folder_name_from_specs(args.field, args.crop, args.camera)
     convert(file_prefix, img_folder_name, src_csv, dest)
 
 if __name__ == "__main__":
     main()
+
+    # Example usage:
+    # python scripts/COCO_convert_vgg_csv_to_coco_annotations.py GH OSR HF2G -f 20-06-02
     
