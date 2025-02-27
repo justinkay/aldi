@@ -94,6 +94,9 @@ def convert(file_prefix, img_folder_name, csv_file_path, coco_file_destination):
     # Create categories entries 
     categories = load_json(categories_file)["categories"]
     
+
+    images_to_clean_out = set()
+
     # Create images entries, one for each image
     images = []
     imagedf = data.drop_duplicates(subset=['fileid']).sort_values(by='fileid')
@@ -117,6 +120,7 @@ def convert(file_prefix, img_folder_name, csv_file_path, coco_file_destination):
             if img_folder_name not in ignored_images.keys():
                 ignored_images[img_folder_name] = [] 
             ignored_images[img_folder_name].append(ccu.ignored_img(filename=row.fileid, explanation="Incomplete annotation: No insect class in annotation (region_attributes).", og_csv_name=csv_name, og_filename=og_filename))
+            images_to_clean_out.add(row.fileid)
             continue
 
         category_name = ccu.normalise_category_name(category_name)
@@ -126,6 +130,10 @@ def convert(file_prefix, img_folder_name, csv_file_path, coco_file_destination):
         ann = annotation(row,category_id)
         annotations.append(ann)
     
+    # Clean out images that need to be removed due to errors (undefined annotation)
+    images = [img for img in images if img["id"] not in images_to_clean_out]
+    annotations = [ann for ann in annotations if ann["image_id"] not in images_to_clean_out]
+
     # Create final coco-json file 
     data_coco = {}
     data_coco["info"] = gen_info(img_folder_name)

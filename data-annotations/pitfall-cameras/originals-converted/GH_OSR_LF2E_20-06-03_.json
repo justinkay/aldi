@@ -576,12 +576,6 @@
             "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0650.JPG"
         },
         {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0651.JPG",
-            "height": 3420,
-            "width": 6080,
-            "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0651.JPG"
-        },
-        {
             "id": "GH_OSR_LF2E_20-06-03_WSCT0652.JPG",
             "height": 3420,
             "width": 6080,
@@ -1248,12 +1242,6 @@
             "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0762.JPG"
         },
         {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0763.JPG",
-            "height": 3420,
-            "width": 6080,
-            "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0763.JPG"
-        },
-        {
             "id": "GH_OSR_LF2E_20-06-03_WSCT0764.JPG",
             "height": 3420,
             "width": 6080,
@@ -1306,18 +1294,6 @@
             "height": 3420,
             "width": 6080,
             "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0772.JPG"
-        },
-        {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0773.JPG",
-            "height": 3420,
-            "width": 6080,
-            "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0773.JPG"
-        },
-        {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0774.JPG",
-            "height": 3420,
-            "width": 6080,
-            "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0774.JPG"
         },
         {
             "id": "GH_OSR_LF2E_20-06-03_WSCT0775.JPG",
@@ -1390,12 +1366,6 @@
             "height": 3420,
             "width": 6080,
             "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0786.JPG"
-        },
-        {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0787.JPG",
-            "height": 3420,
-            "width": 6080,
-            "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0787.JPG"
         },
         {
             "id": "GH_OSR_LF2E_20-06-03_WSCT0788.JPG",
@@ -2082,12 +2052,6 @@
             "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0901.JPG"
         },
         {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0902.JPG",
-            "height": 3420,
-            "width": 6080,
-            "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0902.JPG"
-        },
-        {
             "id": "GH_OSR_LF2E_20-06-03_WSCT0903.JPG",
             "height": 3420,
             "width": 6080,
@@ -2148,12 +2112,6 @@
             "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0912.JPG"
         },
         {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0913.JPG",
-            "height": 3420,
-            "width": 6080,
-            "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0913.JPG"
-        },
-        {
             "id": "GH_OSR_LF2E_20-06-03_WSCT0914.JPG",
             "height": 3420,
             "width": 6080,
@@ -2212,12 +2170,6 @@
             "height": 3420,
             "width": 6080,
             "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0923.JPG"
-        },
-        {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0924.JPG",
-            "height": 3420,
-            "width": 6080,
-            "file_name": "GH-OSR-LF2E/GH_OSR_LF2E_20-06-03_WSCT0924.JPG"
         },
         {
             "id": "GH_OSR_LF2E_20-06-03_WSCT0925.JPG",
@@ -5148,20 +5100,6 @@
             "iscrowd": 0
         },
         {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0774.JPG_1",
-            "image_id": "GH_OSR_LF2E_20-06-03_WSCT0774.JPG",
-            "category_id": 22,
-            "segmentation": [],
-            "area": 16614,
-            "bbox": [
-                3550,
-                3,
-                117,
-                142
-            ],
-            "iscrowd": 0
-        },
-        {
             "id": "GH_OSR_LF2E_20-06-03_WSCT0775.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-03_WSCT0775.JPG",
             "category_id": 22,
@@ -5872,20 +5810,6 @@
                 1487,
                 81,
                 122
-            ],
-            "iscrowd": 0
-        },
-        {
-            "id": "GH_OSR_LF2E_20-06-03_WSCT0902.JPG_1",
-            "image_id": "GH_OSR_LF2E_20-06-03_WSCT0902.JPG",
-            "category_id": 17,
-            "segmentation": [],
-            "area": 10752,
-            "bbox": [
-                966,
-                2057,
-                84,
-                128
             ],
             "iscrowd": 0
         },
