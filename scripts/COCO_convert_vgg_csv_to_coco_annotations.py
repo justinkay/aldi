@@ -106,8 +106,7 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     with open(coco_file_destination, "w") as f:
         json.dump(data_coco, f, indent=4)
 
-# info_file = "../ERDA/bugmaster/datasets/pitfall-cameras/info.json"
-categories_file = "../ERDA/bugmaster/datasets/pitfall-cameras/annotations/categories.json"
+categories_file = "data-annotations/pitfall-cameras/info/info.json"
 
 def main():
     # Set up command-line argument parsing
@@ -121,8 +120,8 @@ def main():
     # Parse the arguments
     args = parser.parse_args()
 
-    src_csv = f"../ERDA/bugmaster/datasets/pitfall-cameras/annotations/Annotations and other files/CSV files/{get_filename_for_csv_annotations(args.date, args.camera, flash=args.f)}"
-    dest = f"../ERDA/bugmaster/datasets/pitfall-cameras/annotations-converted/{create_title(args.field, args.crop, args.camera, args.date, flash=args.f)}" # sys.argv[0]
+    src_csv = f"data-annotations/pitfall-cameras/originals/{get_filename_for_csv_annotations(args.date, args.camera, flash=args.f)}"
+    dest = f"data-annotations/pitfall-cameras/originals-converted/{create_title(args.field, args.crop, args.camera, args.date, flash=args.f)}" # sys.argv[0]
     
     file_prefix = ccu.get_file_prefix_from_specs(args.field, args.crop, args.camera, args.date, flash=args.f)
     img_folder_name = ccu.get_img_folder_name_from_specs(args.field, args.crop, args.camera)

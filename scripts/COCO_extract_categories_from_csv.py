@@ -115,8 +115,8 @@ def record_ignored_images(ignored_images, dest_dir):
 def main():
     # Set up command-line argument parsing
     parser = argparse.ArgumentParser(description="Extract categories from all VGG-CSV annotations into a single JSON-object (\"categories\") compatible with the COCO-format.")
-    parser.add_argument("src_dir", nargs="?", help="Source directory containing the csv files.", default="../ERDA/bugmaster/datasets/pitfall-cameras/annotations/Annotations and other files/CSV files")
-    parser.add_argument("dest_dir", nargs="?", help="Directory at which to save the generated categories.json.", default="../ERDA/bugmaster/datasets/pitfall-cameras/annotations/")
+    parser.add_argument("src_dir", nargs="?", help="Source directory containing the csv files.", default="data-annotations/pitfall-cameras/originals/")
+    parser.add_argument("dest_dir", nargs="?", help="Directory at which to save the generated categories.json.", default="./data-annotations/pitfall-cameras/info/")
     parser.add_argument("filename", nargs="?", default="categories", help="Optional name of the generated file (default is \"categories.json\").")
     
     # Parse the arguments

@@ -1,7 +1,7 @@
 import re
 import json
 
-INFO_FILE_PATH =  "../ERDA/bugmaster/datasets/pitfall-cameras/info.json"
+INFO_FILE_PATH =  "data-annotations/pitfall-cameras/info/info.json"
 
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
