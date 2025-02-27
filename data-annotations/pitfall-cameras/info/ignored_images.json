@@ -1,0 +1,72 @@
+{
+    "ignored_images": {
+        "300620 LS3E Flash on_csv.csv": [
+            {
+                "filename": "WSCT8096.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            }
+        ],
+        "090720 LF1D Flash off_csv.csv": [
+            {
+                "filename": "WSCT8874.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            }
+        ],
+        "030620 NARS26 Flash on_csv.csv": [
+            {
+                "filename": "WSCT4719.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            }
+        ],
+        "030620 LF2E Flash off_csv.csv": [
+            {
+                "filename": "WSCT0651.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            },
+            {
+                "filename": "WSCT0763.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            },
+            {
+                "filename": "WSCT0773.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            },
+            {
+                "filename": "WSCT0774.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            },
+            {
+                "filename": "WSCT0787.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            },
+            {
+                "filename": "WSCT0902.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            },
+            {
+                "filename": "WSCT0913.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            },
+            {
+                "filename": "WSCT0924.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            }
+        ],
+        "130720 LF1D Flash on_csv.csv": [
+            {
+                "filename": "WSCT4288.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            }
+        ],
+        "030620 LF2E Flash on_csv.csv": [
+            {
+                "filename": "WSCT0134.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            },
+            {
+                "filename": "WSCT0136.JPG",
+                "explanation": "Incomplete annotation: No insect class in annotation (region_attributes)."
+            }
+        ]
+    }
+}
