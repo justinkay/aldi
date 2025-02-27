@@ -37,7 +37,7 @@ def extract_category_name_from_region_attributes(attr):
     try:
         attr_dict = json.loads(attr)
         keys = list(attr_dict.keys())
-        if ("Insect ID" not in keys) and ("Insect" not in keys) and ("Insects" not in keys): print(keys)
+        #if ("Insect ID" not in keys) and ("Insect" not in keys) and ("Insects" not in keys): print(attr_dict)
         for key in ["Insect ID"]:
             if key in attr_dict:
                 return set([attr_dict[key]])
@@ -47,3 +47,6 @@ def extract_category_name_from_region_attributes(attr):
     except json.JSONDecodeError:
         cat = set() # ignore malformed json
     return cat
+
+def ignored_img(filename, explanation):
+    return {"filename": filename, "explanation": explanation}

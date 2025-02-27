@@ -21,8 +21,8 @@ name_mappings = { # corrections for typos and redundancies that weren't caught b
     "isopod": "isopoda",
     "linyphiiidae": "linyphiidae",
     "molllusc": "mollusca",
-    "molllusca": "mollusca",
-    "mollluska": "mollusca",
+    "mollusca": "mollusca",
+    "molluska": "mollusca",
     "myriapod": "myriapoda",
     "phyllotreta sp": "phyllotreta",
     "poecilius cupreus": "poecilus cupreus",
@@ -33,6 +33,8 @@ name_mappings = { # corrections for typos and redundancies that weren't caught b
     "unsure": "unknown"
     }
 
+ignored_images = {} # "csv_file_name": [{"img_name": "img_name", "explanation": "...", "img_name", ...]
+
 def clean_categories(cats):
     """Normalises all category names and merges according to typos/redundancies (manually defined in the dict above)"""
     cleaned_set = set()
@@ -42,8 +44,6 @@ def clean_categories(cats):
         
         if normalized in name_mappings: # overwrite with the correction if it's there!
             category_name = name_mappings[normalized]
-            print("True: "+ category_name)
-            print("Wrong: "+ normalized)
         else:
             category_name = normalized  
 
@@ -60,6 +60,14 @@ def extract_categories_from_vgg_csv(src):
         # if there is a detection, append the annotation
         cat = ccu.extract_category_name_from_region_attributes(row.region_attributes)
         unique_categories.update(cat)
+        
+        no_insect_label_but_was_annotated = not bool(cat)
+        if no_insect_label_but_was_annotated: 
+            csv_name = src.split("/")[-1]
+            if csv_name not in ignored_images.keys():
+                ignored_images[csv_name] = [] 
+            ignored_images[csv_name].append(ccu.ignored_img(filename=row.filename, explanation="Incomplete annotation: No insect class in annotation (region_attributes)."))
+                
     return unique_categories
 
 def extract_categories_from_vgg_csv_dir(src_dir):
@@ -94,6 +102,14 @@ def save_categories_to_file(cats, mappings, dest_dir, filename):
     with open(path, "w") as f:
         json.dump(categories, f, indent=4)
 
+def record_ignored_images(ignored_images, dest_dir):
+    path = os.path.join(dest_dir, "ignored_images.json")
+    ignored_images_for_file = {}
+    ignored_images_for_file["ignored_images"] = ignored_images # keep a record of images that were ignored
+    with open(path,"w") as f:
+        json.dump(ignored_images_for_file, f, indent=4)
+
+
 def main():
     # Set up command-line argument parsing
     parser = argparse.ArgumentParser(description="Extract categories from all VGG-CSV annotations into a single JSON-object (\"categories\") compatible with the COCO-format.")
@@ -109,7 +125,9 @@ def main():
     categories_set_clean = clean_categories(categories_set)
     coco_categories = create_coco_categories_from_set(categories_set_clean)
     print(f"Extracted {len(coco_categories)} categories from the annotations.")
+    print(f"Ignored {sum([len(ignored_images[key]) for key in ignored_images.keys()])} images due to errors - see the file for more details.")
     save_categories_to_file(cats=coco_categories, mappings=name_mappings, dest_dir=args.dest_dir, filename=args.filename)
+    record_ignored_images(ignored_images=ignored_images, dest_dir=args.dest_dir)
     
 
 
