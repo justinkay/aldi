@@ -69,8 +69,10 @@ def gen_info(img_folder_name):
     return info
 
 
-def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
-    data = pd.read_csv(csv_file, on_bad_lines='skip')
+def convert(file_prefix, img_folder_name, csv_file_path, coco_file_destination):
+    data = pd.read_csv(csv_file_path, on_bad_lines='skip')
+
+
     data['fileid'] = file_prefix + data['filename'].astype(str) # create fileid column
                                                                 # id is the file prefix prepended to the original filename (this corresponds to the correct filename in OUR system)
     data['filename'] = img_folder_name + "/" + data['fileid'].astype(str) # update the filename to have the entire path (and of course the correct filename, which we just saved in the fileid-column)
@@ -96,11 +98,12 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
 
         no_insect_label_but_was_annotated = not bool(category_name)
         if no_insect_label_but_was_annotated: 
-            if csv_file not in ignored_images.keys():
-                ignored_images[csv_file] = [] 
-            ignored_images[csv_file].append(ccu.ignored_img(filename=row.filename, explanation="Incomplete annotation: No insect class in annotation (region_attributes)."))
+            csv_name = csv_file_path.split("/")[-1]
+            og_filename = row.fileid.split("_")[-1]
+            if img_folder_name not in ignored_images.keys():
+                ignored_images[img_folder_name] = [] 
+            ignored_images[img_folder_name].append(ccu.ignored_img(filename=row.fileid, explanation="Incomplete annotation: No insect class in annotation (region_attributes).", og_csv_name=csv_name, og_filename=og_filename))
             continue
-
 
         category_name = ccu.normalise_category_name(category_name)
         if category_name in name_mappings.keys():
@@ -120,13 +123,18 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
         json.dump(data_coco, f, indent=4)
 
 def record_ignored_images(ignored_images, dest_dir):
-    path = os.path.join(dest_dir, "ignored_images.json")
-    ignored_images_for_file = {}
-    ignored_images_for_file["ignored_images"] = ignored_images # keep a record of images that were ignored
-    with open(path,"w") as f:
-        json.dump(ignored_images_for_file, f, indent=4)
+    already_ignored = load_json(ccu.IGNORED_IMAGES_PATH)
+    if not bool(already_ignored): already_ignored = {}
+    with open(ccu.IGNORED_IMAGES_PATH, 'w') as f:
+        for key in ignored_images.keys():
+            if key in already_ignored:
+                already_ignored[key].append(ignored_images[key])
+            else:
+                already_ignored[key] = ignored_images[key]
+        json.dump(already_ignored, f, indent=4)
+
     
-categories_file = "data-annotations/pitfall-cameras/info/info.json"
+categories_file = "data-annotations/pitfall-cameras/info/categories.json"
 
 def main():
     # Set up command-line argument parsing
@@ -147,7 +155,7 @@ def main():
     img_folder_name = ccu.get_img_folder_name_from_specs(args.field, args.crop, args.camera)
     convert(file_prefix, img_folder_name, src_csv, dest)
     print(f"Ignored {sum([len(ignored_images[key]) for key in ignored_images.keys()])} images due to errors - see the file for more details.")
-    record_ignored_images(ignored_images=ignored_images, dest_dir=args.dest_dir)
+    record_ignored_images(ignored_images=ignored_images, dest_dir="data-annotations/pitfall-cameras/info/")
     
 
 

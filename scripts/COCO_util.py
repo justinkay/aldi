@@ -2,6 +2,7 @@ import re
 import json
 
 INFO_FILE_PATH =  "data-annotations/pitfall-cameras/info/info.json"
+IGNORED_IMAGES_PATH =  "data-annotations/pitfall-cameras/info/ignored_images.json"
 
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
@@ -61,5 +62,5 @@ def extract_category_name_from_region_attributes(attr):
         return None # ignore malformed json
     return None 
 
-def ignored_img(filename, explanation):
-    return {"filename": filename, "explanation": explanation}
+def ignored_img(filename, explanation, og_filename, og_csv_name):
+    return {"filename": filename, "explanation": explanation, "original_filename": og_filename, "orignal_csv_file": og_csv_name}
