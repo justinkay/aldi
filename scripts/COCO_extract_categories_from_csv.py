@@ -33,8 +33,6 @@ name_mappings = { # corrections for typos and redundancies that weren't caught b
     "unsure": "unknown"
     }
 
-ignored_images = {} # "csv_file_name": [{"img_name": "img_name", "explanation": "...", "img_name", ...]
-
 def clean_categories(cats):
     """Normalises all category names and merges according to typos/redundancies (manually defined in the dict above)"""
     cleaned_set = set()
@@ -63,10 +61,6 @@ def extract_categories_from_vgg_csv(src):
         # ignore the detection, if there is not associated label with the annotation
         no_insect_label_but_was_annotated = not bool(cat)
         if no_insect_label_but_was_annotated: 
-            csv_name = src.split("/")[-1]
-            if csv_name not in ignored_images.keys():
-                ignored_images[csv_name] = [] 
-            ignored_images[csv_name].append(ccu.ignored_img(filename=row.filename, explanation="Incomplete annotation: No insect class in annotation (region_attributes)."))
             continue
         
         unique_categories.add(cat)
@@ -104,13 +98,6 @@ def save_categories_to_file(cats, mappings, dest_dir, filename):
     with open(path, "w") as f:
         json.dump(categories, f, indent=4)
 
-def record_ignored_images(ignored_images, dest_dir):
-    path = os.path.join(dest_dir, "ignored_images.json")
-    ignored_images_for_file = {}
-    ignored_images_for_file["ignored_images"] = ignored_images # keep a record of images that were ignored
-    with open(path,"w") as f:
-        json.dump(ignored_images_for_file, f, indent=4)
-
 
 def main():
     # Set up command-line argument parsing
@@ -127,10 +114,7 @@ def main():
     categories_set_clean = clean_categories(categories_set)
     coco_categories = create_coco_categories_from_set(categories_set_clean)
     print(f"Extracted {len(coco_categories)} categories from the annotations.")
-    print(f"Ignored {sum([len(ignored_images[key]) for key in ignored_images.keys()])} images due to errors - see the file for more details.")
     save_categories_to_file(cats=coco_categories, mappings=name_mappings, dest_dir=args.dest_dir, filename=args.filename)
-    record_ignored_images(ignored_images=ignored_images, dest_dir=args.dest_dir)
-    
 
 
 if __name__ == "__main__":

@@ -4,6 +4,10 @@ import pandas as pd
 import sys
 import argparse
 import COCO_util as ccu
+import os
+
+
+ignored_images = {} # "csv_file_name": [{"img_name": "img_name", "explanation": "...", "img_name", ...]
 
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
@@ -89,6 +93,15 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
             continue
         # if there is a detection, append the annotation
         category_name = ccu.extract_category_name_from_region_attributes(row.region_attributes)
+
+        no_insect_label_but_was_annotated = not bool(category_name)
+        if no_insect_label_but_was_annotated: 
+            if csv_file not in ignored_images.keys():
+                ignored_images[csv_file] = [] 
+            ignored_images[csv_file].append(ccu.ignored_img(filename=row.filename, explanation="Incomplete annotation: No insect class in annotation (region_attributes)."))
+            continue
+
+
         category_name = ccu.normalise_category_name(category_name)
         if category_name in name_mappings.keys():
             category_name = name_mappings[category_name] # make correction, if needed
@@ -106,6 +119,13 @@ def convert(file_prefix, img_folder_name, csv_file, coco_file_destination):
     with open(coco_file_destination, "w") as f:
         json.dump(data_coco, f, indent=4)
 
+def record_ignored_images(ignored_images, dest_dir):
+    path = os.path.join(dest_dir, "ignored_images.json")
+    ignored_images_for_file = {}
+    ignored_images_for_file["ignored_images"] = ignored_images # keep a record of images that were ignored
+    with open(path,"w") as f:
+        json.dump(ignored_images_for_file, f, indent=4)
+    
 categories_file = "data-annotations/pitfall-cameras/info/info.json"
 
 def main():
@@ -126,6 +146,11 @@ def main():
     file_prefix = ccu.get_file_prefix_from_specs(args.field, args.crop, args.camera, args.date, flash=args.f)
     img_folder_name = ccu.get_img_folder_name_from_specs(args.field, args.crop, args.camera)
     convert(file_prefix, img_folder_name, src_csv, dest)
+    print(f"Ignored {sum([len(ignored_images[key]) for key in ignored_images.keys()])} images due to errors - see the file for more details.")
+    record_ignored_images(ignored_images=ignored_images, dest_dir=args.dest_dir)
+    
+
+
 
 if __name__ == "__main__":
     main()
