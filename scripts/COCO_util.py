@@ -33,20 +33,24 @@ def reorder_unknown(name):
 
 
 def extract_category_name_from_region_attributes(attr):
-    cat = set()
     try:
         attr_dict = json.loads(attr)
-        keys = list(attr_dict.keys())
+        #keys = list(attr_dict.keys())
         #if ("Insect ID" not in keys) and ("Insect" not in keys) and ("Insects" not in keys): print(attr_dict)
         for key in ["Insect ID"]:
+            # retrieve label from this format: {"Insect": "Carabid"}
             if key in attr_dict:
-                return set([attr_dict[key]])
+                return attr_dict[key]
         for key in ["Insect", "Insects"]:
+            # retrieve label from this format: {"Insect": {"Carabid": True}}
             if key in attr_dict:
-                return attr_dict[key].keys() # NOTE - we assume that the supercategory is always insect (or insects, lol)
+                keys = list(attr_dict[key].keys())
+                if len(keys)==0:
+                    return None # no label
+                return keys[0] 
     except json.JSONDecodeError:
-        cat = set() # ignore malformed json
-    return cat
+        return None # ignore malformed json
+    return None 
 
 def ignored_img(filename, explanation):
     return {"filename": filename, "explanation": explanation}

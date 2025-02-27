@@ -59,15 +59,19 @@ def extract_categories_from_vgg_csv(src):
             continue
         # if there is a detection, append the annotation
         cat = ccu.extract_category_name_from_region_attributes(row.region_attributes)
-        unique_categories.update(cat)
-        
+
+        # ignore the detection, if there is not associated label with the annotation
         no_insect_label_but_was_annotated = not bool(cat)
         if no_insect_label_but_was_annotated: 
             csv_name = src.split("/")[-1]
             if csv_name not in ignored_images.keys():
                 ignored_images[csv_name] = [] 
             ignored_images[csv_name].append(ccu.ignored_img(filename=row.filename, explanation="Incomplete annotation: No insect class in annotation (region_attributes)."))
-                
+            continue
+        
+        unique_categories.add(cat)
+        
+        
     return unique_categories
 
 def extract_categories_from_vgg_csv_dir(src_dir):
