@@ -9,7 +9,6 @@ def create_title(field, crop, camera, date, flash=False):
     flashstr = "_fl" if flash else ""
     return f"{location}_{date}{flashstr}.json"
 
-
 def get_specs_from_info(img_folder_name, info_file_path=INFO_FILE_PATH):
     info = {}
     with open(info_file_path, 'r') as f:

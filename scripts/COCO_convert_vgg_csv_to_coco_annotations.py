@@ -5,14 +5,39 @@ import sys
 import argparse
 import COCO_util as ccu
 import os
+import re
 
-
-ignored_images = {} # "csv_file_name": [{"img_name": "img_name", "explanation": "...", "img_name", ...]
+ignored_images = {} # "csv_file_name": [{"img_name": "img_name", "explanation": "..."}, ...]
 
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
     flashstr = "_fl" if flash else ""
     return f"{location}_{date}{flashstr}.json"
+
+def get_camera_from_csv_filename(csv_name):
+    return csv_name.split(" ")[1]
+
+def get_datetime_from_csv_filename(csv_name):
+    og_date = csv_name.split(" ")[0]
+    date = re.findall('..', og_date)
+    date.reverse()
+    date = "-".join(date)
+    return date
+
+def get_og_date_from_csv_filename(csv_name):
+    return csv_name.split(" ")[0]
+    
+def gen_dict_for_cam_and_date_to_img_folder_name():
+    with open(ccu.INFO_FILE_PATH, "r") as f:
+        folders = json.load(f)["folders"]
+    date_and_camera_to_folder_name = {}
+    for folder in folders.keys():
+        camera = folders[folder]["specs"]["camera"]
+        dates = folders[folder]["specs"]["dates"]
+        for date in dates:
+            date_and_camera_to_folder_name[f"{camera}-{date}"] = folder
+    return date_and_camera_to_folder_name
+
 
 def get_filename_for_csv_annotations(date:str, camera, flash=False):
     date_list = date.split("-")
@@ -63,7 +88,7 @@ def gen_info(img_folder_name):
     date_last = specs["dates"][-1]
 
     info = {}
-    description = f"{field} {crop} field, camera {camera} - recorded from {date_first} to {date_last} (specific date in filename)."
+    description = f"{field} {crop} field, camera {camera} - recorded (and annotated) between 20{date_first} and 20{date_last} (specific date in filename)."
     info["description"] = description
     info["date_created"] = date_first
     return info
@@ -71,7 +96,6 @@ def gen_info(img_folder_name):
 
 def convert(file_prefix, img_folder_name, csv_file_path, coco_file_destination):
     data = pd.read_csv(csv_file_path, on_bad_lines='skip')
-
 
     data['fileid'] = file_prefix + data['filename'].astype(str) # create fileid column
                                                                 # id is the file prefix prepended to the original filename (this corresponds to the correct filename in OUR system)
@@ -132,11 +156,40 @@ def record_ignored_images(ignored_images, dest_dir):
             else:
                 already_ignored[key] = ignored_images[key]
         json.dump(already_ignored, f, indent=4)
+    
+def convert_all_vgg_csv_in_dir_to_COCO(src_dir):
+    """Runs through a given directory of vgg-csv annotation files and extracts all unique categories (returned as a set)"""
+    files = [f for f in os.listdir(src_dir) if (os.path.isfile(os.path.join(src_dir, f)) and os.path.splitext(f)[1].lower().endswith((".csv")))]
+    total_files = len(files)
+    
+    cam_and_date_to_img_folder_name = gen_dict_for_cam_and_date_to_img_folder_name()
+    print(cam_and_date_to_img_folder_name)
+    
+    for index, filename in enumerate(files, start=1): 
+        # Build the full path to the file
+        src_file_path = os.path.join(src_dir, filename)
 
+        date = get_datetime_from_csv_filename(filename)
+        img_folder_name = cam_and_date_to_img_folder_name[f"{get_camera_from_csv_filename(filename)}-{date}"]
+        specs = ccu.get_specs_from_info(img_folder_name)
+        flash = filename.split(" ")[-1].startswith("on")
+        file_prefix = ccu.get_file_prefix_from_specs(field=specs["field"], crop=specs["crop"], camera=specs["camera"], date=date, flash=flash)
+        
+        convert(file_prefix=file_prefix, img_folder_name=img_folder_name, csv_file_path=src_file_path, coco_file_destination=f"data-annotations/pitfall-cameras/originals-converted/{file_prefix}.json")
+        # Print progress every 5 files
+        if index % 5 == 0 or index == total_files:
+            print(f"Processed {index} out of {total_files} files")
+    
+    print(f"Converted all the csv-annotations in {src_dir}")
+    with open(ccu.IGNORED_IMAGES_PATH, 'w') as f:
+        json.dump(ignored_images, f, indent=4)
+    print(f"Ignored {sum([len(ignored_images[key]) for key in ignored_images.keys()])} images due to errors - see the file for more details.")
     
 categories_file = "data-annotations/pitfall-cameras/info/categories.json"
 
 def main():
+    convert_all_vgg_csv_in_dir_to_COCO("data-annotations/pitfall-cameras/originals/")
+    '''
     # Set up command-line argument parsing
     parser = argparse.ArgumentParser(description="Convert VGG CSV annotations to COCO JSON for given location and date.")
     parser.add_argument("field", help="Field, e.g. GH for Geescroft and Highfield.")
@@ -154,9 +207,10 @@ def main():
     file_prefix = ccu.get_file_prefix_from_specs(args.field, args.crop, args.camera, args.date, flash=args.f)
     img_folder_name = ccu.get_img_folder_name_from_specs(args.field, args.crop, args.camera)
     convert(file_prefix, img_folder_name, src_csv, dest)
+    print(f"Converted the annotations for {img_folder_name}.")
     print(f"Ignored {sum([len(ignored_images[key]) for key in ignored_images.keys()])} images due to errors - see the file for more details.")
     record_ignored_images(ignored_images=ignored_images, dest_dir="data-annotations/pitfall-cameras/info/")
-    
+    '''
 
 
 
