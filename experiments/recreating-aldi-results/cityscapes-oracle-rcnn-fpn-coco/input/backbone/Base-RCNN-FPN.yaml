@@ -1,6 +1,6 @@
 _BASE_: "detectron2/Base-RCNN-FPN.yaml"
 MODEL:
-  WEIGHTS: "models/model_final_f10217.pkl"
+  WEIGHTS: "input/model_final_f10217.pkl"
   MASK_ON: False
 INPUT:
   MIN_SIZE_TRAIN: (800, 832, 864, 896, 928, 960, 992, 1024)
