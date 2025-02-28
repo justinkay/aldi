@@ -27,7 +27,7 @@ name_mappings = { # corrections for typos and redundancies that weren't caught b
     "phyllotreta sp": "phyllotreta",
     "poecilius cupreus": "poecilus cupreus",
     "psyllidoes chrysocephalus": "psylliodes chrysocephalus",
-    "spider": "arachnida",
+    "spider": "araneae",
     "tachyporus hyphorum": "tachyporus hypnorum",
     "tachyprous hypnorum": "tachyporus hypnorum",
     "unsure": "unknown"
