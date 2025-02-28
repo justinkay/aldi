@@ -23,8 +23,8 @@ def update_image_sizes(coco_json_file_path, image_folder):
         else:
             print(f"Warning: Image not found - {image_path}")
         
-        if (index+1) % 10 == 0 or (index+1) == no_of_images:
-            print(f"-- Processed {index+1} out of {no_of_images} images.")
+        if (index+1) % 100 == 0 or (index+1) == no_of_images:
+            print(f"--- Processed {index+1} out of {no_of_images} images.")
 
     with open(coco_json_file_path, "w") as f:
         json.dump(coco, f, indent=4)
@@ -38,8 +38,8 @@ def update_image_sizes_for_all_annotations_in_dir(src_dir, image_folder):
         src_file_path = os.path.join(src_dir, filename)
         update_image_sizes(src_file_path, image_folder=image_folder)
         # Print progress every 5 files
-        if index % 5 == 0 or index == total_files:
-            print(f"Processed {index} out of {total_files} annotation files.")
+        #if index % 5 == 0 or index == total_files: 
+        print(f"Processed {index} out of {total_files} annotation files.")
 
 
 image_folder = "../ERDA/bugmaster/datasets/pitfall-cameras/images/" 

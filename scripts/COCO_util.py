@@ -1,8 +1,11 @@
 import re
 import json
+from PIL import Image
+import os
 
 INFO_FILE_PATH =  "data-annotations/pitfall-cameras/info/info.json"
 IGNORED_IMAGES_PATH =  "data-annotations/pitfall-cameras/info/ignored_images.json"
+IMAGES_FOLDER = "../ERDA/bugmaster/datasets/pitfall-cameras/images/"
 
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
@@ -40,6 +43,12 @@ def reorder_unknown(name):
         words.append("unknown")  # Place "unknown" last
     return " ".join(words)
 
+def read_image_size(image_path):
+    if os.path.exists(image_path):
+        with Image.open(image_path) as image:
+            return image.size # width, height
+    else:
+        print(f"Warning: Image not found - {image_path}")    
 
 def extract_category_name_from_region_attributes(attr):
     try:

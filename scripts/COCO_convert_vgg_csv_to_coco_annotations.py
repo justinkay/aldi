@@ -54,10 +54,12 @@ def gen_info(img_folder_name):
     return info
 
 def image(row):
+    width, height = ccu.read_image_size(row.filename)
+
     image = {}
     image["id"] = row.fileid
-    image["height"] = 3420 # FIXME currently hardcoded - update after cropping?
-    image["width"] = 6080 # FIXME
+    image["height"] = width 
+    image["width"] = height 
     image["file_name"] = row.filename
     return image
 
