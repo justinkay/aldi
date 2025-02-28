@@ -4,3 +4,5 @@ Renamed the csv-file "30-06-22 NARS-30 flash off_csv(1).csv" to "300620 NARS30 F
 Renamed the csv-file "150620 LSE3 Flash on.csv" to "150620 LS3E Flash on.csv" - the LSE3 was clearly a type for the correct camera name, which is LS3E. 
 
 The originals-converted annotations have filenames that match the prefix used for the files they are annotating.
+
+All the images combined are 146 GB
