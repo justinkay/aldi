@@ -1,0 +1,2026 @@
+{
+    "overall": {
+        "total images": 59656,
+        "total annotations": 11002,
+        "positive samples": 9928,
+        "negative samples": 49728,
+        "positive samples (%)": 16.64,
+        "negative samples (%)": -9828,
+        "class distribution": {
+            "brassicogethes aeneus": 2,
+            "tipulidae": 10,
+            "tachyporus hypnorum": 7,
+            "diptera": 31,
+            "psylliodes chrysocephalus": 5,
+            "coccinella larvae": 6,
+            "carabidae": 12,
+            "formicidae": 249,
+            "amara": 18,
+            "mollusca": 6,
+            "opiliones": 1,
+            "harpalus rufipes": 2,
+            "linyphiidae": 5,
+            "unknown": 2,
+            "anchomenus dorsalis": 1,
+            "isopoda": 1,
+            "myriapoda": 1,
+            "pterostichus madidus": 1,
+            "harpalus affinis": 9,
+            "staphylinidae": 1,
+            "poecilus cupreus": 2,
+            "coccinellidae": 2,
+            "phyllotreta": 3,
+            "dermaptera": 2,
+            "notiophilus biguttatus": 3,
+            "gnaphosidae": 1,
+            "mollusc": 4,
+            "diptera larvae": 2,
+            "lycosidae": 1,
+            "pterostichus melanarius": 1,
+            "carabid larvae": 3,
+            "coccinella": 47,
+            "braconidae": 1,
+            "brassicogethes": 1,
+            "bibionidae": 10,
+            "arachnida": 1,
+            "elateridae": 1,
+            "lepidoptera": 6,
+            "coleoptera": 1,
+            "cantharis lateralis": 1,
+            "chalcididae": 1,
+            "molllusca": 5,
+            "nebria brevicollis": 615,
+            "argasidae": 1,
+            "cantharis rustica": 2,
+            "cantharis rufa": 1,
+            "syrphidae": 2,
+            "acari": 10,
+            "diapriidae": 2,
+            "parasitoid": 4
+        }
+    },
+    "per file": {
+        "GH_OSR_LF1F_20-06-01_.json": {
+            "total images": 59656,
+            "total annotations": 11002,
+            "positive samples": 9928,
+            "negative samples": 49728,
+            "positive samples (%)": 16.64,
+            "negative samples (%)": -9828,
+            "class distribution": {
+                "brassicogethes aeneus": 2,
+                "tipulidae": 10,
+                "tachyporus hypnorum": 7,
+                "diptera": 31,
+                "psylliodes chrysocephalus": 5,
+                "coccinella larvae": 6,
+                "carabidae": 12,
+                "formicidae": 249,
+                "amara": 18,
+                "mollusca": 6,
+                "opiliones": 1,
+                "harpalus rufipes": 2,
+                "linyphiidae": 5,
+                "unknown": 2,
+                "anchomenus dorsalis": 1,
+                "isopoda": 1,
+                "myriapoda": 1,
+                "pterostichus madidus": 1,
+                "harpalus affinis": 9,
+                "staphylinidae": 1,
+                "poecilus cupreus": 2,
+                "coccinellidae": 2,
+                "phyllotreta": 3,
+                "dermaptera": 2,
+                "notiophilus biguttatus": 3,
+                "gnaphosidae": 1,
+                "mollusc": 4,
+                "diptera larvae": 2,
+                "lycosidae": 1,
+                "pterostichus melanarius": 1,
+                "carabid larvae": 3,
+                "coccinella": 47,
+                "braconidae": 1,
+                "brassicogethes": 1,
+                "bibionidae": 10,
+                "arachnida": 1,
+                "elateridae": 1,
+                "lepidoptera": 6,
+                "coleoptera": 1,
+                "cantharis lateralis": 1,
+                "chalcididae": 1,
+                "molllusca": 5,
+                "nebria brevicollis": 615,
+                "argasidae": 1,
+                "cantharis rustica": 2,
+                "cantharis rufa": 1,
+                "syrphidae": 2,
+                "acari": 10,
+                "diapriidae": 2,
+                "parasitoid": 4
+            }
+        },
+        "WW_OSR_LF1G_20-06-25_fl_.json": {
+            "total images": 572,
+            "total annotations": 27,
+            "positive samples": 27,
+            "negative samples": 545,
+            "positive samples (%)": 95.28,
+            "negative samples (%)": 4.72,
+            "class distribution": {
+                "carabidae": 7,
+                "formicidae": 2,
+                "diptera": 3,
+                "amara": 2,
+                "mollusca": 1,
+                "opiliones": 1,
+                "tachyporus hypnorum": 4,
+                "harpalus rufipes": 1,
+                "linyphiidae": 1,
+                "unknown": 5
+            }
+        },
+        "LG_OSR_LF1D_20-07-01_fl_.json": {
+            "total images": 565,
+            "total annotations": 26,
+            "positive samples": 26,
+            "negative samples": 539,
+            "positive samples (%)": 95.4,
+            "negative samples (%)": 4.6,
+            "class distribution": {
+                "unknown": 6,
+                "carabidae": 3,
+                "mollusca": 2,
+                "anchomenus dorsalis": 3,
+                "tachyporus hypnorum": 6,
+                "amara": 1,
+                "isopoda": 2,
+                "linyphiidae": 1,
+                "myriapoda": 2
+            }
+        },
+        "LG_OSR_HF2F_20-06-30_fl_.json": {
+            "total images": 520,
+            "total annotations": 52,
+            "positive samples": 47,
+            "negative samples": 473,
+            "positive samples (%)": 90.96,
+            "negative samples (%)": 9.04,
+            "class distribution": {
+                "pterostichus madidus": 1,
+                "myriapoda": 5,
+                "unknown": 15,
+                "anchomenus dorsalis": 5,
+                "harpalus affinis": 16,
+                "staphylinidae": 2,
+                "tachyporus hypnorum": 2,
+                "poecilus cupreus": 1,
+                "carabidae": 1,
+                "amara": 3,
+                "linyphiidae": 1
+            }
+        },
+        "LG_OSR_LF1G_20-07-09_.json": {
+            "total images": 793,
+            "total annotations": 47,
+            "positive samples": 47,
+            "negative samples": 746,
+            "positive samples (%)": 94.07,
+            "negative samples (%)": 5.93,
+            "class distribution": {
+                "diptera": 13,
+                "staphylinidae": 1,
+                "carabidae": 9,
+                "anchomenus dorsalis": 2,
+                "myriapoda": 1,
+                "amara": 18,
+                "coccinellidae": 2,
+                "psylliodes chrysocephalus": 1
+            }
+        },
+        "LG_OSR_LF1G_20-07-15_fl_.json": {
+            "total images": 599,
+            "total annotations": 98,
+            "positive samples": 95,
+            "negative samples": 504,
+            "positive samples (%)": 84.14,
+            "negative samples (%)": 15.86,
+            "class distribution": {
+                "carabidae": 10,
+                "amara": 3,
+                "phyllotreta": 5,
+                "tachyporus hypnorum": 54,
+                "poecilus cupreus": 1,
+                "anchomenus dorsalis": 4,
+                "unknown": 5,
+                "myriapoda": 4,
+                "harpalus rufipes": 6,
+                "diptera": 1,
+                "isopoda": 1,
+                "dermaptera": 1,
+                "linyphiidae": 2,
+                "staphylinidae": 1
+            }
+        },
+        "LG_OSR_LF2F_20-07-06_fl_.json": {
+            "total images": 484,
+            "total annotations": 64,
+            "positive samples": 63,
+            "negative samples": 421,
+            "positive samples (%)": 86.98,
+            "negative samples (%)": 13.02,
+            "class distribution": {
+                "isopoda": 2,
+                "dermaptera": 26,
+                "anchomenus dorsalis": 1,
+                "unknown": 15,
+                "tachyporus hypnorum": 8,
+                "myriapoda": 1,
+                "linyphiidae": 1,
+                "carabidae": 8,
+                "poecilus cupreus": 2
+            }
+        },
+        "LG_OSR_LF2F_20-07-09_fl_.json": {
+            "total images": 614,
+            "total annotations": 55,
+            "positive samples": 54,
+            "negative samples": 560,
+            "positive samples (%)": 91.21,
+            "negative samples (%)": 8.79,
+            "class distribution": {
+                "unknown": 4,
+                "staphylinidae": 1,
+                "mollusca": 18,
+                "carabidae": 14,
+                "tachyporus hypnorum": 1,
+                "harpalus rufipes": 3,
+                "myriapoda": 9,
+                "anchomenus dorsalis": 2,
+                "dermaptera": 1,
+                "pterostichus madidus": 1,
+                "amara": 1
+            }
+        },
+        "WW_OSR_HF2F_20-06-24_fl_.json": {
+            "total images": 497,
+            "total annotations": 67,
+            "positive samples": 64,
+            "negative samples": 433,
+            "positive samples (%)": 87.12,
+            "negative samples (%)": 12.88,
+            "class distribution": {
+                "unknown": 7,
+                "diptera": 1,
+                "linyphiidae": 15,
+                "mollusca": 25,
+                "amara": 4,
+                "carabidae": 12,
+                "opiliones": 1,
+                "isopoda": 1,
+                "anchomenus dorsalis": 1
+            }
+        },
+        "GH_OSR_LF1F_20-06-11_fl_.json": {
+            "total images": 588,
+            "total annotations": 226,
+            "positive samples": 185,
+            "negative samples": 403,
+            "positive samples (%)": 68.54,
+            "negative samples (%)": 31.46,
+            "class distribution": {
+                "carabidae": 49,
+                "unknown": 7,
+                "tachyporus hypnorum": 31,
+                "harpalus affinis": 46,
+                "diptera": 1,
+                "amara": 8,
+                "harpalus rufipes": 18,
+                "staphylinidae": 2,
+                "mollusca": 50,
+                "anchomenus dorsalis": 10,
+                "isopoda": 2,
+                "psylliodes chrysocephalus": 1,
+                "linyphiidae": 1
+            }
+        },
+        "LG_OSR_LS3E_20-07-06_fl_.json": {
+            "total images": 491,
+            "total annotations": 64,
+            "positive samples": 59,
+            "negative samples": 432,
+            "positive samples (%)": 87.98,
+            "negative samples (%)": 12.02,
+            "class distribution": {
+                "tachyporus hypnorum": 34,
+                "poecilus cupreus": 2,
+                "unknown": 15,
+                "linyphiidae": 1,
+                "myriapoda": 5,
+                "mollusca": 5,
+                "anchomenus dorsalis": 1,
+                "carabidae": 1
+            }
+        },
+        "GH_OSR_LF1F_20-06-01_fl_.json": {
+            "total images": 523,
+            "total annotations": 105,
+            "positive samples": 98,
+            "negative samples": 425,
+            "positive samples (%)": 81.26,
+            "negative samples (%)": 18.74,
+            "class distribution": {
+                "tachyporus hypnorum": 36,
+                "notiophilus biguttatus": 3,
+                "amara": 10,
+                "gnaphosidae": 1,
+                "poecilus cupreus": 2,
+                "mollusc": 32,
+                "linyphiidae": 5,
+                "psylliodes chrysocephalus": 1,
+                "myriapoda": 4,
+                "diptera larvae": 11
+            }
+        },
+        "WW_OSR_LF1G_20-06-15_fl_.json": {
+            "total images": 522,
+            "total annotations": 11,
+            "positive samples": 11,
+            "negative samples": 511,
+            "positive samples (%)": 97.89,
+            "negative samples (%)": 2.11,
+            "class distribution": {
+                "carabidae": 1,
+                "lycosidae": 1,
+                "linyphiidae": 2,
+                "harpalus affinis": 1,
+                "unknown": 6
+            }
+        },
+        "LG_OSR_LF1D_20-07-09_fl_.json": {
+            "total images": 697,
+            "total annotations": 185,
+            "positive samples": 170,
+            "negative samples": 527,
+            "positive samples (%)": 75.61,
+            "negative samples (%)": 24.39,
+            "class distribution": {
+                "staphylinidae": 4,
+                "anchomenus dorsalis": 5,
+                "carabidae": 11,
+                "amara": 7,
+                "harpalus affinis": 2,
+                "mollusca": 102,
+                "pterostichus melanarius": 1,
+                "tachyporus hypnorum": 6,
+                "harpalus rufipes": 3,
+                "diptera": 40,
+                "linyphiidae": 3,
+                "unknown": 1
+            }
+        },
+        "LG_OSR_LF1D_20-07-06_fl_.json": {
+            "total images": 531,
+            "total annotations": 92,
+            "positive samples": 82,
+            "negative samples": 449,
+            "positive samples (%)": 84.56,
+            "negative samples (%)": 15.44,
+            "class distribution": {
+                "unknown": 15,
+                "carabidae": 1,
+                "tachyporus hypnorum": 9,
+                "harpalus affinis": 2,
+                "linyphiidae": 3,
+                "poecilus cupreus": 10,
+                "mollusca": 45,
+                "anchomenus dorsalis": 3,
+                "myriapoda": 2,
+                "isopoda": 2
+            }
+        },
+        "GH_OSR_HF2G_20-06-08_fl_.json": {
+            "total images": 556,
+            "total annotations": 184,
+            "positive samples": 154,
+            "negative samples": 402,
+            "positive samples (%)": 72.3,
+            "negative samples (%)": 27.7,
+            "class distribution": {
+                "myriapoda": 40,
+                "lycosidae": 11,
+                "mollusca": 66,
+                "amara": 31,
+                "tachyporus hypnorum": 13,
+                "isopoda": 1,
+                "unknown": 6,
+                "psylliodes chrysocephalus": 4,
+                "phyllotreta": 5,
+                "carabidae": 4,
+                "harpalus affinis": 1,
+                "linyphiidae": 1,
+                "anchomenus dorsalis": 1
+            }
+        },
+        "LG_OSR_LF1G_20-07-02_fl_.json": {
+            "total images": 515,
+            "total annotations": 60,
+            "positive samples": 57,
+            "negative samples": 458,
+            "positive samples (%)": 88.93,
+            "negative samples (%)": 11.07,
+            "class distribution": {
+                "carabidae": 26,
+                "amara": 6,
+                "anchomenus dorsalis": 1,
+                "harpalus rufipes": 10,
+                "myriapoda": 6,
+                "pterostichus melanarius": 1,
+                "opiliones": 1,
+                "tachyporus hypnorum": 1,
+                "harpalus affinis": 2,
+                "linyphiidae": 4,
+                "unknown": 2
+            }
+        },
+        "WW_OSR_LF1G_20-06-22_fl_.json": {
+            "total images": 509,
+            "total annotations": 196,
+            "positive samples": 194,
+            "negative samples": 315,
+            "positive samples (%)": 61.89,
+            "negative samples (%)": 38.11,
+            "class distribution": {
+                "unknown": 2,
+                "amara": 1,
+                "carabidae": 2,
+                "pterostichus melanarius": 1,
+                "mollusca": 9,
+                "diptera": 179,
+                "myriapoda": 1,
+                "linyphiidae": 1
+            }
+        },
+        "LG_OSR_HF2F_20-07-13_fl_.json": {
+            "total images": 593,
+            "total annotations": 76,
+            "positive samples": 69,
+            "negative samples": 524,
+            "positive samples (%)": 88.36,
+            "negative samples (%)": 11.64,
+            "class distribution": {
+                "diptera": 20,
+                "unknown": 2,
+                "carabidae": 15,
+                "mollusca": 9,
+                "harpalus affinis": 5,
+                "amara": 2,
+                "pterostichus melanarius": 2,
+                "poecilus cupreus": 2,
+                "harpalus rufipes": 2,
+                "tachyporus hypnorum": 13,
+                "lycosidae": 1,
+                "anchomenus dorsalis": 1,
+                "linyphiidae": 1,
+                "myriapoda": 1
+            }
+        },
+        "LG_OSR_LS3E_20-07-01_fl_.json": {
+            "total images": 506,
+            "total annotations": 68,
+            "positive samples": 66,
+            "negative samples": 440,
+            "positive samples (%)": 86.96,
+            "negative samples (%)": 13.04,
+            "class distribution": {
+                "unknown": 4,
+                "amara": 2,
+                "carabidae": 20,
+                "diptera": 31,
+                "linyphiidae": 3,
+                "poecilus cupreus": 3,
+                "harpalus affinis": 3,
+                "staphylinidae": 1,
+                "myriapoda": 1
+            }
+        },
+        "LG_OSR_LF1G_20-06-29_fl_.json": {
+            "total images": 530,
+            "total annotations": 52,
+            "positive samples": 51,
+            "negative samples": 479,
+            "positive samples (%)": 90.38,
+            "negative samples (%)": 9.62,
+            "class distribution": {
+                "carabidae": 30,
+                "diptera": 11,
+                "myriapoda": 2,
+                "linyphiidae": 2,
+                "amara": 1,
+                "anchomenus dorsalis": 4,
+                "harpalus rufipes": 2
+            }
+        },
+        "LG_OSR_LF2F_20-07-01_fl_.json": {
+            "total images": 499,
+            "total annotations": 229,
+            "positive samples": 211,
+            "negative samples": 288,
+            "positive samples (%)": 57.72,
+            "negative samples (%)": 42.28,
+            "class distribution": {
+                "diptera": 171,
+                "carabidae": 11,
+                "poecilus cupreus": 4,
+                "staphylinidae": 2,
+                "unknown": 15,
+                "isopoda": 2,
+                "harpalus affinis": 1,
+                "formicidae": 2,
+                "tachyporus hypnorum": 14,
+                "myriapoda": 1,
+                "linyphiidae": 6
+            }
+        },
+        "LG_OSR_HF2F_20-07-09_.json": {
+            "total images": 789,
+            "total annotations": 27,
+            "positive samples": 26,
+            "negative samples": 763,
+            "positive samples (%)": 96.7,
+            "negative samples (%)": 3.3,
+            "class distribution": {
+                "carabid larvae": 3,
+                "diptera": 9,
+                "carabidae": 9,
+                "mollusca": 3,
+                "amara": 2,
+                "staphylinidae": 1
+            }
+        },
+        "LG_OSR_LS3E_20-06-15_fl_.json": {
+            "total images": 511,
+            "total annotations": 98,
+            "positive samples": 86,
+            "negative samples": 425,
+            "positive samples (%)": 83.17,
+            "negative samples (%)": 16.83,
+            "class distribution": {
+                "carabidae": 17,
+                "unknown": 30,
+                "diptera": 3,
+                "tachyporus hypnorum": 8,
+                "pterostichus melanarius": 1,
+                "amara": 4,
+                "poecilus cupreus": 2,
+                "anchomenus dorsalis": 4,
+                "mollusca": 28,
+                "myriapoda": 1
+            }
+        },
+        "WW_OSR_HF2F_20-06-23_fl_.json": {
+            "total images": 493,
+            "total annotations": 45,
+            "positive samples": 44,
+            "negative samples": 449,
+            "positive samples (%)": 91.08,
+            "negative samples (%)": 8.92,
+            "class distribution": {
+                "diptera": 4,
+                "amara": 4,
+                "mollusca": 28,
+                "staphylinidae": 1,
+                "linyphiidae": 4,
+                "pterostichus melanarius": 1,
+                "carabidae": 2,
+                "unknown": 1
+            }
+        },
+        "LG_OSR_LF2F_20-07-08_fl_.json": {
+            "total images": 572,
+            "total annotations": 47,
+            "positive samples": 43,
+            "negative samples": 529,
+            "positive samples (%)": 92.48,
+            "negative samples (%)": 7.52,
+            "class distribution": {
+                "carabidae": 13,
+                "mollusca": 16,
+                "amara": 5,
+                "dermaptera": 1,
+                "unknown": 1,
+                "staphylinidae": 1,
+                "anchomenus dorsalis": 2,
+                "isopoda": 3,
+                "harpalus rufipes": 1,
+                "pterostichus madidus": 4
+            }
+        },
+        "WW_OSR_HF2F_20-06-25_fl_.json": {
+            "total images": 553,
+            "total annotations": 255,
+            "positive samples": 210,
+            "negative samples": 343,
+            "positive samples (%)": 62.03,
+            "negative samples (%)": 37.97,
+            "class distribution": {
+                "linyphiidae": 167,
+                "amara": 6,
+                "opiliones": 35,
+                "carabidae": 3,
+                "unknown": 5,
+                "tachyporus hypnorum": 5,
+                "isopoda": 1,
+                "diptera": 24,
+                "harpalus affinis": 9
+            }
+        },
+        "LG_OSR_LS3E_20-07-08_fl_.json": {
+            "total images": 573,
+            "total annotations": 45,
+            "positive samples": 44,
+            "negative samples": 529,
+            "positive samples (%)": 92.32,
+            "negative samples (%)": 7.68,
+            "class distribution": {
+                "carabidae": 18,
+                "pterostichus melanarius": 1,
+                "mollusca": 5,
+                "myriapoda": 5,
+                "anchomenus dorsalis": 3,
+                "harpalus affinis": 1,
+                "tachyporus hypnorum": 3,
+                "amara": 2,
+                "linyphiidae": 1,
+                "harpalus rufipes": 1,
+                "staphylinidae": 5
+            }
+        },
+        "LG_OSR_LF1G_20-06-30_fl_.json": {
+            "total images": 519,
+            "total annotations": 95,
+            "positive samples": 90,
+            "negative samples": 429,
+            "positive samples (%)": 82.66,
+            "negative samples (%)": 17.34,
+            "class distribution": {
+                "carabidae": 28,
+                "diptera": 9,
+                "amara": 8,
+                "anchomenus dorsalis": 6,
+                "linyphiidae": 2,
+                "tachyporus hypnorum": 9,
+                "myriapoda": 11,
+                "harpalus affinis": 7,
+                "staphylinidae": 8,
+                "unknown": 4,
+                "poecilus cupreus": 1,
+                "harpalus rufipes": 2
+            }
+        },
+        "GH_OSR_HF2G_20-06-02_.json": {
+            "total images": 951,
+            "total annotations": 58,
+            "positive samples": 55,
+            "negative samples": 896,
+            "positive samples (%)": 94.22,
+            "negative samples (%)": 5.78,
+            "class distribution": {
+                "carabidae": 2,
+                "tachyporus hypnorum": 5,
+                "isopoda": 2,
+                "diptera": 46,
+                "amara": 1,
+                "psylliodes chrysocephalus": 1,
+                "staphylinidae": 1
+            }
+        },
+        "WW_OSR_LF1G_20-06-24_fl_.json": {
+            "total images": 507,
+            "total annotations": 18,
+            "positive samples": 16,
+            "negative samples": 491,
+            "positive samples (%)": 96.84,
+            "negative samples (%)": 3.16,
+            "class distribution": {
+                "linyphiidae": 7,
+                "unknown": 1,
+                "carabidae": 2,
+                "amara": 1,
+                "tachyporus hypnorum": 4,
+                "harpalus rufipes": 1,
+                "opiliones": 2
+            }
+        },
+        "GH_OSR_HF2G_20-06-11_fl_.json": {
+            "total images": 620,
+            "total annotations": 271,
+            "positive samples": 228,
+            "negative samples": 392,
+            "positive samples (%)": 63.23,
+            "negative samples (%)": 36.77,
+            "class distribution": {
+                "tachyporus hypnorum": 1,
+                "amara": 27,
+                "myriapoda": 107,
+                "carabidae": 5,
+                "mollusca": 120,
+                "psylliodes chrysocephalus": 1,
+                "unknown": 2,
+                "poecilus cupreus": 2,
+                "harpalus rufipes": 1,
+                "isopoda": 5
+            }
+        },
+        "LG_OSR_LF1G_20-07-14_fl_.json": {
+            "total images": 521,
+            "total annotations": 158,
+            "positive samples": 148,
+            "negative samples": 373,
+            "positive samples (%)": 71.59,
+            "negative samples (%)": 28.41,
+            "class distribution": {
+                "carabidae": 5,
+                "amara": 2,
+                "myriapoda": 7,
+                "unknown": 3,
+                "lycosidae": 1,
+                "tachyporus hypnorum": 122,
+                "anchomenus dorsalis": 1,
+                "linyphiidae": 8,
+                "dermaptera": 2,
+                "harpalus rufipes": 4,
+                "diptera": 1,
+                "harpalus affinis": 2
+            }
+        },
+        "GH_OSR_NARS26_20-06-11_fl_.json": {
+            "total images": 600,
+            "total annotations": 99,
+            "positive samples": 88,
+            "negative samples": 512,
+            "positive samples (%)": 85.33,
+            "negative samples (%)": 14.67,
+            "class distribution": {
+                "carabidae": 34,
+                "psylliodes chrysocephalus": 9,
+                "diptera": 5,
+                "linyphiidae": 10,
+                "unknown": 8,
+                "myriapoda": 4,
+                "mollusca": 11,
+                "amara": 11,
+                "harpalus affinis": 2,
+                "tachyporus hypnorum": 4,
+                "staphylinidae": 1
+            }
+        },
+        "WW_OSR_HF2F_20-06-15_fl_.json": {
+            "total images": 509,
+            "total annotations": 127,
+            "positive samples": 110,
+            "negative samples": 399,
+            "positive samples (%)": 78.39,
+            "negative samples (%)": 21.61,
+            "class distribution": {
+                "amara": 8,
+                "harpalus affinis": 4,
+                "formicidae": 86,
+                "unknown": 9,
+                "coccinella": 2,
+                "linyphiidae": 3,
+                "mollusca": 12,
+                "carabidae": 1,
+                "tachyporus hypnorum": 1,
+                "anchomenus dorsalis": 1
+            }
+        },
+        "GH_OSR_HF2G_20-06-01_fl_.json": {
+            "total images": 547,
+            "total annotations": 23,
+            "positive samples": 23,
+            "negative samples": 524,
+            "positive samples (%)": 95.8,
+            "negative samples (%)": 4.2,
+            "class distribution": {
+                "carabidae": 4,
+                "unknown": 5,
+                "amara": 3,
+                "poecilus cupreus": 1,
+                "tachyporus hypnorum": 5,
+                "myriapoda": 5
+            }
+        },
+        "GH_OSR_LF2E_20-06-01_fl_.json": {
+            "total images": 515,
+            "total annotations": 83,
+            "positive samples": 82,
+            "negative samples": 433,
+            "positive samples (%)": 84.08,
+            "negative samples (%)": 15.92,
+            "class distribution": {
+                "diptera": 45,
+                "tachyporus hypnorum": 20,
+                "amara": 2,
+                "linyphiidae": 1,
+                "unknown": 15
+            }
+        },
+        "GH_OSR_LF1F_20-06-02_.json": {
+            "total images": 998,
+            "total annotations": 53,
+            "positive samples": 50,
+            "negative samples": 948,
+            "positive samples (%)": 94.99,
+            "negative samples (%)": 5.01,
+            "class distribution": {
+                "braconidae": 1,
+                "myriapoda": 1,
+                "tachyporus hypnorum": 3,
+                "diptera": 37,
+                "coccinella larvae": 9,
+                "brassicogethes": 1,
+                "bibionidae": 1
+            }
+        },
+        "GH_OSR_LF1F_20-06-08_fl_.json": {
+            "total images": 511,
+            "total annotations": 66,
+            "positive samples": 64,
+            "negative samples": 447,
+            "positive samples (%)": 87.48,
+            "negative samples (%)": 12.52,
+            "class distribution": {
+                "carabidae": 2,
+                "amara": 9,
+                "linyphiidae": 3,
+                "myriapoda": 6,
+                "tachyporus hypnorum": 26,
+                "anchomenus dorsalis": 2,
+                "unknown": 12,
+                "arachnida": 1,
+                "mollusca": 5
+            }
+        },
+        "GH_OSR_LF2E_20-06-11_fl_.json": {
+            "total images": 577,
+            "total annotations": 69,
+            "positive samples": 66,
+            "negative samples": 511,
+            "positive samples (%)": 88.56,
+            "negative samples (%)": 11.44,
+            "class distribution": {
+                "tachyporus hypnorum": 31,
+                "phyllotreta": 2,
+                "unknown": 3,
+                "carabidae": 6,
+                "mollusca": 12,
+                "arachnida": 4,
+                "linyphiidae": 4,
+                "amara": 5,
+                "anchomenus dorsalis": 1,
+                "harpalus affinis": 1
+            }
+        },
+        "LG_OSR_HF2F_20-07-02_fl_.json": {
+            "total images": 511,
+            "total annotations": 55,
+            "positive samples": 54,
+            "negative samples": 457,
+            "positive samples (%)": 89.43,
+            "negative samples (%)": 10.57,
+            "class distribution": {
+                "carabidae": 35,
+                "amara": 10,
+                "anchomenus dorsalis": 3,
+                "pterostichus melanarius": 2,
+                "myriapoda": 2,
+                "harpalus affinis": 2,
+                "poecilus cupreus": 1
+            }
+        },
+        "WW_OSR_HF2F_20-06-22_fl_.json": {
+            "total images": 504,
+            "total annotations": 107,
+            "positive samples": 100,
+            "negative samples": 404,
+            "positive samples (%)": 80.16,
+            "negative samples (%)": 19.84,
+            "class distribution": {
+                "mollusca": 78,
+                "amara": 7,
+                "staphylinidae": 1,
+                "poecilus cupreus": 5,
+                "harpalus affinis": 3,
+                "linyphiidae": 2,
+                "carabidae": 2,
+                "isopoda": 1,
+                "unknown": 5,
+                "anchomenus dorsalis": 2,
+                "tachyporus hypnorum": 1
+            }
+        },
+        "LG_OSR_LF1G_20-07-13_fl_.json": {
+            "total images": 597,
+            "total annotations": 122,
+            "positive samples": 107,
+            "negative samples": 490,
+            "positive samples (%)": 82.08,
+            "negative samples (%)": 17.92,
+            "class distribution": {
+                "diptera": 30,
+                "myriapoda": 7,
+                "carabidae": 7,
+                "unknown": 11,
+                "linyphiidae": 30,
+                "lycosidae": 1,
+                "tachyporus hypnorum": 17,
+                "amara": 6,
+                "phyllotreta": 8,
+                "anchomenus dorsalis": 2,
+                "staphylinidae": 1,
+                "poecilus cupreus": 2
+            }
+        },
+        "LG_OSR_LF1D_20-07-08_fl_.json": {
+            "total images": 691,
+            "total annotations": 98,
+            "positive samples": 92,
+            "negative samples": 599,
+            "positive samples (%)": 86.69,
+            "negative samples (%)": 13.31,
+            "class distribution": {
+                "anchomenus dorsalis": 10,
+                "diptera": 8,
+                "carabidae": 28,
+                "poecilus cupreus": 6,
+                "harpalus affinis": 6,
+                "isopoda": 2,
+                "harpalus rufipes": 1,
+                "amara": 8,
+                "tachyporus hypnorum": 6,
+                "pterostichus melanarius": 1,
+                "mollusca": 18,
+                "myriapoda": 1,
+                "unknown": 3
+            }
+        },
+        "LG_OSR_HF2F_20-06-29_fl_.json": {
+            "total images": 531,
+            "total annotations": 29,
+            "positive samples": 29,
+            "negative samples": 502,
+            "positive samples (%)": 94.54,
+            "negative samples (%)": 5.46,
+            "class distribution": {
+                "carabidae": 3,
+                "myriapoda": 2,
+                "unknown": 12,
+                "anchomenus dorsalis": 2,
+                "harpalus affinis": 2,
+                "amara": 1,
+                "poecilus cupreus": 3,
+                "diptera": 4
+            }
+        },
+        "GH_OSR_NARS30_20-06-01_.json": {
+            "total images": 914,
+            "total annotations": 108,
+            "positive samples": 104,
+            "negative samples": 810,
+            "positive samples (%)": 88.62,
+            "negative samples (%)": 11.38,
+            "class distribution": {
+                "coccinella larvae": 78,
+                "elateridae": 1,
+                "diptera": 15,
+                "tachyporus hypnorum": 5,
+                "lepidoptera": 6,
+                "coleoptera": 1,
+                "cantharis lateralis": 1,
+                "amara": 1
+            }
+        },
+        "WW_OSR_LF1G_20-06-23_fl_.json": {
+            "total images": 498,
+            "total annotations": 209,
+            "positive samples": 198,
+            "negative samples": 300,
+            "positive samples (%)": 60.24,
+            "negative samples (%)": 39.76,
+            "class distribution": {
+                "psylliodes chrysocephalus": 2,
+                "mollusca": 124,
+                "amara": 5,
+                "unknown": 3,
+                "linyphiidae": 61,
+                "opiliones": 2,
+                "tachyporus hypnorum": 12
+            }
+        },
+        "WW_OSR_LF1D_20-06-24_fl_.json": {
+            "total images": 521,
+            "total annotations": 97,
+            "positive samples": 91,
+            "negative samples": 430,
+            "positive samples (%)": 82.53,
+            "negative samples (%)": 17.47,
+            "class distribution": {
+                "diptera": 6,
+                "linyphiidae": 6,
+                "harpalus rufipes": 2,
+                "mollusca": 61,
+                "opiliones": 7,
+                "carabidae": 1,
+                "unknown": 3,
+                "tachyporus hypnorum": 5,
+                "amara": 1,
+                "formicidae": 5
+            }
+        },
+        "GH_OSR_LF2E_20-06-03_.json": {
+            "total images": 809,
+            "total annotations": 173,
+            "positive samples": 156,
+            "negative samples": 653,
+            "positive samples (%)": 80.72,
+            "negative samples (%)": 19.28,
+            "class distribution": {
+                "tachyporus hypnorum": 16,
+                "linyphiidae": 7,
+                "braconidae": 6,
+                "coccinella larvae": 26,
+                "diptera": 103,
+                "carabidae": 1,
+                "gnaphosidae": 1,
+                "bibionidae": 10,
+                "chalcididae": 1,
+                "diptera larvae": 2
+            }
+        },
+        "GH_OSR_NARS30_20-06-01_fl_.json": {
+            "total images": 533,
+            "total annotations": 65,
+            "positive samples": 64,
+            "negative samples": 469,
+            "positive samples (%)": 87.99,
+            "negative samples (%)": 12.01,
+            "class distribution": {
+                "unknown": 8,
+                "diptera": 3,
+                "amara": 12,
+                "carabidae": 2,
+                "linyphiidae": 1,
+                "tachyporus hypnorum": 21,
+                "lycosidae": 1,
+                "psylliodes chrysocephalus": 17
+            }
+        },
+        "LG_OSR_LS3E_20-07-09_.json": {
+            "total images": 118,
+            "total annotations": 7,
+            "positive samples": 7,
+            "negative samples": 111,
+            "positive samples (%)": 94.07,
+            "negative samples (%)": 5.93,
+            "class distribution": {
+                "carabidae": 6,
+                "poecilus cupreus": 1
+            }
+        },
+        "LG_OSR_LF1D_20-07-14_fl_.json": {
+            "total images": 568,
+            "total annotations": 120,
+            "positive samples": 111,
+            "negative samples": 457,
+            "positive samples (%)": 80.46,
+            "negative samples (%)": 19.54,
+            "class distribution": {
+                "diptera": 1,
+                "tachyporus hypnorum": 15,
+                "mollusca": 66,
+                "carabidae": 8,
+                "unknown": 4,
+                "staphylinidae": 6,
+                "linyphiidae": 2,
+                "amara": 2,
+                "psylliodes chrysocephalus": 3,
+                "anchomenus dorsalis": 4,
+                "isopoda": 4,
+                "pterostichus melanarius": 1,
+                "myriapoda": 3,
+                "harpalus affinis": 1
+            }
+        },
+        "GH_OSR_NARS30_20-06-11_fl_.json": {
+            "total images": 600,
+            "total annotations": 113,
+            "positive samples": 105,
+            "negative samples": 495,
+            "positive samples (%)": 82.5,
+            "negative samples (%)": 17.5,
+            "class distribution": {
+                "carabidae": 34,
+                "tachyporus hypnorum": 39,
+                "unknown": 9,
+                "staphylinidae": 7,
+                "amara": 18,
+                "diptera": 2,
+                "linyphiidae": 2,
+                "psylliodes chrysocephalus": 2
+            }
+        },
+        "WW_OSR_LS3E_20-06-23_fl_.json": {
+            "total images": 486,
+            "total annotations": 85,
+            "positive samples": 76,
+            "negative samples": 410,
+            "positive samples (%)": 84.36,
+            "negative samples (%)": 15.64,
+            "class distribution": {
+                "mollusca": 38,
+                "amara": 23,
+                "carabidae": 19,
+                "staphylinidae": 1,
+                "harpalus rufipes": 1,
+                "tachyporus hypnorum": 1,
+                "linyphiidae": 1,
+                "unknown": 1
+            }
+        },
+        "GH_OSR_LF2E_20-06-02_fl_.json": {
+            "total images": 528,
+            "total annotations": 90,
+            "positive samples": 80,
+            "negative samples": 448,
+            "positive samples (%)": 84.85,
+            "negative samples (%)": 15.15,
+            "class distribution": {
+                "tachyporus hypnorum": 19,
+                "diptera": 54,
+                "amara": 9,
+                "carabidae": 6,
+                "linyphiidae": 2
+            }
+        },
+        "LG_OSR_LF2F_20-07-13_fl_.json": {
+            "total images": 586,
+            "total annotations": 198,
+            "positive samples": 160,
+            "negative samples": 426,
+            "positive samples (%)": 72.7,
+            "negative samples (%)": 27.3,
+            "class distribution": {
+                "myriapoda": 2,
+                "tachyporus hypnorum": 3,
+                "unknown": 18,
+                "carabidae": 30,
+                "staphylinidae": 1,
+                "amara": 2,
+                "mollusca": 7,
+                "diptera": 128,
+                "linyphiidae": 3,
+                "lycosidae": 2,
+                "dermaptera": 1,
+                "harpalus rufipes": 1
+            }
+        },
+        "WW_OSR_LF2F_20-06-23_fl_.json": {
+            "total images": 495,
+            "total annotations": 94,
+            "positive samples": 89,
+            "negative samples": 406,
+            "positive samples (%)": 82.02,
+            "negative samples (%)": 17.98,
+            "class distribution": {
+                "mollusca": 30,
+                "formicidae": 25,
+                "amara": 10,
+                "unknown": 3,
+                "carabidae": 7,
+                "poecilus cupreus": 3,
+                "linyphiidae": 1,
+                "myriapoda": 1,
+                "tachyporus hypnorum": 6,
+                "isopoda": 7,
+                "harpalus affinis": 1
+            }
+        },
+        "LG_OSR_LS3E_20-07-13_fl_.json": {
+            "total images": 599,
+            "total annotations": 80,
+            "positive samples": 75,
+            "negative samples": 524,
+            "positive samples (%)": 87.48,
+            "negative samples (%)": 12.52,
+            "class distribution": {
+                "diptera": 28,
+                "linyphiidae": 3,
+                "myriapoda": 7,
+                "harpalus rufipes": 10,
+                "amara": 1,
+                "tachyporus hypnorum": 7,
+                "unknown": 2,
+                "carabidae": 21,
+                "anchomenus dorsalis": 1
+            }
+        },
+        "LG_OSR_HF2F_20-07-01_fl_.json": {
+            "total images": 527,
+            "total annotations": 400,
+            "positive samples": 308,
+            "negative samples": 219,
+            "positive samples (%)": 41.56,
+            "negative samples (%)": 58.44,
+            "class distribution": {
+                "diptera": 369,
+                "formicidae": 3,
+                "carabidae": 4,
+                "unknown": 1,
+                "harpalus affinis": 1,
+                "tachyporus hypnorum": 6,
+                "staphylinidae": 3,
+                "linyphiidae": 3,
+                "poecilus cupreus": 5,
+                "myriapoda": 5
+            }
+        },
+        "LG_OSR_LF1D_20-06-30_fl_.json": {
+            "total images": 549,
+            "total annotations": 46,
+            "positive samples": 46,
+            "negative samples": 503,
+            "positive samples (%)": 91.62,
+            "negative samples (%)": 8.38,
+            "class distribution": {
+                "staphylinidae": 3,
+                "amara": 8,
+                "carabidae": 3,
+                "mollusca": 16,
+                "unknown": 3,
+                "anchomenus dorsalis": 1,
+                "poecilus cupreus": 2,
+                "myriapoda": 5,
+                "harpalus affinis": 2,
+                "psylliodes chrysocephalus": 2,
+                "linyphiidae": 1
+            }
+        },
+        "LG_OSR_LF2F_20-07-09_.json": {
+            "total images": 810,
+            "total annotations": 82,
+            "positive samples": 82,
+            "negative samples": 728,
+            "positive samples (%)": 89.88,
+            "negative samples (%)": 10.12,
+            "class distribution": {
+                "tachyporus hypnorum": 1,
+                "psylliodes chrysocephalus": 3,
+                "molllusca": 5,
+                "diptera": 72,
+                "linyphiidae": 1
+            }
+        },
+        "LG_OSR_LF1G_20-07-08_fl_.json": {
+            "total images": 591,
+            "total annotations": 74,
+            "positive samples": 72,
+            "negative samples": 519,
+            "positive samples (%)": 87.82,
+            "negative samples (%)": 12.18,
+            "class distribution": {
+                "diptera": 6,
+                "staphylinidae": 1,
+                "carabidae": 18,
+                "anchomenus dorsalis": 4,
+                "unknown": 4,
+                "amara": 15,
+                "tachyporus hypnorum": 13,
+                "harpalus rufipes": 6,
+                "myriapoda": 2,
+                "poecilus cupreus": 3,
+                "pterostichus melanarius": 1,
+                "linyphiidae": 1
+            }
+        },
+        "LG_OSR_LF1D_20-07-13_fl_.json": {
+            "total images": 635,
+            "total annotations": 78,
+            "positive samples": 76,
+            "negative samples": 559,
+            "positive samples (%)": 88.03,
+            "negative samples (%)": 11.97,
+            "class distribution": {
+                "staphylinidae": 3,
+                "diptera": 4,
+                "anchomenus dorsalis": 4,
+                "tachyporus hypnorum": 9,
+                "nebria brevicollis": 1,
+                "amara": 11,
+                "carabidae": 10,
+                "myriapoda": 4,
+                "mollusca": 14,
+                "psylliodes chrysocephalus": 3,
+                "unknown": 8,
+                "isopoda": 1,
+                "phyllotreta": 2,
+                "harpalus affinis": 1,
+                "linyphiidae": 3
+            }
+        },
+        "LG_OSR_LS3E_20-06-30_fl_.json": {
+            "total images": 524,
+            "total annotations": 114,
+            "positive samples": 101,
+            "negative samples": 423,
+            "positive samples (%)": 80.73,
+            "negative samples (%)": 19.27,
+            "class distribution": {
+                "tachyporus hypnorum": 2,
+                "harpalus affinis": 56,
+                "carabidae": 23,
+                "myriapoda": 9,
+                "anchomenus dorsalis": 2,
+                "amara": 6,
+                "linyphiidae": 2,
+                "unknown": 8,
+                "poecilus cupreus": 2,
+                "lycosidae": 4
+            }
+        },
+        "GH_OSR_NARS26_20-06-02_fl_.json": {
+            "total images": 511,
+            "total annotations": 45,
+            "positive samples": 43,
+            "negative samples": 468,
+            "positive samples (%)": 91.59,
+            "negative samples (%)": 8.41,
+            "class distribution": {
+                "linyphiidae": 8,
+                "unknown": 4,
+                "tachyporus hypnorum": 18,
+                "amara": 11,
+                "diptera": 4
+            }
+        },
+        "WW_OSR_LF1D_20-06-23_fl_.json": {
+            "total images": 512,
+            "total annotations": 150,
+            "positive samples": 142,
+            "negative samples": 370,
+            "positive samples (%)": 72.27,
+            "negative samples (%)": 27.73,
+            "class distribution": {
+                "diptera": 18,
+                "unknown": 3,
+                "amara": 3,
+                "linyphiidae": 5,
+                "anchomenus dorsalis": 1,
+                "mollusca": 119,
+                "opiliones": 1
+            }
+        },
+        "GH_OSR_HF2G_20-06-02_fl_.json": {
+            "total images": 562,
+            "total annotations": 95,
+            "positive samples": 85,
+            "negative samples": 477,
+            "positive samples (%)": 84.88,
+            "negative samples (%)": 15.12,
+            "class distribution": {
+                "myriapoda": 17,
+                "carabidae": 12,
+                "amara": 43,
+                "opiliones": 1,
+                "lycosidae": 2,
+                "phyllotreta": 6,
+                "tachyporus hypnorum": 6,
+                "poecilus cupreus": 2,
+                "anchomenus dorsalis": 1,
+                "isopoda": 4,
+                "diptera": 1
+            }
+        },
+        "LG_OSR_LF2F_20-06-30_fl_.json": {
+            "total images": 504,
+            "total annotations": 75,
+            "positive samples": 73,
+            "negative samples": 431,
+            "positive samples (%)": 85.52,
+            "negative samples (%)": 14.48,
+            "class distribution": {
+                "carabidae": 41,
+                "diptera": 3,
+                "myriapoda": 2,
+                "dermaptera": 4,
+                "amara": 4,
+                "poecilus cupreus": 1,
+                "harpalus affinis": 5,
+                "unknown": 5,
+                "isopoda": 1,
+                "tachyporus hypnorum": 1,
+                "linyphiidae": 3,
+                "argasidae": 1,
+                "staphylinidae": 4
+            }
+        },
+        "WW_OSR_LF2F_20-06-24_fl_.json": {
+            "total images": 504,
+            "total annotations": 150,
+            "positive samples": 128,
+            "negative samples": 376,
+            "positive samples (%)": 74.6,
+            "negative samples (%)": 25.4,
+            "class distribution": {
+                "formicidae": 33,
+                "carabidae": 7,
+                "diptera": 9,
+                "unknown": 13,
+                "linyphiidae": 17,
+                "mollusca": 59,
+                "tachyporus hypnorum": 1,
+                "isopoda": 6,
+                "myriapoda": 1,
+                "amara": 3,
+                "lycosidae": 1
+            }
+        },
+        "LG_OSR_HF2F_20-07-09_fl_.json": {
+            "total images": 634,
+            "total annotations": 37,
+            "positive samples": 36,
+            "negative samples": 598,
+            "positive samples (%)": 94.32,
+            "negative samples (%)": 5.68,
+            "class distribution": {
+                "diptera": 3,
+                "carabidae": 2,
+                "amara": 2,
+                "harpalus rufipes": 5,
+                "mollusca": 14,
+                "myriapoda": 1,
+                "tachyporus hypnorum": 2,
+                "harpalus affinis": 2,
+                "staphylinidae": 2,
+                "pterostichus melanarius": 1,
+                "unknown": 3
+            }
+        },
+        "LG_OSR_HF2F_20-07-06_fl_.json": {
+            "total images": 493,
+            "total annotations": 224,
+            "positive samples": 209,
+            "negative samples": 284,
+            "positive samples (%)": 57.61,
+            "negative samples (%)": 42.39,
+            "class distribution": {
+                "linyphiidae": 23,
+                "diptera": 173,
+                "poecilus cupreus": 1,
+                "tachyporus hypnorum": 18,
+                "unknown": 5,
+                "staphylinidae": 2,
+                "carabidae": 1,
+                "dermaptera": 1
+            }
+        },
+        "LG_WWH_NARS30_20-06-30_.json": {
+            "total images": 866,
+            "total annotations": 243,
+            "positive samples": 225,
+            "negative samples": 641,
+            "positive samples (%)": 74.02,
+            "negative samples (%)": 25.98,
+            "class distribution": {
+                "isopoda": 1,
+                "linyphiidae": 1,
+                "formicidae": 6,
+                "chalcididae": 1,
+                "myriapoda": 10,
+                "mollusca": 29,
+                "diptera": 185,
+                "unknown": 10
+            }
+        },
+        "LG_OSR_LF1D_20-07-09_.json": {
+            "total images": 727,
+            "total annotations": 20,
+            "positive samples": 20,
+            "negative samples": 707,
+            "positive samples (%)": 97.25,
+            "negative samples (%)": 2.75,
+            "class distribution": {
+                "phyllotreta": 3,
+                "diptera": 11,
+                "mollusca": 3,
+                "tachyporus hypnorum": 1,
+                "psylliodes chrysocephalus": 1,
+                "amara": 1
+            }
+        },
+        "WW_OSR_LS3E_20-06-24_fl_.json": {
+            "total images": 493,
+            "total annotations": 164,
+            "positive samples": 135,
+            "negative samples": 358,
+            "positive samples (%)": 72.62,
+            "negative samples (%)": 27.38,
+            "class distribution": {
+                "unknown": 11,
+                "carabidae": 20,
+                "linyphiidae": 57,
+                "diptera": 4,
+                "mollusca": 53,
+                "staphylinidae": 2,
+                "formicidae": 1,
+                "anchomenus dorsalis": 1,
+                "amara": 12,
+                "poecilus cupreus": 2,
+                "opiliones": 1
+            }
+        },
+        "LG_OSR_LF2F_20-07-14_fl_.json": {
+            "total images": 681,
+            "total annotations": 110,
+            "positive samples": 101,
+            "negative samples": 580,
+            "positive samples (%)": 85.17,
+            "negative samples (%)": 14.83,
+            "class distribution": {
+                "unknown": 15,
+                "diptera": 15,
+                "carabidae": 15,
+                "tachyporus hypnorum": 15,
+                "staphylinidae": 6,
+                "isopoda": 5,
+                "pterostichus madidus": 2,
+                "myriapoda": 4,
+                "linyphiidae": 2,
+                "pterostichus melanarius": 2,
+                "amara": 11,
+                "psylliodes chrysocephalus": 2,
+                "mollusca": 8,
+                "anchomenus dorsalis": 2,
+                "harpalus affinis": 1,
+                "dermaptera": 5
+            }
+        },
+        "GH_OSR_NARS26_20-06-02_.json": {
+            "total images": 907,
+            "total annotations": 48,
+            "positive samples": 46,
+            "negative samples": 861,
+            "positive samples (%)": 94.93,
+            "negative samples (%)": 5.07,
+            "class distribution": {
+                "coccinella larvae": 4,
+                "diptera": 25,
+                "coleoptera": 3,
+                "arachnida": 1,
+                "brassicogethes aeneus": 2,
+                "cantharis rustica": 2,
+                "tipulidae": 10,
+                "unknown": 1
+            }
+        },
+        "WW_OSR_LS3E_20-06-22_fl_.json": {
+            "total images": 495,
+            "total annotations": 109,
+            "positive samples": 103,
+            "negative samples": 392,
+            "positive samples (%)": 79.19,
+            "negative samples (%)": 20.81,
+            "class distribution": {
+                "mollusca": 78,
+                "carabidae": 16,
+                "amara": 8,
+                "unknown": 3,
+                "harpalus affinis": 1,
+                "linyphiidae": 1,
+                "formicidae": 1,
+                "poecilus cupreus": 1
+            }
+        },
+        "GH_OSR_LF2E_20-06-01_.json": {
+            "total images": 932,
+            "total annotations": 43,
+            "positive samples": 41,
+            "negative samples": 891,
+            "positive samples (%)": 95.6,
+            "negative samples (%)": 4.4,
+            "class distribution": {
+                "coccinella larvae": 12,
+                "diptera": 17,
+                "diptera larvae": 9,
+                "cantharis rufa": 1,
+                "tachyporus hypnorum": 2,
+                "syrphidae": 2
+            }
+        },
+        "GH_OSR_LF2E_20-06-03_fl_.json": {
+            "total images": 553,
+            "total annotations": 38,
+            "positive samples": 37,
+            "negative samples": 516,
+            "positive samples (%)": 93.31,
+            "negative samples (%)": 6.69,
+            "class distribution": {
+                "coccinella larvae": 2,
+                "myriapoda": 1,
+                "tachyporus hypnorum": 9,
+                "braconidae": 1,
+                "amara": 3,
+                "linyphiidae": 3,
+                "mollusc": 4,
+                "carabidae": 2,
+                "acari": 10,
+                "coleoptera": 2,
+                "elateridae": 1
+            }
+        },
+        "WW_OSR_LF1D_20-06-15_fl_.json": {
+            "total images": 549,
+            "total annotations": 119,
+            "positive samples": 114,
+            "negative samples": 435,
+            "positive samples (%)": 79.23,
+            "negative samples (%)": 20.77,
+            "class distribution": {
+                "unknown": 17,
+                "carabidae": 1,
+                "linyphiidae": 6,
+                "diptera": 1,
+                "amara": 4,
+                "mollusca": 85,
+                "lycosidae": 4,
+                "tachyporus hypnorum": 1
+            }
+        },
+        "WW_OSR_LF2F_20-06-22_fl_.json": {
+            "total images": 459,
+            "total annotations": 159,
+            "positive samples": 149,
+            "negative samples": 310,
+            "positive samples (%)": 67.54,
+            "negative samples (%)": 32.46,
+            "class distribution": {
+                "unknown": 8,
+                "mollusca": 95,
+                "carabidae": 18,
+                "staphylinidae": 1,
+                "formicidae": 23,
+                "tachyporus hypnorum": 2,
+                "isopoda": 2,
+                "myriapoda": 5,
+                "linyphiidae": 5
+            }
+        },
+        "LG_OSR_LF2F_20-07-02_fl_.json": {
+            "total images": 498,
+            "total annotations": 35,
+            "positive samples": 34,
+            "negative samples": 464,
+            "positive samples (%)": 93.17,
+            "negative samples (%)": 6.83,
+            "class distribution": {
+                "carabidae": 8,
+                "harpalus affinis": 2,
+                "myriapoda": 5,
+                "pterostichus madidus": 1,
+                "unknown": 13,
+                "linyphiidae": 1,
+                "amara": 2,
+                "anchomenus dorsalis": 2,
+                "harpalus rufipes": 1
+            }
+        },
+        "WW_OSR_LF1D_20-06-25_fl_.json": {
+            "total images": 577,
+            "total annotations": 55,
+            "positive samples": 53,
+            "negative samples": 524,
+            "positive samples (%)": 90.81,
+            "negative samples (%)": 9.19,
+            "class distribution": {
+                "linyphiidae": 15,
+                "formicidae": 1,
+                "diptera": 1,
+                "carabidae": 5,
+                "amara": 8,
+                "tachyporus hypnorum": 1,
+                "unknown": 14,
+                "mollusca": 9,
+                "poecilus cupreus": 1
+            }
+        },
+        "LG_OSR_LS3E_20-06-29_fl_.json": {
+            "total images": 530,
+            "total annotations": 116,
+            "positive samples": 101,
+            "negative samples": 429,
+            "positive samples (%)": 80.94,
+            "negative samples (%)": 19.06,
+            "class distribution": {
+                "diptera": 7,
+                "carabidae": 32,
+                "amara": 4,
+                "tachyporus hypnorum": 5,
+                "poecilus cupreus": 3,
+                "harpalus rufipes": 42,
+                "harpalus affinis": 5,
+                "staphylinidae": 2,
+                "unknown": 6,
+                "anchomenus dorsalis": 2,
+                "linyphiidae": 4,
+                "myriapoda": 4
+            }
+        },
+        "LG_OSR_LF2F_20-06-29_fl_.json": {
+            "total images": 497,
+            "total annotations": 182,
+            "positive samples": 168,
+            "negative samples": 329,
+            "positive samples (%)": 66.2,
+            "negative samples (%)": 33.8,
+            "class distribution": {
+                "amara": 7,
+                "tachyporus hypnorum": 6,
+                "diptera": 163,
+                "dermaptera": 1,
+                "unknown": 1,
+                "carabidae": 3,
+                "poecilus cupreus": 1
+            }
+        },
+        "LG_OSR_LF1G_20-07-01_fl_.json": {
+            "total images": 526,
+            "total annotations": 64,
+            "positive samples": 61,
+            "negative samples": 465,
+            "positive samples (%)": 88.4,
+            "negative samples (%)": 11.6,
+            "class distribution": {
+                "unknown": 24,
+                "carabidae": 17,
+                "amara": 5,
+                "harpalus affinis": 3,
+                "tachyporus hypnorum": 1,
+                "poecilus cupreus": 4,
+                "myriapoda": 4,
+                "anchomenus dorsalis": 1,
+                "staphylinidae": 3,
+                "arachnida": 1,
+                "linyphiidae": 1
+            }
+        },
+        "WW_OSR_LF2F_20-06-25_fl_.json": {
+            "total images": 564,
+            "total annotations": 185,
+            "positive samples": 150,
+            "negative samples": 414,
+            "positive samples (%)": 73.4,
+            "negative samples (%)": 26.6,
+            "class distribution": {
+                "formicidae": 136,
+                "isopoda": 7,
+                "amara": 2,
+                "harpalus affinis": 1,
+                "mollusca": 26,
+                "tachyporus hypnorum": 5,
+                "carabidae": 3,
+                "unknown": 3,
+                "lycosidae": 1,
+                "diptera": 1
+            }
+        },
+        "GH_OSR_NARS26_20-06-03_.json": {
+            "total images": 792,
+            "total annotations": 387,
+            "positive samples": 368,
+            "negative samples": 424,
+            "positive samples (%)": 53.54,
+            "negative samples (%)": 46.46,
+            "class distribution": {
+                "coccinella larvae": 6,
+                "diptera": 373,
+                "tachyporus hypnorum": 2,
+                "gnaphosidae": 1,
+                "notiophilus biguttatus": 3,
+                "diapriidae": 2
+            }
+        },
+        "LG_OSR_HF2F_20-07-08_fl_.json": {
+            "total images": 579,
+            "total annotations": 67,
+            "positive samples": 63,
+            "negative samples": 516,
+            "positive samples (%)": 89.12,
+            "negative samples (%)": 10.88,
+            "class distribution": {
+                "carabidae": 24,
+                "anchomenus dorsalis": 7,
+                "tachyporus hypnorum": 9,
+                "poecilus cupreus": 1,
+                "myriapoda": 3,
+                "harpalus rufipes": 3,
+                "mollusca": 13,
+                "staphylinidae": 2,
+                "pterostichus melanarius": 2,
+                "amara": 1,
+                "dermaptera": 1,
+                "diptera": 1
+            }
+        },
+        "WW_OSR_LS3E_20-06-25_fl_.json": {
+            "total images": 520,
+            "total annotations": 86,
+            "positive samples": 81,
+            "negative samples": 439,
+            "positive samples (%)": 84.42,
+            "negative samples (%)": 15.58,
+            "class distribution": {
+                "unknown": 4,
+                "mollusca": 18,
+                "amara": 41,
+                "harpalus affinis": 1,
+                "tachyporus hypnorum": 8,
+                "poecilus cupreus": 4,
+                "carabidae": 9,
+                "anchomenus dorsalis": 1
+            }
+        },
+        "GH_OSR_LF1F_20-06-02_fl_.json": {
+            "total images": 514,
+            "total annotations": 69,
+            "positive samples": 65,
+            "negative samples": 449,
+            "positive samples (%)": 87.35,
+            "negative samples (%)": 12.65,
+            "class distribution": {
+                "linyphiidae": 5,
+                "tachyporus hypnorum": 31,
+                "amara": 5,
+                "carabidae": 6,
+                "unknown": 3,
+                "myriapoda": 2,
+                "diptera": 13,
+                "anchomenus dorsalis": 2,
+                "staphylinidae": 1,
+                "harpalus affinis": 1
+            }
+        },
+        "LG_OSR_LF1D_20-06-29_fl_.json": {
+            "total images": 544,
+            "total annotations": 6,
+            "positive samples": 6,
+            "negative samples": 538,
+            "positive samples (%)": 98.9,
+            "negative samples (%)": 1.1,
+            "class distribution": {
+                "anchomenus dorsalis": 2,
+                "amara": 1,
+                "carabidae": 1,
+                "dermaptera": 2
+            }
+        },
+        "LG_OSR_LF2F_20-07-06_.json": {
+            "total images": 982,
+            "total annotations": 142,
+            "positive samples": 134,
+            "negative samples": 848,
+            "positive samples (%)": 86.35,
+            "negative samples (%)": 13.65,
+            "class distribution": {
+                "diptera": 132,
+                "parasitoid": 4,
+                "psylliodes chrysocephalus": 5,
+                "carabidae": 1
+            }
+        },
+        "GH_OSR_NARS26_20-06-03_fl_.json": {
+            "total images": 549,
+            "total annotations": 63,
+            "positive samples": 61,
+            "negative samples": 488,
+            "positive samples (%)": 88.89,
+            "negative samples (%)": 11.11,
+            "class distribution": {
+                "tachyporus hypnorum": 36,
+                "myriapoda": 3,
+                "diptera": 15,
+                "amara": 6,
+                "coleoptera": 1,
+                "diptera larvae": 2
+            }
+        },
+        "LG_OSR_LF1G_20-07-06_fl_.json": {
+            "total images": 499,
+            "total annotations": 39,
+            "positive samples": 35,
+            "negative samples": 464,
+            "positive samples (%)": 92.99,
+            "negative samples (%)": 7.01,
+            "class distribution": {
+                "tachyporus hypnorum": 18,
+                "carabidae": 4,
+                "myriapoda": 8,
+                "staphylinidae": 1,
+                "poecilus cupreus": 3,
+                "harpalus affinis": 1,
+                "linyphiidae": 3,
+                "anchomenus dorsalis": 1
+            }
+        },
+        "LG_OSR_LF1G_20-07-09_fl_.json": {
+            "total images": 631,
+            "total annotations": 110,
+            "positive samples": 99,
+            "negative samples": 532,
+            "positive samples (%)": 84.31,
+            "negative samples (%)": 15.69,
+            "class distribution": {
+                "unknown": 39,
+                "diptera": 2,
+                "carabidae": 5,
+                "harpalus rufipes": 7,
+                "mollusca": 37,
+                "tachyporus hypnorum": 3,
+                "amara": 2,
+                "anchomenus dorsalis": 10,
+                "harpalus affinis": 1,
+                "pterostichus melanarius": 2,
+                "myriapoda": 2
+            }
+        },
+        "WW_OSR_LF2F_20-06-15_fl_.json": {
+            "total images": 532,
+            "total annotations": 390,
+            "positive samples": 283,
+            "negative samples": 249,
+            "positive samples (%)": 46.8,
+            "negative samples (%)": 53.2,
+            "class distribution": {
+                "tachyporus hypnorum": 7,
+                "unknown": 14,
+                "formicidae": 249,
+                "carabidae": 5,
+                "coccinella": 47,
+                "anchomenus dorsalis": 2,
+                "mollusca": 63,
+                "staphylinidae": 1,
+                "linyphiidae": 2
+            }
+        },
+        "WW_OSR_LF1D_20-06-22_fl_.json": {
+            "total images": 523,
+            "total annotations": 161,
+            "positive samples": 158,
+            "negative samples": 365,
+            "positive samples (%)": 69.79,
+            "negative samples (%)": 30.21,
+            "class distribution": {
+                "diptera": 31,
+                "carabidae": 4,
+                "amara": 1,
+                "isopoda": 1,
+                "unknown": 1,
+                "linyphiidae": 5,
+                "mollusca": 117,
+                "harpalus affinis": 1
+            }
+        },
+        "LG_OSR_LF1D_20-07-02_fl_.json": {
+            "total images": 582,
+            "total annotations": 56,
+            "positive samples": 55,
+            "negative samples": 527,
+            "positive samples (%)": 90.55,
+            "negative samples (%)": 9.45,
+            "class distribution": {
+                "carabidae": 12,
+                "harpalus affinis": 9,
+                "mollusca": 6,
+                "pterostichus madidus": 1,
+                "amara": 18,
+                "unknown": 2,
+                "harpalus rufipes": 2,
+                "myriapoda": 1,
+                "pterostichus melanarius": 1,
+                "isopoda": 1,
+                "poecilus cupreus": 2,
+                "anchomenus dorsalis": 1
+            }
+        },
+        "LG_OSR_LF1G_20-07-16_fl_.json": {
+            "total images": 690,
+            "total annotations": 615,
+            "positive samples": 502,
+            "negative samples": 188,
+            "positive samples (%)": 27.25,
+            "negative samples (%)": 72.75,
+            "class distribution": {
+                "nebria brevicollis": 615
+            }
+        }
+    }
+}
