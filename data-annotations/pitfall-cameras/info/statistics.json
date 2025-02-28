@@ -164,7 +164,7 @@
             "total annotations": 52,
             "positive samples": 47,
             "negative samples": 473,
-            "positive samples (%)": 90.96,
+            "positive samples (%)": 90.96000000000001,
             "negative samples (%)": 9.04,
             "class distribution": {
                 "pterostichus madidus": 1,
@@ -246,7 +246,7 @@
             "total annotations": 55,
             "positive samples": 54,
             "negative samples": 560,
-            "positive samples (%)": 91.21,
+            "positive samples (%)": 91.21000000000001,
             "negative samples (%)": 8.79,
             "class distribution": {
                 "unknown": 4,
@@ -286,7 +286,7 @@
             "total annotations": 226,
             "positive samples": 185,
             "negative samples": 403,
-            "positive samples (%)": 68.54,
+            "positive samples (%)": 68.53999999999999,
             "negative samples (%)": 31.46,
             "class distribution": {
                 "carabidae": 49,
@@ -490,7 +490,7 @@
             "total annotations": 68,
             "positive samples": 66,
             "negative samples": 440,
-            "positive samples (%)": 86.96,
+            "positive samples (%)": 86.96000000000001,
             "negative samples (%)": 13.04,
             "class distribution": {
                 "unknown": 4,
@@ -1093,7 +1093,7 @@
             "total annotations": 120,
             "positive samples": 111,
             "negative samples": 457,
-            "positive samples (%)": 80.46,
+            "positive samples (%)": 80.46000000000001,
             "negative samples (%)": 19.54,
             "class distribution": {
                 "diptera": 1,
@@ -1661,7 +1661,7 @@
             "total annotations": 159,
             "positive samples": 149,
             "negative samples": 310,
-            "positive samples (%)": 67.54,
+            "positive samples (%)": 67.53999999999999,
             "negative samples (%)": 32.46,
             "class distribution": {
                 "unknown": 8,
@@ -1976,7 +1976,7 @@
             "total annotations": 161,
             "positive samples": 158,
             "negative samples": 365,
-            "positive samples (%)": 69.79,
+            "positive samples (%)": 69.78999999999999,
             "negative samples (%)": 30.21,
             "class distribution": {
                 "diptera": 31,

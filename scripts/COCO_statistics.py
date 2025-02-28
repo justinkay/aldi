@@ -1,6 +1,27 @@
 import json
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 from collections import Counter
+
+def plot_and_save_class_distribution(class_distribution, filename="data-annotations/pitfall-cameras/info/statistics_class_distribution_zoomedmore.png"):
+    """
+    Plots and saves a bar chart of the class distribution.
+    
+    :param class_distribution: Dictionary {class_name: count}
+    :param filename: Output file name
+    """
+    plt.figure(figsize=(10, 5))
+    sns.barplot(x=list(class_distribution.keys()), y=list(class_distribution.values()), palette="viridis")
+    plt.xticks(rotation=45, ha="right")
+    plt.xlabel("Category")
+    plt.ylabel("Number of Instances")
+    plt.ylim(5,30)
+    plt.title("Class Distribution")
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+    print(f"Saved class distribution chart as {filename}")
 
 def update_global_stats(global_stats, stats_to_add):
     updated = global_stats
@@ -14,7 +35,6 @@ def update_global_stats(global_stats, stats_to_add):
     updated["negative samples (%)"] = 100 - updated["positive samples"] # round(((updated["negative samples"]/updated["total images"])*100),2)
     updated["class distribution"].update(stats_to_add["class distribution"])
     return updated
-
 
 def get_coco_statistics(coco):
     """
@@ -78,11 +98,7 @@ def collect_statistics_from_directory(json_dir):
 
     print("\n**Overall Statistics Across All Datasets**")
     print(json.dumps(global_stats, indent=4))
-
-    print("\n**Statistics Per Dataset**")
-    for filename, this_files_stats in per_file_stats.items():
-        print(f"\nDataset: {filename}")
-        print(json.dumps(this_files_stats, indent=4))
+    plot_and_save_class_distribution(global_stats["class distribution"])
     return {"overall": global_stats, "per file": per_file_stats}
 
 ann_dir = "data-annotations/pitfall-cameras/originals-converted"  
