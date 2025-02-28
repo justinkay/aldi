@@ -1,0 +1,157 @@
+{
+    "folders": {
+        "GH-OSR-HF2G": {
+            "specs": {
+                "camera": "HF2G", 
+                "field": "GH", 
+                "crop": "OSR",
+                "dates": ["20-06-01", "20-06-02", "20-06-08", "20-06-11"]
+            }
+        },
+        "GH-OSR-LF1F": {
+            "specs": {
+                "camera": "LF1F", 
+                "field": "GH", 
+                "crop": "OSR",
+                "dates": ["20-06-01", "20-06-02", "20-06-08", "20-06-11"]
+            }
+        },
+        "GH-OSR-LF2E": {
+            "specs": {
+                "camera": "LF2E", 
+                "field": "GH", 
+                "crop": "OSR",
+                "dates": ["20-06-01", "20-06-02", "20-06-03", "20-06-11"]
+            }
+        },
+        "GH-OSR-NARS26": {
+            "specs": {
+                "camera": "NARS26", 
+                "field": "GH", 
+                "crop": "OSR",
+                "dates": ["20-06-01", "20-06-02", "20-06-03", "20-06-11"]
+            }
+        },
+        "GH-OSR-NARS30": {
+            "specs": {
+                "camera": "NARS30", 
+                "field": "GH", 
+                "crop": "OSR",
+                "dates": ["20-06-01", "20-06-11"]
+            }
+        },
+        "LG-OSR-HF2F": {
+            "specs": {
+                "camera": "HF2F", 
+                "field": "LG", 
+                "crop": "OSR",
+                "dates": ["20-06-29", "20-06-30", "20-07-01", "20-07-02", "20-07-06", "20-07-08", "20-07-09", "20-07-13"]
+            }
+        },
+        "LG-OSR-LF1D": {
+            "specs": {
+                "camera": "LF1D", 
+                "field": "LG", 
+                "crop": "OSR",
+                "dates": ["20-06-29", "20-06-30", "20-07-01", "20-07-02", "20-07-06", "20-07-08", "20-07-09", "20-07-13", "20-07-14"]
+            }
+        },
+        "LG-OSR-LF1G": {
+            "specs": {
+                "camera": "LF1G", 
+                "field": "LG", 
+                "crop": "OSR",
+                "dates": ["20-06-29", "20-06-30", "20-07-01", "20-07-02", "20-07-06", "20-07-08", "20-07-09", "20-07-13", "20-07-14", "20-07-15", "20-07-16"]
+            }
+        },
+        "LG-OSR-LF2F": {
+            "specs": {
+                "camera": "LF2F", 
+                "field": "LG", 
+                "crop": "OSR",
+                "dates": ["20-06-29", "20-06-30", "20-07-01", "20-07-02", "20-07-06", "20-07-08", "20-07-09", "20-07-13", "20-07-14"]
+            }
+        },
+        "LG-OSR-LS3E": {
+            "specs": {
+                "camera": "LS3E", 
+                "field": "LG", 
+                "crop": "OSR",
+                "dates": ["20-06-15", "20-06-29", "20-06-30", "20-07-01", "20-07-06", "20-07-08", "20-07-09", "20-07-13"]
+            }
+        },
+        "LG-WWH-NARS30": {
+            "specs": {
+                "camera": "NARS30", 
+                "field": "LG", 
+                "crop": "WWH",
+                "dates": ["20-06-30"]
+            }
+        },
+        "WW-OSR-HF2F": {
+            "specs": {
+                "camera": "HF2F", 
+                "field": "WW", 
+                "crop": "OSR",
+                "dates": ["20-06-15", "20-06-22", "20-06-23", "20-06-24", "20-06-25"]
+            }
+        },
+        "WW-OSR-LF1D": {
+            "specs": {
+                "camera": "LF1D", 
+                "field": "WW", 
+                "crop": "OSR",
+                "dates": ["20-06-15", "20-06-22", "20-06-23", "20-06-24", "20-06-25"]
+            }
+        },
+        "WW-OSR-LF1G": {
+            "specs": {
+                "camera": "LF1G", 
+                "field": "WW", 
+                "crop": "OSR",
+                "dates": ["20-06-15", "20-06-22", "20-06-23", "20-06-24", "20-06-25"]
+            }
+        },
+        "WW-OSR-LF2F": {
+            "specs": {
+                "camera": "LF2F", 
+                "field": "WW", 
+                "crop": "OSR",
+                "dates": ["20-06-15", "20-06-22", "20-06-23", "20-06-24", "20-06-25"]
+            }
+        },
+        "WW-OSR-LS3E": {
+            "specs": {
+                "camera": "LS3E", 
+                "field": "WW", 
+                "crop": "OSR",
+                "dates": ["20-06-22", "20-06-23", "20-06-24", "20-06-25"]
+            }
+        }
+    },
+    "fields": {
+        "GH": {
+            "name": "Geescroft & Highfield",
+            "code": "GH"
+        },
+        "LG": {
+            "name": "Long Hoos & Great Knott",
+            "code": "LG"
+        },
+        "WW": {
+            "name": "Whitehorse & Webbs",
+            "code": "WW"
+        }
+        
+    },
+    "crops": {
+        "OSR": { 
+            "name": "oil rapeseed",
+            "code": "OSR"
+        },
+        "WWH": { 
+            "name": "winter wheat",
+            "code": "WWH"
+        }
+    }
+}

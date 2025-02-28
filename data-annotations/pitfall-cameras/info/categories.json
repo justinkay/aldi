@@ -1,0 +1,279 @@
+{
+    "categories": [
+        {
+            "id": 1,
+            "name": "acari",
+            "supercategory": "insect"
+        },
+        {
+            "id": 2,
+            "name": "amara",
+            "supercategory": "insect"
+        },
+        {
+            "id": 3,
+            "name": "anchomenus dorsalis",
+            "supercategory": "insect"
+        },
+        {
+            "id": 4,
+            "name": "arachnida",
+            "supercategory": "insect"
+        },
+        {
+            "id": 5,
+            "name": "argasidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 6,
+            "name": "bibionidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 7,
+            "name": "braconidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 8,
+            "name": "brassicogethes",
+            "supercategory": "insect"
+        },
+        {
+            "id": 9,
+            "name": "brassicogethes aeneus",
+            "supercategory": "insect"
+        },
+        {
+            "id": 10,
+            "name": "cantharis lateralis",
+            "supercategory": "insect"
+        },
+        {
+            "id": 11,
+            "name": "cantharis rufa",
+            "supercategory": "insect"
+        },
+        {
+            "id": 12,
+            "name": "cantharis rustica",
+            "supercategory": "insect"
+        },
+        {
+            "id": 13,
+            "name": "carabid larvae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 14,
+            "name": "carabidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 15,
+            "name": "chalcididae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 16,
+            "name": "coccinella",
+            "supercategory": "insect"
+        },
+        {
+            "id": 17,
+            "name": "coccinella larvae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 18,
+            "name": "coccinellidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 19,
+            "name": "coleoptera",
+            "supercategory": "insect"
+        },
+        {
+            "id": 20,
+            "name": "dermaptera",
+            "supercategory": "insect"
+        },
+        {
+            "id": 21,
+            "name": "diapriidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 22,
+            "name": "diptera",
+            "supercategory": "insect"
+        },
+        {
+            "id": 23,
+            "name": "diptera larvae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 24,
+            "name": "elateridae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 25,
+            "name": "formicidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 26,
+            "name": "gnaphosidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 27,
+            "name": "harpalus affinis",
+            "supercategory": "insect"
+        },
+        {
+            "id": 28,
+            "name": "harpalus rufipes",
+            "supercategory": "insect"
+        },
+        {
+            "id": 29,
+            "name": "isopoda",
+            "supercategory": "insect"
+        },
+        {
+            "id": 30,
+            "name": "lepidoptera",
+            "supercategory": "insect"
+        },
+        {
+            "id": 31,
+            "name": "linyphiidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 32,
+            "name": "lycosidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 33,
+            "name": "molllusca",
+            "supercategory": "insect"
+        },
+        {
+            "id": 34,
+            "name": "mollusc",
+            "supercategory": "insect"
+        },
+        {
+            "id": 35,
+            "name": "mollusca",
+            "supercategory": "insect"
+        },
+        {
+            "id": 36,
+            "name": "myriapoda",
+            "supercategory": "insect"
+        },
+        {
+            "id": 37,
+            "name": "nebria brevicollis",
+            "supercategory": "insect"
+        },
+        {
+            "id": 38,
+            "name": "notiophilus biguttatus",
+            "supercategory": "insect"
+        },
+        {
+            "id": 39,
+            "name": "opiliones",
+            "supercategory": "insect"
+        },
+        {
+            "id": 40,
+            "name": "parasitoid",
+            "supercategory": "insect"
+        },
+        {
+            "id": 41,
+            "name": "phyllotreta",
+            "supercategory": "insect"
+        },
+        {
+            "id": 42,
+            "name": "poecilus cupreus",
+            "supercategory": "insect"
+        },
+        {
+            "id": 43,
+            "name": "psylliodes chrysocephalus",
+            "supercategory": "insect"
+        },
+        {
+            "id": 44,
+            "name": "pterostichus madidus",
+            "supercategory": "insect"
+        },
+        {
+            "id": 45,
+            "name": "pterostichus melanarius",
+            "supercategory": "insect"
+        },
+        {
+            "id": 46,
+            "name": "staphylinidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 47,
+            "name": "syrphidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 48,
+            "name": "tachyporus hypnorum",
+            "supercategory": "insect"
+        },
+        {
+            "id": 49,
+            "name": "tipulidae",
+            "supercategory": "insect"
+        },
+        {
+            "id": 50,
+            "name": "unknown",
+            "supercategory": "insect"
+        }
+    ],
+    "name_mappings": {
+        "arachnid": "arachnida",
+        "amara sp": "amara",
+        "braconid": "braconidae",
+        "carabid": "carabidae",
+        "carabid unknown": "carabidae",
+        "carabids": "carabidae",
+        "carabid lar": "beetle",
+        "chalcidae": "chalcididae",
+        "dipteran larvae": "diptera larvae",
+        "gnaposidae": "gnaphosidae",
+        "isopod": "isopoda",
+        "linyphiiidae": "linyphiidae",
+        "molllusc": "mollusca",
+        "mollusca": "mollusca",
+        "molluska": "mollusca",
+        "myriapod": "myriapoda",
+        "phyllotreta sp": "phyllotreta",
+        "poecilius cupreus": "poecilus cupreus",
+        "psyllidoes chrysocephalus": "psylliodes chrysocephalus",
+        "spider": "arachnida",
+        "tachyporus hyphorum": "tachyporus hypnorum",
+        "tachyprous hypnorum": "tachyporus hypnorum",
+        "unsure": "unknown"
+    }
+}
