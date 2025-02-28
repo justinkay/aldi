@@ -21,7 +21,7 @@ name_mappings = { # corrections for typos and redundancies that weren't caught b
     "isopod": "isopoda",
     "linyphiiidae": "linyphiidae",
     "molllusc": "mollusca",
-    "mollusca": "mollusca",
+    "mollusc": "mollusca",
     "molluska": "mollusca",
     "myriapod": "myriapoda",
     "phyllotreta sp": "phyllotreta",
