@@ -3,6 +3,72 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import Counter
+import numpy as np
+
+def plot_category_prevalence(statistics_dict, output_path="data-annotations/pitfall-cameras/info/statistics_comparative_classes.png"):
+    """
+    Creates and saves bar charts showing the prevalence of each class across multiple datasets.
+
+    :param statistics_dict: Dictionary with dataset statistics.
+    :param output_path: Path to save the final image.
+    """
+    datasets = list(statistics_dict.keys())
+    num_datasets = len(datasets)
+    
+    # Prepare for class distributions (collect all classes across datasets)
+    all_classes = set()
+    for stats in statistics_dict.values():
+        all_classes.update(stats["class distribution"].keys())
+    all_classes = sorted(list(all_classes))  # Sort for consistent ordering
+    
+    # Create a figure with a subplot for each class
+    num_classes = len(all_classes)
+    fig, axs = plt.subplots(num_classes, 1, figsize=(10, 5 * num_classes))
+
+    if num_classes == 1:
+        axs = [axs]  # Make sure axs is iterable even if we have only one class
+
+    for idx, class_name in enumerate(all_classes):
+        # Collect the class counts for each dataset
+        class_counts = [stats["class distribution"].get(class_name, 0) for stats in statistics_dict.values()]
+        
+        # Plot the bar chart for this class
+        axs[idx].bar(datasets, class_counts, color='skyblue')
+        axs[idx].set_title(f"Prevalence of {class_name}")
+        axs[idx].set_ylabel(f"Count of {class_name}")
+        axs[idx].set_xlabel("Datasets")
+        axs[idx].set_xticklabels(datasets, rotation=45, ha="right")
+
+    # Adjust layout for readability
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    print(f"Saved category prevalence chart as {output_path}")
+
+def plot_negative_sample_percentages(statistics_dict, output_path="data-annotations/pitfall-cameras/info/statistics_comparative_neg.png"):
+    """
+    Creates and saves visualizations comparing negative sample percentages
+    across multiple datasets.
+    
+    :param statistics_dict: Dictionary with dataset statistics.
+    :param output_path: Path to save the final image.
+    """
+    datasets = list(statistics_dict.keys())
+    
+    # Negative sample percentage visualization (Side-by-side bar chart)
+    neg_percentages = [stats["negative samples (%)"] for stats in statistics_dict.values()]
+
+    fig, ax = plt.subplots(1, 1, figsize=(10, 12))
+
+    # Negative sample percentage (Bar chart)
+    ax.bar(datasets, neg_percentages, color='skyblue')
+    ax.set_title('Negative Sample Percentages')
+    ax.set_ylabel('Negative Sample Percentage (%)')
+    ax.set_ylim(0, 100)
+
+    # Adjust layout
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    print(f"Saved comparative statistics as {output_path}")
 
 def plot_and_save_class_distribution(class_distribution, filename="data-annotations/pitfall-cameras/info/statistics_class_distribution_zoomedmore.png"):
     """
@@ -107,6 +173,8 @@ def main():
     stats = collect_statistics_from_directory(ann_dir)
     with open("data-annotations/pitfall-cameras/info/statistics.json", 'w') as f:
         json.dump(stats, f, indent=4)
+    plot_negative_sample_percentages(stats["per file"])
+    plot_category_prevalence(stats["per file"])
 
 if __name__ == "__main__":
     main()
