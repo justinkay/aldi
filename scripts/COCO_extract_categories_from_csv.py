@@ -14,7 +14,6 @@ name_mappings = { # corrections for typos and redundancies that weren't caught b
     "carabid": "carabidae", 
     "carabid unknown": "carabidae",  
     "carabids": "carabidae",  
-    "carabid lar": "beetle",  
     "chalcidae": "chalcididae",
     "dipteran larvae": "diptera larvae",
     "gnaposidae": "gnaphosidae",

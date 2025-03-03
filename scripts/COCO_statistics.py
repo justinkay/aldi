@@ -91,8 +91,6 @@ def plot_and_save_class_distribution(class_distribution, filename="data-annotati
 
 def update_global_stats(global_stats, stats_to_add):
     updated = global_stats
-    print(type(updated["total annotations"]))
-    print(type(stats_to_add["total annotations"]))
     updated["total images"] += stats_to_add["total images"]
     updated["total annotations"] += stats_to_add["total annotations"]
     updated["positive samples"] +=  stats_to_add["positive samples"]
