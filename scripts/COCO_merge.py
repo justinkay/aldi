@@ -31,6 +31,9 @@ def merge_coco_json(coco1, coco2):
         
         for ann in coco["annotations"]:
             merged_annotations.append(ann)
+        
+        print(len(coco["annotations"]))
+    print("-- " + str(len(merged_annotations)))
 
     merged = {}
     merged["info"] = merged_info
