@@ -1,5 +1,6 @@
 import json
 import os
+import argparse
 import COCO_util as ccu 
 
 def merge_coco_json(coco_list):
@@ -21,6 +22,9 @@ def merge_coco_json(coco_list):
     merged_images = []
     merged_annotations = []
     total_files = len(coco_list)
+
+    no_of_images = 0
+    no_of_annotations = 0
     for index, file in enumerate(coco_list):
         # Load datasets
         with open(file, "r") as f:
@@ -35,9 +39,15 @@ def merge_coco_json(coco_list):
         for ann in coco["annotations"]:
             merged_annotations.append(ann)
 
-        # Print progress every 2 files
-        if index % 2 == 0 or index == total_files:
+        # Print progress every 5 files
+        if index % 5 == 0 or index == total_files:
             print(f"--- Processed {index} out of {total_files} files.")
+        
+        no_of_images += len(coco["images"])
+        no_of_annotations += len(coco["annotations"])
+   
+    print(f"Sum of images: {no_of_images}\nMerged images: {len(merged_images)}")
+    print(f"Sum of anns: {no_of_annotations}\nMerged anns: {len(merged_annotations)}")
 
     merged = {}
     merged["info"] = merged_info
@@ -67,21 +77,29 @@ def merge_by_location(src_dir="data-annotations/pitfall-cameras/originals-conver
     print(location_to_file_list)
         
     for loc in ccu.LOCATIONS:
+        print(f"Merging for location, {loc}...")
         merged = merge_coco_json(location_to_file_list[loc])
         save_merged_annotations(merged=merged, destination_path=dest_dir+loc+".json")
+        print(f"Finished merging for location, {loc}.")
 
 
 def merge_all_in_dir(src_dir, dest_path):
-    files_to_merge = [f for f in os.listdir(src_dir) if os.path.isfile(os.path.join(src_dir, f)) and f.endswith(".json")]
+    files_to_merge = [os.path.join(src_dir, f) for f in os.listdir(src_dir) if os.path.isfile(os.path.join(src_dir, f)) and f.endswith(".json")]
     merged = merge_coco_json(coco_list=files_to_merge)
+    merged["info"] = "Annotations for object detections in the images collection in the ECOSTACK-project's experiment with pitfall traps and wild cameras. The images were taken in June-July 2020 in oil rapeseed and winter wheat fields in the UK belonging to Geescroft & Highfield, Long Hoos & Great Knott, and Whitehorse & Webbs. Converted to COCO-format by Stinna Danger and Mikkel Berg for their thesis project at Aarhus University at the Department of Computer Science with biodiversity group at the Department of Ecoscience."
     save_merged_annotations(merged=merged, destination_path=dest_path)
     
 def main():
-    merge_by_location()
-
-
-
-
+    # Set up command-line argument parsing
+    parser = argparse.ArgumentParser(description="Merge the json files for COCO-datasets in a directory.")
+    parser.add_argument("src_dir", nargs="?", help="Source directory containing the individual COCO-files you want to merge.", default="data-annotations/pitfall-cameras/originals-converted/")
+    parser.add_argument("dest_dir", nargs="?", help="Directory at which to save the merged .json-file.", default="data-annotations/pitfall-cameras/merged-by-location/")
+    parser.add_argument('-loc', action='store_true', help="Add flag if you wish to merge by location.")
+    
+    # Parse the arguments
+    args = parser.parse_args()
+    if args.loc: merge_by_location(src_dir=args.src_dir, dest_dir=args.dest_dir)
+    else: merge_all_in_dir(src_dir=args.src_dir, dest_path="data-annotations/pitfall-cameras/pitfall-cameras_all.json")
 
 if __name__ == "__main__":
     main()
