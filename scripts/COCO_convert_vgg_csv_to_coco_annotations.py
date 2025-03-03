@@ -3,6 +3,7 @@ import pandas as pd
 import COCO_util as ccu
 import os
 import re
+from collections import Counter
 
 def get_filename_for_csv_annotations(date:str, camera, flash=False):
     date_list = date.split("-")
@@ -54,12 +55,12 @@ def gen_info(img_folder_name):
     return info
 
 def image(row):
-    width, height = ccu.read_image_size(row.filename)
+    # width, height = ccu.read_image_size(row.filename)
 
     image = {}
     image["id"] = row.fileid
-    image["height"] = width 
-    image["width"] = height 
+    image["height"] = 3420#  width 
+    image["width"] = 6080 #height 
     image["file_name"] = row.filename
     return image
 
@@ -95,8 +96,6 @@ def convert(file_prefix, img_folder_name, csv_file_path, coco_file_destination):
 
     # Create categories entries 
     categories = load_json(categories_file)["categories"]
-    
-
     images_to_clean_out = set()
 
     # Create images entries, one for each image
@@ -131,10 +130,11 @@ def convert(file_prefix, img_folder_name, csv_file_path, coco_file_destination):
         category_id = category_name_to_id[category_name]
         ann = annotation(row,category_id)
         annotations.append(ann)
-    
+
     # Clean out images that need to be removed due to errors (undefined annotation)
     images = [img for img in images if img["id"] not in images_to_clean_out]
     annotations = [ann for ann in annotations if ann["image_id"] not in images_to_clean_out]
+    
 
     # Create final coco-json file 
     data_coco = {}

@@ -1,4 +1,12 @@
 {
+    "LG-OSR-LS3E": [
+        {
+            "filename": "LG_OSR_LS3E_20-06-30_fl_WSCT8096.JPG",
+            "explanation": "Incomplete annotation: No insect class in annotation (region_attributes).",
+            "original_filename": "WSCT8096.JPG",
+            "orignal_csv_file": "300620 LS3E Flash on_csv.csv"
+        }
+    ],
     "GH-OSR-LF2E": [
         {
             "filename": "GH_OSR_LF2E_20-06-03_WSCT0651.JPG",
@@ -67,14 +75,6 @@
             "explanation": "Incomplete annotation: No insect class in annotation (region_attributes).",
             "original_filename": "WSCT4719.JPG",
             "orignal_csv_file": "030620 NARS26 Flash on_csv.csv"
-        }
-    ],
-    "LG-OSR-LS3E": [
-        {
-            "filename": "LG_OSR_LS3E_20-06-30_fl_WSCT8096.JPG",
-            "explanation": "Incomplete annotation: No insect class in annotation (region_attributes).",
-            "original_filename": "WSCT8096.JPG",
-            "orignal_csv_file": "300620 LS3E Flash on_csv.csv"
         }
     ],
     "LG-OSR-LF1D": [

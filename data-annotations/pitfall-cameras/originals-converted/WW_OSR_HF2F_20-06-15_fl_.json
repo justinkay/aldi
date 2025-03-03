@@ -3078,7 +3078,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0005.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0005.JPG",
-            "category_id": 27,
+            "category_id": 28,
             "segmentation": [],
             "area": 38807,
             "bbox": [
@@ -3092,7 +3092,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0006.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0006.JPG",
-            "category_id": 27,
+            "category_id": 28,
             "segmentation": [],
             "area": 34185,
             "bbox": [
@@ -3106,7 +3106,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0007.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0007.JPG",
-            "category_id": 27,
+            "category_id": 28,
             "segmentation": [],
             "area": 20776,
             "bbox": [
@@ -3120,7 +3120,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0009.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0009.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5858,
             "bbox": [
@@ -3134,7 +3134,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0014.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0014.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6873,
             "bbox": [
@@ -3148,7 +3148,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0014.JPG_1",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0014.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 9010,
             "bbox": [
@@ -3162,7 +3162,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0015.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0015.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6552,
             "bbox": [
@@ -3176,7 +3176,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0016.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0016.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 11049,
             "bbox": [
@@ -3218,7 +3218,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0030.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0030.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7505,
             "bbox": [
@@ -3232,7 +3232,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0032.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0032.JPG",
-            "category_id": 16,
+            "category_id": 17,
             "segmentation": [],
             "area": 16459,
             "bbox": [
@@ -3246,7 +3246,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0033.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0033.JPG",
-            "category_id": 16,
+            "category_id": 17,
             "segmentation": [],
             "area": 14529,
             "bbox": [
@@ -3260,7 +3260,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0037.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0037.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6480,
             "bbox": [
@@ -3274,7 +3274,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0044.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0044.JPG",
-            "category_id": 31,
+            "category_id": 32,
             "segmentation": [],
             "area": 16428,
             "bbox": [
@@ -3316,7 +3316,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0065.JPG_1",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0065.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 8320,
             "bbox": [
@@ -3330,7 +3330,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0070.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0070.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6592,
             "bbox": [
@@ -3344,7 +3344,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0071.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0071.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4608,
             "bbox": [
@@ -3358,7 +3358,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0073.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0073.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5698,
             "bbox": [
@@ -3372,7 +3372,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0080.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0080.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5760,
             "bbox": [
@@ -3386,7 +3386,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0082.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0082.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 8446,
             "bbox": [
@@ -3400,7 +3400,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0083.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0083.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5353,
             "bbox": [
@@ -3428,7 +3428,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0084.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0084.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6954,
             "bbox": [
@@ -3442,7 +3442,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0085.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0085.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7134,
             "bbox": [
@@ -3456,7 +3456,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0087.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0087.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6464,
             "bbox": [
@@ -3470,7 +3470,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0087.JPG_1",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0087.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 8547,
             "bbox": [
@@ -3484,7 +3484,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0088.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0088.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6083,
             "bbox": [
@@ -3498,7 +3498,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0089.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0089.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6290,
             "bbox": [
@@ -3512,7 +3512,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0090.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0090.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7272,
             "bbox": [
@@ -3526,7 +3526,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0091.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0091.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4466,
             "bbox": [
@@ -3540,7 +3540,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0092.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0092.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6715,
             "bbox": [
@@ -3554,7 +3554,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0093.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0093.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 11514,
             "bbox": [
@@ -3568,7 +3568,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0094.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0094.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5307,
             "bbox": [
@@ -3596,7 +3596,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0095.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0095.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5568,
             "bbox": [
@@ -3624,7 +3624,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0095.JPG_2",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0095.JPG",
-            "category_id": 31,
+            "category_id": 32,
             "segmentation": [],
             "area": 4608,
             "bbox": [
@@ -3638,7 +3638,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0096.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0096.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7252,
             "bbox": [
@@ -3666,7 +3666,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0097.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0097.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7979,
             "bbox": [
@@ -3694,7 +3694,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0098.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0098.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6272,
             "bbox": [
@@ -3722,7 +3722,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0099.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0099.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7104,
             "bbox": [
@@ -3750,7 +3750,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0100.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0100.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 10179,
             "bbox": [
@@ -3778,7 +3778,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0101.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0101.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6545,
             "bbox": [
@@ -3792,7 +3792,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0102.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0102.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6270,
             "bbox": [
@@ -3806,7 +3806,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0103.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0103.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 11430,
             "bbox": [
@@ -3876,7 +3876,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0107.JPG_1",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0107.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 8282,
             "bbox": [
@@ -3904,7 +3904,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0134.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0134.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7540,
             "bbox": [
@@ -3918,7 +3918,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0137.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0137.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6572,
             "bbox": [
@@ -3932,7 +3932,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0141.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0141.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5940,
             "bbox": [
@@ -3946,7 +3946,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0142.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0142.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6283,
             "bbox": [
@@ -3960,7 +3960,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0142.JPG_1",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0142.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6762,
             "bbox": [
@@ -3974,7 +3974,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0144.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0144.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6080,
             "bbox": [
@@ -3988,7 +3988,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0152.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0152.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4968,
             "bbox": [
@@ -4002,7 +4002,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0155.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0155.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 9638,
             "bbox": [
@@ -4016,7 +4016,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0156.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0156.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7416,
             "bbox": [
@@ -4044,7 +4044,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0192.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0192.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6798,
             "bbox": [
@@ -4058,7 +4058,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0196.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0196.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4736,
             "bbox": [
@@ -4072,7 +4072,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0203.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0203.JPG",
-            "category_id": 31,
+            "category_id": 32,
             "segmentation": [],
             "area": 13338,
             "bbox": [
@@ -4086,7 +4086,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0203.JPG_1",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0203.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 24674,
             "bbox": [
@@ -4114,7 +4114,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0226.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0226.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 2960,
             "bbox": [
@@ -4142,7 +4142,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0243.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0243.JPG",
-            "category_id": 27,
+            "category_id": 28,
             "segmentation": [],
             "area": 31416,
             "bbox": [
@@ -4156,7 +4156,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0251.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0251.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4032,
             "bbox": [
@@ -4170,7 +4170,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0257.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0257.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6283,
             "bbox": [
@@ -4184,7 +4184,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0267.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0267.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 9620,
             "bbox": [
@@ -4226,7 +4226,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0274.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0274.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7161,
             "bbox": [
@@ -4240,7 +4240,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0276.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0276.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5035,
             "bbox": [
@@ -4268,7 +4268,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0294.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0294.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7225,
             "bbox": [
@@ -4282,7 +4282,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0295.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0295.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4872,
             "bbox": [
@@ -4296,7 +4296,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0296.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0296.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5940,
             "bbox": [
@@ -4352,7 +4352,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0342.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0342.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4736,
             "bbox": [
@@ -4380,7 +4380,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0345.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0345.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 9006,
             "bbox": [
@@ -4394,7 +4394,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0346.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0346.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5208,
             "bbox": [
@@ -4408,7 +4408,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0350.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0350.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5883,
             "bbox": [
@@ -4422,7 +4422,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0351.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0351.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6216,
             "bbox": [
@@ -4436,7 +4436,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0359.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0359.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7030,
             "bbox": [
@@ -4450,7 +4450,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0366.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0366.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4697,
             "bbox": [
@@ -4464,7 +4464,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0370.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0370.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 8100,
             "bbox": [
@@ -4478,7 +4478,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0377.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0377.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 9393,
             "bbox": [
@@ -4492,7 +4492,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0378.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0378.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5490,
             "bbox": [
@@ -4506,7 +4506,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0391.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0391.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6350,
             "bbox": [
@@ -4520,7 +4520,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0393.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0393.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5978,
             "bbox": [
@@ -4534,7 +4534,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0393.JPG_1",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0393.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4578,
             "bbox": [
@@ -4548,7 +4548,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0394.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0394.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6882,
             "bbox": [
@@ -4562,7 +4562,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0401.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0401.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6080,
             "bbox": [
@@ -4576,7 +4576,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT0416.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT0416.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5974,
             "bbox": [
@@ -4604,7 +4604,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9912.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9912.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6976,
             "bbox": [
@@ -4618,7 +4618,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9913.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9913.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5978,
             "bbox": [
@@ -4632,7 +4632,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9915.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9915.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7225,
             "bbox": [
@@ -4646,7 +4646,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9917.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9917.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5313,
             "bbox": [
@@ -4660,7 +4660,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9918.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9918.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7474,
             "bbox": [
@@ -4674,7 +4674,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9923.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9923.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7844,
             "bbox": [
@@ -4688,7 +4688,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9927.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9927.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7137,
             "bbox": [
@@ -4702,7 +4702,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9928.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9928.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7161,
             "bbox": [
@@ -4716,7 +4716,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9935.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9935.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 6771,
             "bbox": [
@@ -4730,7 +4730,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9942.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9942.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5688,
             "bbox": [
@@ -4744,7 +4744,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9952.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9952.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4968,
             "bbox": [
@@ -4758,7 +4758,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9976.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9976.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4187,
             "bbox": [
@@ -4772,7 +4772,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9982.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9982.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 4464,
             "bbox": [
@@ -4814,7 +4814,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9986.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9986.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 5883,
             "bbox": [
@@ -4828,7 +4828,7 @@
         {
             "id": "WW_OSR_HF2F_20-06-15_fl_WSCT9997.JPG_0",
             "image_id": "WW_OSR_HF2F_20-06-15_fl_WSCT9997.JPG",
-            "category_id": 25,
+            "category_id": 26,
             "segmentation": [],
             "area": 7650,
             "bbox": [
@@ -4863,152 +4863,152 @@
         },
         {
             "id": 5,
-            "name": "argasidae",
+            "name": "araneae",
             "supercategory": "insect"
         },
         {
             "id": 6,
-            "name": "bibionidae",
+            "name": "argasidae",
             "supercategory": "insect"
         },
         {
             "id": 7,
-            "name": "braconidae",
+            "name": "bibionidae",
             "supercategory": "insect"
         },
         {
             "id": 8,
-            "name": "brassicogethes",
+            "name": "braconidae",
             "supercategory": "insect"
         },
         {
             "id": 9,
-            "name": "brassicogethes aeneus",
+            "name": "brassicogethes",
             "supercategory": "insect"
         },
         {
             "id": 10,
-            "name": "cantharis lateralis",
+            "name": "brassicogethes aeneus",
             "supercategory": "insect"
         },
         {
             "id": 11,
-            "name": "cantharis rufa",
+            "name": "cantharis lateralis",
             "supercategory": "insect"
         },
         {
             "id": 12,
-            "name": "cantharis rustica",
+            "name": "cantharis rufa",
             "supercategory": "insect"
         },
         {
             "id": 13,
-            "name": "carabid larvae",
+            "name": "cantharis rustica",
             "supercategory": "insect"
         },
         {
             "id": 14,
-            "name": "carabidae",
+            "name": "carabid larvae",
             "supercategory": "insect"
         },
         {
             "id": 15,
-            "name": "chalcididae",
+            "name": "carabidae",
             "supercategory": "insect"
         },
         {
             "id": 16,
-            "name": "coccinella",
+            "name": "chalcididae",
             "supercategory": "insect"
         },
         {
             "id": 17,
-            "name": "coccinella larvae",
+            "name": "coccinella",
             "supercategory": "insect"
         },
         {
             "id": 18,
-            "name": "coccinellidae",
+            "name": "coccinella larvae",
             "supercategory": "insect"
         },
         {
             "id": 19,
-            "name": "coleoptera",
+            "name": "coccinellidae",
             "supercategory": "insect"
         },
         {
             "id": 20,
-            "name": "dermaptera",
+            "name": "coleoptera",
             "supercategory": "insect"
         },
         {
             "id": 21,
-            "name": "diapriidae",
+            "name": "dermaptera",
             "supercategory": "insect"
         },
         {
             "id": 22,
-            "name": "diptera",
+            "name": "diapriidae",
             "supercategory": "insect"
         },
         {
             "id": 23,
-            "name": "diptera larvae",
+            "name": "diptera",
             "supercategory": "insect"
         },
         {
             "id": 24,
-            "name": "elateridae",
+            "name": "diptera larvae",
             "supercategory": "insect"
         },
         {
             "id": 25,
-            "name": "formicidae",
+            "name": "elateridae",
             "supercategory": "insect"
         },
         {
             "id": 26,
-            "name": "gnaphosidae",
+            "name": "formicidae",
             "supercategory": "insect"
         },
         {
             "id": 27,
-            "name": "harpalus affinis",
+            "name": "gnaphosidae",
             "supercategory": "insect"
         },
         {
             "id": 28,
-            "name": "harpalus rufipes",
+            "name": "harpalus affinis",
             "supercategory": "insect"
         },
         {
             "id": 29,
-            "name": "isopoda",
+            "name": "harpalus rufipes",
             "supercategory": "insect"
         },
         {
             "id": 30,
-            "name": "lepidoptera",
+            "name": "isopoda",
             "supercategory": "insect"
         },
         {
             "id": 31,
-            "name": "linyphiidae",
+            "name": "lepidoptera",
             "supercategory": "insect"
         },
         {
             "id": 32,
-            "name": "lycosidae",
+            "name": "linyphiidae",
             "supercategory": "insect"
         },
         {
             "id": 33,
-            "name": "molllusca",
+            "name": "lycosidae",
             "supercategory": "insect"
         },
         {
             "id": 34,
-            "name": "mollusc",
+            "name": "molllusca",
             "supercategory": "insect"
         },
         {

@@ -3194,7 +3194,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2297.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2297.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 33807,
             "bbox": [
@@ -3222,7 +3222,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2303.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2303.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 30783,
             "bbox": [
@@ -3236,7 +3236,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2309.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2309.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 5858,
             "bbox": [
@@ -3278,7 +3278,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2311.JPG_1",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2311.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 3300,
             "bbox": [
@@ -3320,7 +3320,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2350.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2350.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 5865,
             "bbox": [
@@ -3334,7 +3334,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2355.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2355.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 6272,
             "bbox": [
@@ -3348,7 +3348,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2357.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2357.JPG",
-            "category_id": 27,
+            "category_id": 28,
             "segmentation": [],
             "area": 32154,
             "bbox": [
@@ -3362,7 +3362,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2383.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2383.JPG",
-            "category_id": 27,
+            "category_id": 28,
             "segmentation": [],
             "area": 29256,
             "bbox": [
@@ -3474,7 +3474,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2535.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2535.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 8214,
             "bbox": [
@@ -3530,7 +3530,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2563.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2563.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 6715,
             "bbox": [
@@ -3558,7 +3558,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2570.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2570.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 4900,
             "bbox": [
@@ -3572,7 +3572,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2572.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2572.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 6003,
             "bbox": [
@@ -3614,7 +3614,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2583.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2583.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 38700,
             "bbox": [
@@ -3754,7 +3754,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2630.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2630.JPG",
-            "category_id": 27,
+            "category_id": 28,
             "segmentation": [],
             "area": 45770,
             "bbox": [
@@ -3852,7 +3852,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2670.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2670.JPG",
-            "category_id": 4,
+            "category_id": 5,
             "segmentation": [],
             "area": 30369,
             "bbox": [
@@ -3880,7 +3880,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2699.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2699.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 5040,
             "bbox": [
@@ -3894,7 +3894,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2706.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2706.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 5194,
             "bbox": [
@@ -3950,7 +3950,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2735.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2735.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 4410,
             "bbox": [
@@ -3964,7 +3964,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2736.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2736.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 4788,
             "bbox": [
@@ -3978,7 +3978,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2752.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2752.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 6350,
             "bbox": [
@@ -3992,7 +3992,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2753.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2753.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 4350,
             "bbox": [
@@ -4006,7 +4006,7 @@
         {
             "id": "LG_OSR_LF1G_20-07-01_fl_WSCT2754.JPG_0",
             "image_id": "LG_OSR_LF1G_20-07-01_fl_WSCT2754.JPG",
-            "category_id": 31,
+            "category_id": 32,
             "segmentation": [],
             "area": 3416,
             "bbox": [
@@ -4083,152 +4083,152 @@
         },
         {
             "id": 5,
-            "name": "argasidae",
+            "name": "araneae",
             "supercategory": "insect"
         },
         {
             "id": 6,
-            "name": "bibionidae",
+            "name": "argasidae",
             "supercategory": "insect"
         },
         {
             "id": 7,
-            "name": "braconidae",
+            "name": "bibionidae",
             "supercategory": "insect"
         },
         {
             "id": 8,
-            "name": "brassicogethes",
+            "name": "braconidae",
             "supercategory": "insect"
         },
         {
             "id": 9,
-            "name": "brassicogethes aeneus",
+            "name": "brassicogethes",
             "supercategory": "insect"
         },
         {
             "id": 10,
-            "name": "cantharis lateralis",
+            "name": "brassicogethes aeneus",
             "supercategory": "insect"
         },
         {
             "id": 11,
-            "name": "cantharis rufa",
+            "name": "cantharis lateralis",
             "supercategory": "insect"
         },
         {
             "id": 12,
-            "name": "cantharis rustica",
+            "name": "cantharis rufa",
             "supercategory": "insect"
         },
         {
             "id": 13,
-            "name": "carabid larvae",
+            "name": "cantharis rustica",
             "supercategory": "insect"
         },
         {
             "id": 14,
-            "name": "carabidae",
+            "name": "carabid larvae",
             "supercategory": "insect"
         },
         {
             "id": 15,
-            "name": "chalcididae",
+            "name": "carabidae",
             "supercategory": "insect"
         },
         {
             "id": 16,
-            "name": "coccinella",
+            "name": "chalcididae",
             "supercategory": "insect"
         },
         {
             "id": 17,
-            "name": "coccinella larvae",
+            "name": "coccinella",
             "supercategory": "insect"
         },
         {
             "id": 18,
-            "name": "coccinellidae",
+            "name": "coccinella larvae",
             "supercategory": "insect"
         },
         {
             "id": 19,
-            "name": "coleoptera",
+            "name": "coccinellidae",
             "supercategory": "insect"
         },
         {
             "id": 20,
-            "name": "dermaptera",
+            "name": "coleoptera",
             "supercategory": "insect"
         },
         {
             "id": 21,
-            "name": "diapriidae",
+            "name": "dermaptera",
             "supercategory": "insect"
         },
         {
             "id": 22,
-            "name": "diptera",
+            "name": "diapriidae",
             "supercategory": "insect"
         },
         {
             "id": 23,
-            "name": "diptera larvae",
+            "name": "diptera",
             "supercategory": "insect"
         },
         {
             "id": 24,
-            "name": "elateridae",
+            "name": "diptera larvae",
             "supercategory": "insect"
         },
         {
             "id": 25,
-            "name": "formicidae",
+            "name": "elateridae",
             "supercategory": "insect"
         },
         {
             "id": 26,
-            "name": "gnaphosidae",
+            "name": "formicidae",
             "supercategory": "insect"
         },
         {
             "id": 27,
-            "name": "harpalus affinis",
+            "name": "gnaphosidae",
             "supercategory": "insect"
         },
         {
             "id": 28,
-            "name": "harpalus rufipes",
+            "name": "harpalus affinis",
             "supercategory": "insect"
         },
         {
             "id": 29,
-            "name": "isopoda",
+            "name": "harpalus rufipes",
             "supercategory": "insect"
         },
         {
             "id": 30,
-            "name": "lepidoptera",
+            "name": "isopoda",
             "supercategory": "insect"
         },
         {
             "id": 31,
-            "name": "linyphiidae",
+            "name": "lepidoptera",
             "supercategory": "insect"
         },
         {
             "id": 32,
-            "name": "lycosidae",
+            "name": "linyphiidae",
             "supercategory": "insect"
         },
         {
             "id": 33,
-            "name": "molllusca",
+            "name": "lycosidae",
             "supercategory": "insect"
         },
         {
             "id": 34,
-            "name": "mollusc",
+            "name": "molllusca",
             "supercategory": "insect"
         },
         {

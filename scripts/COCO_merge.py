@@ -21,6 +21,8 @@ def merge_coco_json(coco_list):
 
     merged_images = []
     merged_annotations = []
+    seen_images = set()
+    seen_annotations = set()
     total_files = len(coco_list)
 
     no_of_images = 0
@@ -34,10 +36,14 @@ def merge_coco_json(coco_list):
             raise ValueError(f"Categories do not match in file {file}")
         
         for img in coco["images"]:
+            if img["id"] in seen_images: raise ValueError(f"Image {img["id"]} already seen!")
             merged_images.append(img)
+            seen_annotations.add(img["id"])
         
         for ann in coco["annotations"]:
+            if ann["id"] in seen_annotations: raise ValueError(f"Annotation {ann["id"]} already seen!")
             merged_annotations.append(ann)
+            seen_annotations.add(ann["id"])
 
         # Print progress every 5 files
         if index % 5 == 0 or index == total_files:
@@ -74,7 +80,6 @@ def merge_by_location(src_dir="data-annotations/pitfall-cameras/originals-conver
         file_prefix = "_".join(f.split("_")[0:3])
         if file_prefix not in location_to_file_list.keys(): raise ValueError(f"Location does not exist for file, {f}")
         location_to_file_list[file_prefix].append(os.path.join(src_dir, f))
-    print(location_to_file_list)
         
     for loc in ccu.LOCATIONS:
         print(f"Merging for location, {loc}...")
