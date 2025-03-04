@@ -7,6 +7,8 @@ INFO_FILE_PATH =  "data-annotations/pitfall-cameras/info/info.json"
 IGNORED_IMAGES_PATH =  "data-annotations/pitfall-cameras/info/ignored_images.json"
 IMAGES_FOLDER = "../ERDA/bugmaster/datasets/pitfall-cameras/images/"
 
+LOCATIONS = ['GH_OSR_HF2G', 'GH_OSR_LF1F', 'GH_OSR_LF2E', 'GH_OSR_NARS26', 'GH_OSR_NARS30', 'LG_OSR_HF2F', 'LG_OSR_LF1D', 'LG_OSR_LF1G', 'LG_OSR_LF2F', 'LG_OSR_LS3E', 'LG_WWH_NARS30', 'WW_OSR_HF2F', 'WW_OSR_LF1D', 'WW_OSR_LF1G', 'WW_OSR_LF2F', 'WW_OSR_LS3E']
+
 def create_title(field, crop, camera, date, flash=False):
     location = f"{field}_{crop}_{camera}"
     flashstr = "_fl" if flash else ""

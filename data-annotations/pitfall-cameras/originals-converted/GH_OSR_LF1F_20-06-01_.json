@@ -5560,7 +5560,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT8152.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT8152.JPG",
-            "category_id": 9,
+            "category_id": 10,
             "segmentation": [],
             "area": 6460,
             "bbox": [
@@ -5630,7 +5630,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT8894.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT8894.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 41612,
             "bbox": [
@@ -5672,7 +5672,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9052.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9052.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 15390,
             "bbox": [
@@ -5686,7 +5686,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9053.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9053.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 13536,
             "bbox": [
@@ -5700,7 +5700,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9054.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9054.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 19980,
             "bbox": [
@@ -5714,7 +5714,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9055.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9055.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 23074,
             "bbox": [
@@ -5728,7 +5728,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9056.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9056.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 18997,
             "bbox": [
@@ -5742,7 +5742,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9066.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9066.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 30301,
             "bbox": [
@@ -5756,7 +5756,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9067.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9067.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 18592,
             "bbox": [
@@ -5770,7 +5770,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9068.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9068.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 20608,
             "bbox": [
@@ -5784,7 +5784,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9071.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9071.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 21312,
             "bbox": [
@@ -5798,7 +5798,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9072.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9072.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 26062,
             "bbox": [
@@ -5812,7 +5812,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9073.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9073.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 21659,
             "bbox": [
@@ -5826,7 +5826,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9086.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9086.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 25380,
             "bbox": [
@@ -5840,7 +5840,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9087.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9087.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 25610,
             "bbox": [
@@ -5854,7 +5854,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9088.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9088.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 20691,
             "bbox": [
@@ -5868,7 +5868,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9089.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9089.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 24649,
             "bbox": [
@@ -5882,7 +5882,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9090.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9090.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 22518,
             "bbox": [
@@ -5896,7 +5896,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9112.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9112.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 24192,
             "bbox": [
@@ -5910,7 +5910,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9113.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9113.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 21285,
             "bbox": [
@@ -5924,7 +5924,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9114.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9114.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 23353,
             "bbox": [
@@ -5938,7 +5938,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9115.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9115.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 22788,
             "bbox": [
@@ -5952,7 +5952,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9116.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9116.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 18275,
             "bbox": [
@@ -5966,7 +5966,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9121.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9121.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 19364,
             "bbox": [
@@ -5980,7 +5980,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9122.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9122.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 16524,
             "bbox": [
@@ -5994,7 +5994,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9123.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9123.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 18468,
             "bbox": [
@@ -6008,7 +6008,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9124.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9124.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 15795,
             "bbox": [
@@ -6022,7 +6022,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9125.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9125.JPG",
-            "category_id": 22,
+            "category_id": 23,
             "segmentation": [],
             "area": 26132,
             "bbox": [
@@ -6036,7 +6036,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9247.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9247.JPG",
-            "category_id": 17,
+            "category_id": 18,
             "segmentation": [],
             "area": 27702,
             "bbox": [
@@ -6050,7 +6050,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9301.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9301.JPG",
-            "category_id": 17,
+            "category_id": 18,
             "segmentation": [],
             "area": 62416,
             "bbox": [
@@ -6064,7 +6064,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9305.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9305.JPG",
-            "category_id": 17,
+            "category_id": 18,
             "segmentation": [],
             "area": 47188,
             "bbox": [
@@ -6078,7 +6078,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9306.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9306.JPG",
-            "category_id": 17,
+            "category_id": 18,
             "segmentation": [],
             "area": 64438,
             "bbox": [
@@ -6092,7 +6092,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9318.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9318.JPG",
-            "category_id": 17,
+            "category_id": 18,
             "segmentation": [],
             "area": 60685,
             "bbox": [
@@ -6106,7 +6106,7 @@
         {
             "id": "GH_OSR_LF1F_20-06-01_WSCT9378.JPG_0",
             "image_id": "GH_OSR_LF1F_20-06-01_WSCT9378.JPG",
-            "category_id": 17,
+            "category_id": 18,
             "segmentation": [],
             "area": 53879,
             "bbox": [
@@ -6141,152 +6141,152 @@
         },
         {
             "id": 5,
-            "name": "argasidae",
+            "name": "araneae",
             "supercategory": "insect"
         },
         {
             "id": 6,
-            "name": "bibionidae",
+            "name": "argasidae",
             "supercategory": "insect"
         },
         {
             "id": 7,
-            "name": "braconidae",
+            "name": "bibionidae",
             "supercategory": "insect"
         },
         {
             "id": 8,
-            "name": "brassicogethes",
+            "name": "braconidae",
             "supercategory": "insect"
         },
         {
             "id": 9,
-            "name": "brassicogethes aeneus",
+            "name": "brassicogethes",
             "supercategory": "insect"
         },
         {
             "id": 10,
-            "name": "cantharis lateralis",
+            "name": "brassicogethes aeneus",
             "supercategory": "insect"
         },
         {
             "id": 11,
-            "name": "cantharis rufa",
+            "name": "cantharis lateralis",
             "supercategory": "insect"
         },
         {
             "id": 12,
-            "name": "cantharis rustica",
+            "name": "cantharis rufa",
             "supercategory": "insect"
         },
         {
             "id": 13,
-            "name": "carabid larvae",
+            "name": "cantharis rustica",
             "supercategory": "insect"
         },
         {
             "id": 14,
-            "name": "carabidae",
+            "name": "carabid larvae",
             "supercategory": "insect"
         },
         {
             "id": 15,
-            "name": "chalcididae",
+            "name": "carabidae",
             "supercategory": "insect"
         },
         {
             "id": 16,
-            "name": "coccinella",
+            "name": "chalcididae",
             "supercategory": "insect"
         },
         {
             "id": 17,
-            "name": "coccinella larvae",
+            "name": "coccinella",
             "supercategory": "insect"
         },
         {
             "id": 18,
-            "name": "coccinellidae",
+            "name": "coccinella larvae",
             "supercategory": "insect"
         },
         {
             "id": 19,
-            "name": "coleoptera",
+            "name": "coccinellidae",
             "supercategory": "insect"
         },
         {
             "id": 20,
-            "name": "dermaptera",
+            "name": "coleoptera",
             "supercategory": "insect"
         },
         {
             "id": 21,
-            "name": "diapriidae",
+            "name": "dermaptera",
             "supercategory": "insect"
         },
         {
             "id": 22,
-            "name": "diptera",
+            "name": "diapriidae",
             "supercategory": "insect"
         },
         {
             "id": 23,
-            "name": "diptera larvae",
+            "name": "diptera",
             "supercategory": "insect"
         },
         {
             "id": 24,
-            "name": "elateridae",
+            "name": "diptera larvae",
             "supercategory": "insect"
         },
         {
             "id": 25,
-            "name": "formicidae",
+            "name": "elateridae",
             "supercategory": "insect"
         },
         {
             "id": 26,
-            "name": "gnaphosidae",
+            "name": "formicidae",
             "supercategory": "insect"
         },
         {
             "id": 27,
-            "name": "harpalus affinis",
+            "name": "gnaphosidae",
             "supercategory": "insect"
         },
         {
             "id": 28,
-            "name": "harpalus rufipes",
+            "name": "harpalus affinis",
             "supercategory": "insect"
         },
         {
             "id": 29,
-            "name": "isopoda",
+            "name": "harpalus rufipes",
             "supercategory": "insect"
         },
         {
             "id": 30,
-            "name": "lepidoptera",
+            "name": "isopoda",
             "supercategory": "insect"
         },
         {
             "id": 31,
-            "name": "linyphiidae",
+            "name": "lepidoptera",
             "supercategory": "insect"
         },
         {
             "id": 32,
-            "name": "lycosidae",
+            "name": "linyphiidae",
             "supercategory": "insect"
         },
         {
             "id": 33,
-            "name": "molllusca",
+            "name": "lycosidae",
             "supercategory": "insect"
         },
         {
             "id": 34,
-            "name": "mollusc",
+            "name": "molllusca",
             "supercategory": "insect"
         },
         {

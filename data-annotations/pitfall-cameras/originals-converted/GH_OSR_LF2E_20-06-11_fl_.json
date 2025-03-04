@@ -3528,7 +3528,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT7689.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT7689.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 3416,
             "bbox": [
@@ -3696,7 +3696,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT7848.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT7848.JPG",
-            "category_id": 31,
+            "category_id": 32,
             "segmentation": [],
             "area": 7161,
             "bbox": [
@@ -3710,7 +3710,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT7849.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT7849.JPG",
-            "category_id": 31,
+            "category_id": 32,
             "segmentation": [],
             "area": 10918,
             "bbox": [
@@ -3892,7 +3892,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT7939.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT7939.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 3392,
             "bbox": [
@@ -4102,7 +4102,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT7986.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT7986.JPG",
-            "category_id": 31,
+            "category_id": 32,
             "segmentation": [],
             "area": 8075,
             "bbox": [
@@ -4228,7 +4228,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT8022.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT8022.JPG",
-            "category_id": 31,
+            "category_id": 32,
             "segmentation": [],
             "area": 10403,
             "bbox": [
@@ -4256,7 +4256,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT8041.JPG_1",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT8041.JPG",
-            "category_id": 27,
+            "category_id": 28,
             "segmentation": [],
             "area": 39900,
             "bbox": [
@@ -4298,7 +4298,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT8078.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT8078.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 3136,
             "bbox": [
@@ -4312,7 +4312,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT8079.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT8079.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 5002,
             "bbox": [
@@ -4340,7 +4340,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT8098.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT8098.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 46367,
             "bbox": [
@@ -4354,7 +4354,7 @@
         {
             "id": "GH_OSR_LF2E_20-06-11_fl_WSCT8158.JPG_0",
             "image_id": "GH_OSR_LF2E_20-06-11_fl_WSCT8158.JPG",
-            "category_id": 14,
+            "category_id": 15,
             "segmentation": [],
             "area": 4872,
             "bbox": [
@@ -4459,152 +4459,152 @@
         },
         {
             "id": 5,
-            "name": "argasidae",
+            "name": "araneae",
             "supercategory": "insect"
         },
         {
             "id": 6,
-            "name": "bibionidae",
+            "name": "argasidae",
             "supercategory": "insect"
         },
         {
             "id": 7,
-            "name": "braconidae",
+            "name": "bibionidae",
             "supercategory": "insect"
         },
         {
             "id": 8,
-            "name": "brassicogethes",
+            "name": "braconidae",
             "supercategory": "insect"
         },
         {
             "id": 9,
-            "name": "brassicogethes aeneus",
+            "name": "brassicogethes",
             "supercategory": "insect"
         },
         {
             "id": 10,
-            "name": "cantharis lateralis",
+            "name": "brassicogethes aeneus",
             "supercategory": "insect"
         },
         {
             "id": 11,
-            "name": "cantharis rufa",
+            "name": "cantharis lateralis",
             "supercategory": "insect"
         },
         {
             "id": 12,
-            "name": "cantharis rustica",
+            "name": "cantharis rufa",
             "supercategory": "insect"
         },
         {
             "id": 13,
-            "name": "carabid larvae",
+            "name": "cantharis rustica",
             "supercategory": "insect"
         },
         {
             "id": 14,
-            "name": "carabidae",
+            "name": "carabid larvae",
             "supercategory": "insect"
         },
         {
             "id": 15,
-            "name": "chalcididae",
+            "name": "carabidae",
             "supercategory": "insect"
         },
         {
             "id": 16,
-            "name": "coccinella",
+            "name": "chalcididae",
             "supercategory": "insect"
         },
         {
             "id": 17,
-            "name": "coccinella larvae",
+            "name": "coccinella",
             "supercategory": "insect"
         },
         {
             "id": 18,
-            "name": "coccinellidae",
+            "name": "coccinella larvae",
             "supercategory": "insect"
         },
         {
             "id": 19,
-            "name": "coleoptera",
+            "name": "coccinellidae",
             "supercategory": "insect"
         },
         {
             "id": 20,
-            "name": "dermaptera",
+            "name": "coleoptera",
             "supercategory": "insect"
         },
         {
             "id": 21,
-            "name": "diapriidae",
+            "name": "dermaptera",
             "supercategory": "insect"
         },
         {
             "id": 22,
-            "name": "diptera",
+            "name": "diapriidae",
             "supercategory": "insect"
         },
         {
             "id": 23,
-            "name": "diptera larvae",
+            "name": "diptera",
             "supercategory": "insect"
         },
         {
             "id": 24,
-            "name": "elateridae",
+            "name": "diptera larvae",
             "supercategory": "insect"
         },
         {
             "id": 25,
-            "name": "formicidae",
+            "name": "elateridae",
             "supercategory": "insect"
         },
         {
             "id": 26,
-            "name": "gnaphosidae",
+            "name": "formicidae",
             "supercategory": "insect"
         },
         {
             "id": 27,
-            "name": "harpalus affinis",
+            "name": "gnaphosidae",
             "supercategory": "insect"
         },
         {
             "id": 28,
-            "name": "harpalus rufipes",
+            "name": "harpalus affinis",
             "supercategory": "insect"
         },
         {
             "id": 29,
-            "name": "isopoda",
+            "name": "harpalus rufipes",
             "supercategory": "insect"
         },
         {
             "id": 30,
-            "name": "lepidoptera",
+            "name": "isopoda",
             "supercategory": "insect"
         },
         {
             "id": 31,
-            "name": "linyphiidae",
+            "name": "lepidoptera",
             "supercategory": "insect"
         },
         {
             "id": 32,
-            "name": "lycosidae",
+            "name": "linyphiidae",
             "supercategory": "insect"
         },
         {
             "id": 33,
-            "name": "molllusca",
+            "name": "lycosidae",
             "supercategory": "insect"
         },
         {
             "id": 34,
-            "name": "mollusc",
+            "name": "molllusca",
             "supercategory": "insect"
         },
         {

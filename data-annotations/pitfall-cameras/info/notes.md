@@ -6,3 +6,5 @@ Renamed the csv-file "150620 LSE3 Flash on.csv" to "150620 LS3E Flash on.csv" - 
 The originals-converted annotations have filenames that match the prefix used for the files they are annotating.
 
 All the images combined are 146 GB
+
+Perhaps we should remove parasitoid? This class covers families across many different orders (e.g. they can both be wasps or mites, ...), so it might not be helpful for a model like this 
