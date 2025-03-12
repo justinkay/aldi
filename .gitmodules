@@ -1,0 +1,6 @@
+[submodule "aldi/libs/Yolo_Detectron2"]
+	path = aldi/yolo/libs/Yolo_Detectron2
+	url = git@github.com:timmh/Yolo_Detectron2.git
+[submodule "aldi/detr/libs/DeformableDETRDetectron2"]
+	path = aldi/detr/libs/DeformableDETRDetectron2
+	url = git@github.com:justinkay/Deformable-DETR-Detectron2.git

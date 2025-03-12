@@ -30,12 +30,14 @@ def add_aldi_config(cfg):
      # if MODEL.WEIGHTS contains both ["model", "ema"], initialize with the EMA weights.
      # also determines if EMA is used for eval when running tools/train_net.py --eval-only.
     _C.EMA.LOAD_FROM_EMA_ON_START = True
+    _C.EMA.START_ITER = 0
 
     # Begin domain adaptation settings
     _C.DOMAIN_ADAPT = CN()
 
     # Source-target alignment
     _C.DOMAIN_ADAPT.ALIGN = CN()
+    _C.DOMAIN_ADAPT.ALIGN.MIXIN_NAME = "AlignMixin"
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_ENABLED = False
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_LAYER = "p2"
     _C.DOMAIN_ADAPT.ALIGN.IMG_DA_WEIGHT = 0.01
@@ -49,6 +51,7 @@ def add_aldi_config(cfg):
     # Self-distillation
     _C.DOMAIN_ADAPT.DISTILL = CN()
     _C.DOMAIN_ADAPT.DISTILL.DISTILLER_NAME = "ALDIDistiller"
+    _C.DOMAIN_ADAPT.DISTILL.MIXIN_NAME = "DistillMixin"
     # 'Pseudo label' approaches
     _C.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED = False
     _C.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED = False
@@ -85,3 +88,13 @@ def add_aldi_config(cfg):
 
     # Enable use of different optimizers (necessary to match VitDet settings)
     _C.SOLVER.OPTIMIZER = "SGD"
+
+    # Extra configs for convnext
+    # Default is ConvNext-T (Resnet-50 equiv.)
+    _C.MODEL.CONVNEXT = CN()
+    _C.MODEL.CONVNEXT.DEPTHS= [3, 3, 9, 3]
+    _C.MODEL.CONVNEXT.DIMS= [96, 192, 384, 768]
+    _C.MODEL.CONVNEXT.DROP_PATH_RATE= 0.2
+    _C.MODEL.CONVNEXT.LAYER_SCALE_INIT_VALUE= 1e-6
+    _C.MODEL.CONVNEXT.OUT_FEATURES= [0, 1, 2, 3]
+    _C.SOLVER.WEIGHT_DECAY_RATE= 0.95

@@ -16,7 +16,9 @@ from aldi.checkpoint import DetectionCheckpointerWithEMA
 from aldi.config import add_aldi_config
 from aldi.ema import EMA
 from aldi.trainer import ALDITrainer
+import aldi.align # register align mixins with Detectron2
 import aldi.datasets # register datasets with Detectron2
+import aldi.distill # register distillers and distill mixins with Detectron2
 import aldi.model # register ALDI R-CNN model with Detectron2
 import aldi.backbone # register ViT FPN backbone with Detectron2
 
@@ -29,6 +31,23 @@ def setup(args):
 
     ## Change here
     add_aldi_config(cfg)
+
+    try:
+        from aldi.yolo.helpers import add_yolo_config
+        import aldi.yolo.align # register align mixins with Detectron2
+        import aldi.yolo.distill # register distillers and distill mixins with Detectron2
+        add_yolo_config(cfg)
+    except:
+        print("Could not load YOLO library.")
+
+# try: 
+    from aldi.detr.helpers import add_deformable_detr_config
+    import aldi.detr.align # register align mixins with Detectron2
+    import aldi.detr.distill # register distillers and distill mixins with Detectron2
+    add_deformable_detr_config(cfg)
+# except:
+    # print("Could not load DETR library.")
+
     ## End change
 
     cfg.merge_from_file(args.config_file)
@@ -49,7 +68,7 @@ def main(args):
         ## Change here
         ckpt = DetectionCheckpointerWithEMA(model, save_dir=cfg.OUTPUT_DIR)
         if cfg.EMA.ENABLED and cfg.EMA.LOAD_FROM_EMA_ON_START:
-            ema = EMA(ALDITrainer.build_model(cfg), cfg.EMA.ALPHA)
+            ema = EMA(ALDITrainer.build_model(cfg), cfg.EMA.ALPHA, cfg.EMA.START_ITER)
             ckpt.add_checkpointable("ema", ema)
         ckpt.resume_or_load(cfg.MODEL.WEIGHTS, resume=args.resume)
         ## End change

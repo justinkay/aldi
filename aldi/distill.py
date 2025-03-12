@@ -30,6 +30,11 @@ A Distiller is expected to implement:
         outputs: boolean, whether any distillation loss will be calculated
 """
 
+DISTILL_MIXIN_REGISTRY = Registry("DISTILL_MIXIN")
+DISTILL_MIXIN_REGISTRY.__doc__ = """
+TODO
+"""
+
 
 def build_distiller(cfg, teacher, student):
     name = cfg.DOMAIN_ADAPT.DISTILL.DISTILLER_NAME
@@ -52,6 +57,32 @@ class Distiller:
     def distill_enabled(self):
         return False
     
+    
+@DISTILLER_REGISTRY.register()
+class HardDistiller(Distiller):
+    """Just do hard psuedo-label self-distillation; should work with any kind of detector."""
+    def __init__(self, teacher, student, do_hard_cls=False, do_hard_obj=False, do_hard_rpn_reg=False, 
+                 do_hard_roi_reg=False, pseudo_label_threshold=0.8):
+        set_attributes(self, locals())
+        self.pseudo_labeler = PseudoLabeler(teacher, pseudo_label_threshold)
+
+    @classmethod
+    def from_config(cls, cfg, teacher, student):
+        return HardDistiller(teacher, student, 
+                        do_hard_cls=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_CLS_ENABLED,
+                        do_hard_obj=cfg.DOMAIN_ADAPT.DISTILL.HARD_OBJ_ENABLED,
+                        do_hard_rpn_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_RPN_REG_ENABLED,
+                        do_hard_roi_reg=cfg.DOMAIN_ADAPT.DISTILL.HARD_ROIH_REG_ENABLED,
+                        pseudo_label_threshold=cfg.DOMAIN_ADAPT.TEACHER.THRESHOLD)
+
+    def __call__(self, teacher_batched_inputs, student_batched_inputs):
+        self.pseudo_labeler(teacher_batched_inputs, student_batched_inputs)
+        standard_losses = self.student(student_batched_inputs)
+        return standard_losses
+
+    def distill_enabled(self):
+        return any([self.do_hard_cls, self.do_hard_obj, self.do_hard_rpn_reg, self.do_hard_roi_reg])
+
 
 @DISTILLER_REGISTRY.register()
 class ALDIDistiller(Distiller):
@@ -247,7 +278,8 @@ class ALDIDistiller(Distiller):
         return losses
 
 
-# Any modifications to the torch module itself go here and are mixed in in rcnn.ALDI
+# Any modifications to the torch module itself go here and are mixed in
 # See align.py for an example
 # For now, no modifications are needed
+@DISTILL_MIXIN_REGISTRY.register()
 class DistillMixin(GeneralizedRCNN): pass

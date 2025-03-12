@@ -141,7 +141,7 @@ class ALDITrainer(DefaultTrainer):
      """Modified DefaultTrainer to support Mean Teacher style training."""
      def _create_trainer(self, cfg, model, data_loader, optimizer):
           # build EMA model if applicable
-          self.ema = EMA(build_aldi(cfg), cfg.EMA.ALPHA) if cfg.EMA.ENABLED else None
+          self.ema = EMA(build_aldi(cfg), cfg.EMA.ALPHA, cfg.EMA.START_ITER) if cfg.EMA.ENABLED else None
           distiller = build_distiller(cfg=cfg, teacher=self.ema.model if cfg.EMA.ENABLED else model, student=model)
           trainer = (ALDIAMPTrainer if cfg.SOLVER.AMP.ENABLED else ALDISimpleTrainer)(model, data_loader, optimizer, distiller,
                                                                                   backward_at_end=cfg.SOLVER.BACKWARD_AT_END,
@@ -202,8 +202,8 @@ class ALDITrainer(DefaultTrainer):
           """
           if cfg.SOLVER.OPTIMIZER.upper() == "SGD":
                return super(ALDITrainer, cls).build_optimizer(cfg, model)
-          elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW" and cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone":
-               return get_adamw_optim(model, include_vit_lr_decay=True)
+          elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW":
+               return get_adamw_optim(model, include_vit_lr_decay=cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone")
           else:
                raise ValueError(f"Unsupported optimizer/backbone combination {cfg.SOLVER.OPTIMIZER} {cfg.MODEL.BACKBONE.NAME}.")
 

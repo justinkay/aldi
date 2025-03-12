@@ -3,10 +3,18 @@ import torch.nn.functional as F
 
 from detectron2.config import configurable
 from detectron2.modeling import GeneralizedRCNN
+from detectron2.utils.registry import Registry
 
 from aldi.helpers import SaveIO, grad_reverse
 
 
+ALIGN_MIXIN_REGISTRY = Registry("ALIGN_MIXIN")
+ALIGN_MIXIN_REGISTRY.__doc__ = """
+TODO
+"""
+
+
+@ALIGN_MIXIN_REGISTRY.register()
 class AlignMixin(GeneralizedRCNN):
     """Any modifications to the torch module itself go here and are mixed in in trainer.ALDI"""
 

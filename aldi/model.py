@@ -5,15 +5,17 @@ from detectron2.config import configurable
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 from detectron2.utils.logger import _log_api_usage
 
-from aldi.align import AlignMixin
-from aldi.distill import DistillMixin
+from aldi.align import ALIGN_MIXIN_REGISTRY
+from aldi.distill import DISTILL_MIXIN_REGISTRY
 
 
 def build_aldi(cfg):
     """Add Align and Distill capabilities to any Meta Architecture dynamically."""
     base_cls = META_ARCH_REGISTRY.get(cfg.MODEL.META_ARCHITECTURE)
+    align_mixin = ALIGN_MIXIN_REGISTRY.get(cfg.DOMAIN_ADAPT.ALIGN.MIXIN_NAME)
+    distill_mixin = DISTILL_MIXIN_REGISTRY.get(cfg.DOMAIN_ADAPT.DISTILL.MIXIN_NAME)
 
-    class ALDI(AlignMixin, DistillMixin, base_cls):    
+    class ALDI(align_mixin, distill_mixin, base_cls):    
         @configurable
         def __init__(self, **kwargs):
             super(ALDI, self).__init__(**kwargs)
