@@ -15,13 +15,7 @@ dependencies = [
     "pillow==9.5.0", # see: https://github.com/facebookresearch/detectron2/issues/5010
     "scipy",
     "opencv-python",
-    "detectron2 @ git+https://github.com/justinkay/detectron2_v07ish.git",
-    "pandas", # for yolo
-    "requests", # for yolo
-    "ipython", # for yolo
-    "psutil", # for yolo
-    "seaborn", # for yolo
-    "timm", # for vit
+    "detectron2 @ git+https://github.com/justinkay/detectron2_v07ish.git"
 ]
 
 [project.urls]
