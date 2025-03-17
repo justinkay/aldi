@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aldi"
-version = "0.1.1"
+version = "0.2.0"
 description = "Align and distill: Unifying and improving domain adaptive object detection"
 readme = "README.md"
 authors = [
@@ -16,11 +16,11 @@ dependencies = [
     "scipy",
     "opencv-python",
     "detectron2 @ git+https://github.com/justinkay/detectron2_v07ish.git",
-    "pandas", # for yolo
-    "requests", # for yolo
-    "ipython", # for yolo
-    "psutil", # for yolo
-    "seaborn", # for yolo
+    #"pandas", # for yolo
+    #"requests", # for yolo
+    #"ipython", # for yolo
+    #"psutil", # for yolo
+    #"seaborn", # for yolo
     "timm", # for vit
 ]
 

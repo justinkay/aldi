@@ -1,0 +1,11 @@
+_BASE_: "./Base-DETR-Cityscapes_strongaug_ema.yaml"
+DATASETS:
+  TRAIN: ("cityscapes_train","cityscapes_foggy_train",)
+  TEST: ("cityscapes_foggy_val",)
+  BATCH_CONTENTS: ("labeled_strong",)
+EMA:
+  ENABLED: True
+SOLVER:
+  STEPS: (19999,)
+  MAX_ITER: 20000
+OUTPUT_DIR: "output/cityscapes/cityscapes_oracle-st_detr_coco_strongaug_ema/"
