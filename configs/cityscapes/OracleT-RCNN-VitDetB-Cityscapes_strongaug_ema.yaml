@@ -1,4 +1,4 @@
-_BASE_: "./Base-RCNN-VitDetB-Cityscapes.yaml"
+_BASE_: "./Base-RCNN-VitDetB-Cityscapes_strongaug_ema.yaml"
 DATASETS:
   TRAIN: ("cityscapes_foggy_train",)
   TEST: ("cityscapes_val","cityscapes_foggy_val",)
