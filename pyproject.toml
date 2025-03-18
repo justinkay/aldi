@@ -16,11 +16,6 @@ dependencies = [
     "scipy",
     "opencv-python",
     "detectron2 @ git+https://github.com/justinkay/detectron2_v07ish.git",
-    #"pandas", # for yolo
-    #"requests", # for yolo
-    #"ipython", # for yolo
-    #"psutil", # for yolo
-    #"seaborn", # for yolo
     "timm", # for vit
 ]
 

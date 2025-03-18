@@ -29,11 +29,25 @@ For python-based LazyConfig, use "path.key=value".
 def main(args):
     cfg = get_cfg()
     add_aldi_config(cfg)
+
+    try:
+        from aldi.yolo.helpers import add_yolo_config
+        import aldi.yolo.align # register align mixins with Detectron2
+        import aldi.yolo.distill # register distillers and distill mixins with Detectron2
+        add_yolo_config(cfg)
+    except:
+        print("Could not load YOLO library.")
+
+    from aldi.detr.helpers import add_deformable_detr_config
+    import aldi.detr.align # register align mixins with Detectron2
+    import aldi.detr.distill # register distillers and distill mixins with Detectron2
+    add_deformable_detr_config(cfg)
+
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
 
     weights = cfg.MODEL.WEIGHTS
-    if not os.path.exists(weights):
+    if weights is not None and len(weights) and not os.path.exists(weights):
         dirname, filename = os.path.split(weights)
         os.makedirs(dirname, exist_ok=True)
         url = PTH_URL + filename

@@ -60,6 +60,12 @@ git submodule update --init --recursive
 
 to clone the relevant submodules for YOLO and DETR. 
 
+For YOLO, some additional libraries are needed:
+
+```
+pip install pandas requests ipython psutil seaborn
+```
+
 For DETR, you must perform an additional step to build the custom `MultiScaleDeformableAttention` operation. Note that CUDA/GPU access is required to run this script. **This has been successfully tested with PyTorch 2.5.1 but has known issues with 2.6.0.**
 
 ```

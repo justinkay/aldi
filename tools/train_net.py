@@ -30,8 +30,10 @@ def setup(args):
     cfg = get_cfg()
 
     ## Change here
+    
     add_aldi_config(cfg)
 
+    # enclose YOLO in a try/except because we want the extra pip dependencies to be optional
     try:
         from aldi.yolo.helpers import add_yolo_config
         import aldi.yolo.align # register align mixins with Detectron2
@@ -40,13 +42,10 @@ def setup(args):
     except:
         print("Could not load YOLO library.")
 
-# try: 
     from aldi.detr.helpers import add_deformable_detr_config
     import aldi.detr.align # register align mixins with Detectron2
     import aldi.detr.distill # register distillers and distill mixins with Detectron2
     add_deformable_detr_config(cfg)
-# except:
-    # print("Could not load DETR library.")
 
     ## End change
 

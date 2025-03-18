@@ -200,7 +200,7 @@ class ALDITrainer(DefaultTrainer):
           """
           - Enable use of alternative optimizers (e.g. AdamW for ViTDet)
           """
-          if cfg.SOLVER.OPTIMIZER.upper() == "SGD":
+          if cfg.SOLVER.OPTIMIZER is None or cfg.SOLVER.OPTIMIZER.upper() == "SGD":
                return super(ALDITrainer, cls).build_optimizer(cfg, model)
           elif cfg.SOLVER.OPTIMIZER.upper() == "ADAMW":
                return get_adamw_optim(model, include_vit_lr_decay=cfg.MODEL.BACKBONE.NAME == "build_vitdet_b_backbone")
