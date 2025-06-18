@@ -42,10 +42,12 @@ def setup(args):
     except:
         print("Could not load YOLO library.")
 
-    from aldi.detr.helpers import add_deformable_detr_config
-    import aldi.detr.align # register align mixins with Detectron2
-    import aldi.detr.distill # register distillers and distill mixins with Detectron2
-    add_deformable_detr_config(cfg)
+    # uncomment to enable DETR
+    # WARNING: this seems to interfere with non-DETR training [TODO]
+    # from aldi.detr.helpers import add_deformable_detr_config
+    # import aldi.detr.align # register align mixins with Detectron2
+    # import aldi.detr.distill # register distillers and distill mixins with Detectron2
+    # add_deformable_detr_config(cfg)
 
     ## End change
 

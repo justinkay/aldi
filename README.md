@@ -66,11 +66,20 @@ For YOLO, some additional libraries are needed:
 pip install pandas requests ipython psutil seaborn
 ```
 
-For DETR, you must perform an additional step to build the custom `MultiScaleDeformableAttention` operation. Note that CUDA/GPU access is required to run this script. **This has been successfully tested with PyTorch 2.5.1 but has known issues with 2.6.0.**
+For DETR, you must (1) perform an additional step to build the custom `MultiScaleDeformableAttention` operation. Note that CUDA/GPU access is required to run this script. **This has been successfully tested with PyTorch 2.5.1 but has known issues with 2.6.0.**
 
 ```
 cd aldi/detr/libs/DeformableDETRDetectron2/deformable_detr/models/ops
 bash make.sh
+```
+
+And (2), uncomment the following lines in `tools/train_net.py`
+
+```
+from aldi.detr.helpers import add_deformable_detr_config
+import aldi.detr.align # register align mixins with Detectron2
+import aldi.detr.distill # register distillers and distill mixins with Detectron2
+add_deformable_detr_config(cfg)
 ```
 </details>
 
